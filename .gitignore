@@ -1,0 +1,5 @@
+build/
+examples/Test/build/
+examples/Karen/
+.vscode/
+Karen/build/
