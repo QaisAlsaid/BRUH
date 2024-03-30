@@ -7,3 +7,6 @@
 [submodule "Karen/vendor/glfw"]
 	path = Karen/vendor/glfw
 	url = https://github.com/glfw/glfw.git
+[submodule "Karen/vendor/imgui"]
+	path = Karen/vendor/imgui
+	url = https://github.com/QaisAlsaid/imgui.git
