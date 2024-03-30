@@ -3,3 +3,5 @@ examples/Test/build/
 examples/Karen/
 .vscode/
 Karen/build/
+Karen/.cache/
+examples/.cache/
