@@ -6,7 +6,7 @@
 
 namespace Karen
 {
-  RendererAPI* RenderCommands::s_API = new OpenGLRendererAPI;  
+  RendererAPI* RenderCommands::s_API = new OpenGLRendererAPI; 
   
   void RenderCommands::clear(const Vec4& p_cc)
   {

@@ -14,7 +14,7 @@ option(KAREN_ENABLE_VERIFY "Enables Verify" ON)
 option(KAREN_BUILD_SHARED "builds as shared lib" ON)
 
 add_compile_options(-fPIC -Wall -g -O0)
-if(WIN32)
+if(NOT WIN32)
 set(KAREN_SRC src/Karen/App.cpp src/Karen/Log.cpp src/Platforms/Linux/LinuxWindow.cpp src/Karen/Layers/Layer.cpp
   src/Karen/Layers/LayerStack.cpp src/Karen/Layers/GuiLayer.cpp src/Platforms/Linux/LinuxInput.cpp
   src/Karen/Input.cpp src/Platforms/OpenGl/OpenGlContext.cpp src/Platforms/OpenGl/OpenGlVertexBuffer.cpp
@@ -27,7 +27,7 @@ set(KAREN_SRC src/Karen/App.cpp src/Karen/Log.cpp src/Platforms/Linux/LinuxWindo
   )
 else()
   set(KAREN_SRC src/Karen/App.cpp src/Karen/Log.cpp src/Platforms/Windows/WindowsWindow.cpp src/Karen/Layers/Layer.cpp
-    src/Karen/Layers/LayerStack.cpp src/Karen/Layers/GuiLayer.cpp src/Platforms/Linux/WindowsInput.cpp
+    src/Karen/Layers/LayerStack.cpp src/Karen/Layers/GuiLayer.cpp src/Platforms/Windows/WindowsInput.cpp
   src/Karen/Input.cpp src/Platforms/OpenGl/OpenGlContext.cpp src/Platforms/OpenGl/OpenGlVertexBuffer.cpp
   src/Platforms/OpenGl/OpenGlIndexBuffer.cpp src/Render/API/VertexBuffer.cpp src/Render/API/IndexBuffer.cpp
   src/Render/API/RendererAPI.cpp src/Render/API/VertexArray.cpp

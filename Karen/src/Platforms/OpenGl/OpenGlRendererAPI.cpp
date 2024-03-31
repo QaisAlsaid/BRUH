@@ -12,5 +12,6 @@ namespace Karen
   void OpenGLRendererAPI::clear(const Vec4& col)
   {
     glClearColor(col.x, col.y, col.z, col.w);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   }
 }

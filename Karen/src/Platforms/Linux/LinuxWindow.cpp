@@ -42,6 +42,9 @@ namespace Karen
       glfwSetErrorCallback(glfwerrorCallback);
     }
     m_window = glfwCreateWindow(int(specs.width), int(specs.height), specs.title.c_str(), nullptr, nullptr);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     m_context = new OpenGlContext(m_window);
     m_context->init();
     glfwSetWindowUserPointer(m_window, &m_data);

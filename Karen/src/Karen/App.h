@@ -35,22 +35,18 @@ namespace Karen
       return stat_instance;
     }
   private:
+    uint32_t m_p;
     std::unique_ptr<Window> m_window;
     GuiLayer* m_gui_layer = nullptr;
     bool m_running = true;
     LayerStack m_layers;
     static App* stat_instance;
-    std::shared_ptr<VertexBuffer> m_v_buff;
-    std::shared_ptr<IndexBuffer>  m_i_buff;
-    std::shared_ptr<VertexArray>  m_v_arr;
-    std::shared_ptr<Shader>       m_shader;
-    unsigned int m_p;
-    unsigned int m_varr;
   protected:
     void pushLayer(Layer* layer);
     void pushOverlay(Layer* layer);
     void popLayer(Layer* layer);
     void popOverlay(Layer* layer);
+    bool onResizeCall(WindowResizeEvent& event);
     bool onCloseCall(WindowClosedEvent&);
   };
 

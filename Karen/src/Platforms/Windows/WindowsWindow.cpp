@@ -4,6 +4,7 @@
 #include "Platforms/OpenGl/OpenGlContext.h"
 
 #include <GLFW/glfw3.h>
+#ifdef _WIN32
 
 static bool stat_is_glfw_init = false;
 static void glfwerrorCallback(int code, const char* message)
@@ -29,7 +30,7 @@ namespace Karen
     
   void WindowsWindow::init(const WindowSpecs& specs)
   {
-    Input::create(new LinuxInput);
+    Input::create(new WindowsInput);
     m_data.title  = specs.title;
     m_data.width  = specs.width;
     m_data.height = specs.height;
@@ -141,3 +142,5 @@ namespace Karen
     m_data.vsync = vsync;
   }
 }
+
+#endif //_WIN32

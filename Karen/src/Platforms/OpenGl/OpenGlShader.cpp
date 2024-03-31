@@ -1,10 +1,21 @@
+#include "Karen/Log.h"
 #include "pch.h"
 #include "Platforms/OpenGl/OpenGlShader.h"
 #include "Karen/CommanUtils/FileLoader.h"
 #include "Karen/Core.h"
 #include <glad/glad.h>
 
+//HACK:
+#define glCall(x) x; \
+  glPrintErr(#x, __FILE__, __LINE__);
+void glPrintErr(const char* fn, const char* file, int line)
+{
+  while(auto err = glGetError())
+  {
+    KAREN_CORE_CRITICAL("OpenGl Error code {0}, File: {1}, Line: {2}, function: {3}",err, file, line, fn);
 
+  }
+}
 namespace Karen
 {
   OpenGlShader::OpenGlShader()
@@ -13,22 +24,22 @@ namespace Karen
 
   OpenGlShader::OpenGlShader(const std::string& vp, const std::string& fp)
   {
-    loadFromFile(vp, fp);
+    glCall(loadFromFile(vp, fp));
   }
 
   OpenGlShader::~OpenGlShader()
   {
-    glDeleteProgram(m_program_id);
+    glCall(glDeleteProgram(m_program_id));
   }
 
   void OpenGlShader::bind() const
   {
-    glUseProgram(m_program_id);
+    glCall(glUseProgram(m_program_id));
   }
 
   void OpenGlShader::unbind() const
   {
-    glUseProgram(0);
+    glCall(glUseProgram(0));
   }
 
   void OpenGlShader::loadFromFile(const std::string& vp, const std::string& fp)
@@ -43,32 +54,32 @@ namespace Karen
     KAREN_CORE_TRACE("Fragment: {0}", fs);
     const char *v_cstr = vs.c_str(), *f_cstr = fs.c_str();
     int status_v, status_f;
-    m_vs_id = glCreateShader(GL_VERTEX_SHADER);
-    m_fs_id = glCreateShader(GL_FRAGMENT_SHADER);
+    m_vs_id = glCall(glCreateShader(GL_VERTEX_SHADER));
+    m_fs_id = glCall(glCreateShader(GL_FRAGMENT_SHADER));
 
-    glShaderSource(m_vs_id, 1, &v_cstr, nullptr);
-    glCompileShader(m_vs_id);
-    glGetShaderiv(m_vs_id, GL_COMPILE_STATUS, &status_v);
+    glCall(glShaderSource(m_vs_id, 1, &v_cstr, nullptr));
+    glCall(glCompileShader(m_vs_id));
+    glCall(glGetShaderiv(m_vs_id, GL_COMPILE_STATUS, &status_v));
     if(status_v == GL_FALSE)
     {
       std::string shader_type;
       int mlength;
-      glGetShaderiv(m_vs_id, GL_INFO_LOG_LENGTH, &mlength);
+      glCall(glGetShaderiv(m_vs_id, GL_INFO_LOG_LENGTH, &mlength));
       char* message = (char*)alloca(mlength * sizeof(char));
-      glGetShaderInfoLog(m_vs_id, mlength, &mlength, message);
+      glCall(glGetShaderInfoLog(m_vs_id, mlength, &mlength, message));
 
 		  KAREN_CORE_ERROR("ERROR Compiling Vertex Shader: {0}", message);
     }
 
-    glShaderSource(m_fs_id, 1, &f_cstr, nullptr);
-    glCompileShader(m_fs_id);
-    glGetShaderiv(m_fs_id, GL_COMPILE_STATUS, &status_f);
+    glCall(glShaderSource(m_fs_id, 1, &f_cstr, nullptr));
+    glCall(glCompileShader(m_fs_id));
+    glCall(glGetShaderiv(m_fs_id, GL_COMPILE_STATUS, &status_f));
     if(status_f == GL_FALSE)
     {
       int mlength;
-      glGetShaderiv(m_fs_id, GL_INFO_LOG_LENGTH, &mlength);
+      glCall(glGetShaderiv(m_fs_id, GL_INFO_LOG_LENGTH, &mlength));
       char* message = (char*)alloca(mlength * sizeof(char));
-      glGetShaderInfoLog(m_fs_id, mlength, &mlength, message);
+      glCall(glGetShaderInfoLog(m_fs_id, mlength, &mlength, message));
 
 		  KAREN_CORE_ERROR("ERROR Compiling Fragment Shader: {0}", message);
     }
@@ -77,17 +88,17 @@ namespace Karen
   void OpenGlShader::createProgram()
   {
     int status;
-    m_program_id = glCreateProgram();
-    glAttachShader(m_program_id, m_vs_id);
-    glAttachShader(m_program_id, m_fs_id);
-    glLinkProgram(m_program_id);
-    glGetProgramiv(m_program_id, GL_LINK_STATUS, &status);
+    m_program_id = glCall(glCreateProgram());
+    glCall(glAttachShader(m_program_id, m_vs_id));
+    glCall(glAttachShader(m_program_id, m_fs_id));
+    glCall(glLinkProgram(m_program_id));
+    glCall(glGetProgramiv(m_program_id, GL_LINK_STATUS, &status));
 	  if(status == GL_FALSE)
 	  {
 	  	int mlength;
-	  	glGetProgramiv(m_program_id, GL_INFO_LOG_LENGTH, &mlength);
+	  	glCall(glGetProgramiv(m_program_id, GL_INFO_LOG_LENGTH, &mlength));
 	  	char* message = (char*) alloca(mlength * sizeof(char));
-	  	glGetProgramInfoLog(m_program_id, mlength, &mlength, message);
+	  	glCall(glGetProgramInfoLog(m_program_id, mlength, &mlength, message));
 	  	m_program_id = 0;
 	  	KAREN_CORE_ERROR("ERROR Linking Shader Program: {0}", message);
 	  }
