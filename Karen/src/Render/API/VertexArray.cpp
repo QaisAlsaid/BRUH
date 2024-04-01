@@ -13,5 +13,7 @@ namespace Karen
       case RendererAPI::API::OpenGl:
         return new OpenGlVertexArray;
     }
+    KAREN_CORE_ASSERT(false, "Unknown API");
+    return nullptr;
   }
 }

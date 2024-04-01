@@ -1,8 +1,10 @@
+#ifndef ENTRY_POINT_H
+#define ENTRY_POINT_H
+
 #include "Core.h"
 #include "App.h"
 #include "Log.h"
 #include <iostream>
-#ifdef __linux
 
 Karen::App* Karen::createApp();
 
@@ -14,4 +16,4 @@ int main(int argc, char* argv[])
   app->run();
 }
 
-#endif //__linux
+#endif //ENTRY_POINT_H

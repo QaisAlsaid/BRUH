@@ -36,7 +36,7 @@ namespace Karen
       glVertexAttribPointer(i,
       bl.getElements().at(i).count, GL_FLOAT,
       bl.getElements().at(i).normalized == true ? GL_TRUE : GL_FALSE,
-      bl.getStride(), (const void*)bl.getElements().at(i).offset);
+      bl.getStride(), (const void*)(uintptr_t)(bl.getElements().at(i).offset));
     }
     m_vertex_buffs.push_back(vb);
     vb->unbind();

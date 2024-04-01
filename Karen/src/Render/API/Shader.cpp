@@ -30,7 +30,7 @@ namespace Karen
       case RendererAPI::API::OpenGl:
         return new OpenGlShader;
     }
-    KAREN_CORE_ASSERT(false, "Unknown RendererAPI")
+    KAREN_CORE_ASSERT(false, "Unknown RendererAPI");
+    return nullptr;
   }
-
 }

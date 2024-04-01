@@ -5,15 +5,16 @@ find_package(OpenGL REQUIRED)
 
 set(GLFW_BUILD_DOCS OFF CACHE BOOL  "GLFW lib only")
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 option(KAREN_ENABLE_ASSERT "Enables Assertion" ON)
 option(KAREN_ENABLE_VERIFY "Enables Verify" ON)
-option(KAREN_BUILD_SHARED "builds as shared lib" ON)
-
-add_compile_options(-fPIC -Wall -g -O0)
+option(KAREN_IS_SHARED "builds as shared lib" OFF)
+if(GNU)
+  add_compile_options(-fPIC -Wall -g -O0)
+  set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
+endif()
 if(NOT WIN32)
 set(KAREN_SRC src/Karen/App.cpp src/Karen/Log.cpp src/Platforms/Linux/LinuxWindow.cpp src/Karen/Layers/Layer.cpp
   src/Karen/Layers/LayerStack.cpp src/Karen/Layers/GuiLayer.cpp src/Platforms/Linux/LinuxInput.cpp
@@ -37,6 +38,16 @@ else()
   src/Platforms/OpenGl/OpenGlRendererAPI.cpp
   )
 endif()
+set(KAREN_SRC_H src/Karen/App.h src/Karen/Log.h src/Platforms/Windows/WindowsWindow.h src/Karen/Layers/Layer.h
+    src/Karen/Layers/LayerStack.h src/Karen/Layers/GuiLayer.h src/Platforms/Windows/WindowsInput.h
+  src/Karen/Input.h src/Platforms/OpenGl/OpenGlContext.h src/Platforms/OpenGl/OpenGlVertexBuffer.h
+  src/Platforms/OpenGl/OpenGlIndexBuffer.h src/Render/API/VertexBuffer.h src/Render/API/IndexBuffer.h
+  src/Render/API/RendererAPI.h src/Render/API/VertexArray.h
+  src/Platforms/OpenGl/OpenGlVertexArray.h src/Render/API/Shader.h
+  src/Platforms/OpenGl/OpenGlShader.h src/Karen/CommanUtils/FileLoader.h
+  src/Render/API/Renderer.h src/Render/API/RenderCommands.h
+  src/Platforms/OpenGl/OpenGlRendererAPI.h
+  src/Karen/Core.h src/Karen/Window.h src/Platforms/Linux/LinuxInput.h Platforms/Linux/LinuxWindow.h)
 set(KAREN_PUBLIC_INCLUDE_DIRS
   ${CMAKE_CURRENT_SOURCE_DIR}/include/
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include/ 
@@ -60,10 +71,17 @@ add_subdirectory(vendor/glfw)
 add_subdirectory(vendor/imgui)
 add_subdirectory(vendor/glad)
 add_subdirectory(vendor/glm)
-if(KAREN_BUILD_SHARED)
+
+set(KAREN_LIBS glm glfw imgui glad)
+
+if(KAREN_IS_SHARED)
   add_library(${PROJECT_NAME} SHARED ${KAREN_SRC})
-  target_compile_definitions(${PROJECT_NAME} PRIVATE KAREN_BUILD_SHARED)
-endif(KAREN_BUILD_SHARED)
+  target_compile_definitions(${PROJECT_NAME} PRIVATE KAREN_BUILD_SHARED KAREN_IS_SHARED)
+  set(KAREN_LINK_LIBS ${KAREN_LIBS} PARENT_SCOPE)
+else()
+  set(KAREN_LINK_LIBS  PARENT_SCOPE)
+  add_library(${PROJECT_NAME} STATIC ${KAREN_SRC})
+endif(KAREN_IS_SHARED)
 
 if(KAREN_ENABLE_ASSERT)
   target_compile_definitions(${PROJECT_NAME} PUBLIC KAREN_ENABLE_ASSERT)
@@ -75,7 +93,7 @@ endif(KAREN_ENABLE_VERIFY)
 
 target_precompile_headers(${PROJECT_NAME} PUBLIC src/pch.h)
 
-target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES} glm glfw imgui glad)
+target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES} ${KAREN_LIBS})
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${KAREN_PRIVATE_INCLUDE_DIRS})
 
