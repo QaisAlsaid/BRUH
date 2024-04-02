@@ -1,11 +1,12 @@
 #include "Karen/ButtonsAndKeyCodes.h"
+#include "Karen/Core/Timestep.h"
 #include <Karen.h>
 
 class mLayer : public Karen::Layer
 {
 public:
   mLayer() : Layer("Test") {}
-  void onAttach()        override 
+  void onAttach() override 
   {
     m_r = new Karen::Renderer();
     KAREN_INFO("Layer: {0} Attached", this->getName());
@@ -24,14 +25,15 @@ public:
     m_varr->setIndexBuffer(m_ibuf);
     m_varr->addVertexBuffer(m_vbuf);
   }
-  void onDetach()       override 
+  void onDetach() override
   {
     KAREN_INFO("Layer: {0} Detached", this->getName());
     delete m_r;
   }
 
-  void onUpdate()        override 
+  void onUpdate(Karen::Timestep ts) override 
   {
+    KAREN_INFO("delta sec: {0}, delta mil {1}", ts.getTime(), ts.getTimeAsMilliSeconds());
     if(Karen::Input::isKeyPressed(Karen::Keyboard::W))
       m_ortho.setPosition(Karen::Vec3(m_ortho.getPosition().x, m_ortho.getPosition().y + 0.005f, 0.0f));
     if(Karen::Input::isKeyPressed(Karen::Keyboard::S))

@@ -4,6 +4,7 @@
 
 #include "Karen/Core.h"
 #include "Karen/Events/Events.h"
+#include "Karen/Core/Timestep.h"
 
 const std::string DEFAULT_LAYER_NAME = "Layer";
 
@@ -17,7 +18,7 @@ namespace Karen
 
     virtual void onAttach()      {}
     virtual void onDetach()     {}
-    virtual void onUpdate()      {}
+    virtual void onUpdate(Timestep t)      {}
     virtual void onEvent(Event&) {}
     virtual void onGuiUpdate()   {}
   

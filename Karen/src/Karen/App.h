@@ -2,6 +2,7 @@
 #define APP_H
 
 ///////TODO:remove it
+#include "Karen/Core/Timestep.h"
 #include "Render/API/IndexBuffer.h"
 #include "Render/API/VertexArray.h"
 #include "Render/API/VertexBuffer.h"
@@ -36,6 +37,7 @@ namespace Karen
       return stat_instance;
     }
   private:
+    float m_last_time = 0.0f;
     ARef<Shader> m_p;
     std::unique_ptr<Window> m_window;
     GuiLayer* m_gui_layer = nullptr;

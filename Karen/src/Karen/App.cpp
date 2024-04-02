@@ -1,4 +1,5 @@
 #include "Karen/CommanUtils/FileLoader.h"
+#include "Karen/Core/Timestep.h"
 #include "Karen/Events/AppEvents.h"
 #include "Render/API/RenderCommands.h"
 #include "Render/API/VertexArray.h"
@@ -15,6 +16,7 @@
 
 //FIXME:remove it
 #include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
 namespace Karen
 {
@@ -58,9 +60,13 @@ namespace Karen
   {
     while(m_running)
     {
+      float time = glfwGetTime();
+      float delta_time = time - m_last_time;
+      m_last_time = time;
+      Timestep ts(delta_time);
       for(Layer* layer : m_layers)
       {
-        layer->onUpdate();
+        layer->onUpdate(ts);
       }
 
       m_gui_layer->begin();
