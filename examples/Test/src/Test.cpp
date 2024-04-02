@@ -13,7 +13,8 @@ public:
     m_varr->bind();
     m_vbuf.reset(Karen::VertexBuffer::create(sizeof(float) * 9, m_verts, 5));
     m_ibuf.reset(Karen::IndexBuffer::create(3, m_inds, 5));
-
+    
+    m_sh->loadFromFile("../res/shaders/vs.glsl", "../res/shaders/fs.glsl");
     Karen::BufferLayout bl = 
     {
       {"pos", Karen::ShaderDataType::Float3}
@@ -30,8 +31,24 @@ public:
 
   void onUpdate()        override 
   {
-    if(Karen::Input::isKeyPressed(Karen::Keyboard::Q)) KAREN_TRACE("Q");
-    Karen::RenderCommands::clear(Karen::Vec4(1.0f));
+    if(Karen::Input::isKeyPressed(Karen::Keyboard::W))
+      m_ortho.setPosition(Karen::Vec3(m_ortho.getPosition().x, m_ortho.getPosition().y + 0.00005f, 0.0f));
+    if(Karen::Input::isKeyPressed(Karen::Keyboard::S))
+      m_ortho.setPosition(Karen::Vec3(m_ortho.getPosition().x, m_ortho.getPosition().y - 0.00005f, 0.0f));
+    if(Karen::Input::isKeyPressed(Karen::Keyboard::D))
+      m_ortho.setPosition(Karen::Vec3(m_ortho.getPosition().x + 0.00005f, m_ortho.getPosition().y, 0.0f));
+   if(Karen::Input::isKeyPressed(Karen::Keyboard::A))
+      m_ortho.setPosition(Karen::Vec3(m_ortho.getPosition().x - 0.00005f, m_ortho.getPosition().y, 0.0f));
+   if(Karen::Input::isKeyPressed(Karen::Keyboard::Up))
+     m_ortho.setZoom(m_ortho.getZoom() + 0.02f);
+   if(Karen::Input::isKeyPressed(Karen::Keyboard::Down))
+     m_ortho.setZoom(m_ortho.getZoom() - 0.02f);
+   if(Karen::Input::isKeyPressed(Karen::Keyboard::Q))
+     m_ortho.setZoom(1.0f);
+   m_ortho.onUpdate(3.0f);
+   m_sh->bind();
+   m_sh->setUniformMat4fv("u_pv", m_ortho.getProjView());
+    Karen::RenderCommands::clear(Karen::Vec4(0.2f, 0.2f, 0.2f, 1.0f));
     m_r->beginScene();
     m_r->submit(m_varr);
     m_r->endScene();
@@ -49,7 +66,7 @@ private:
   Karen::ARef<Karen::VertexArray> m_varr;
   Karen::ARef<Karen::VertexBuffer> m_vbuf;
   Karen::ARef<Karen::IndexBuffer> m_ibuf;
-
+  Karen::OrthographicCamera m_ortho = Karen::OrthographicCamera(-1.0f, 1.0f, -1.0f, 1.0f);
   float m_verts[9] = 
   {
     -0.5f, -0.5f, 0.0f,

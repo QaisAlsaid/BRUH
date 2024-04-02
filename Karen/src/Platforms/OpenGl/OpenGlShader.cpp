@@ -50,9 +50,9 @@ namespace Karen
 
   void OpenGlShader::compileShaders(const std::string& vs, const std::string& fs)
   {
-    KAREN_CORE_TRACE("Vertex: {0}", vs);
-    KAREN_CORE_TRACE("Fragment: {0}", fs);
     const char *v_cstr = vs.c_str(), *f_cstr = fs.c_str();
+    KAREN_CORE_TRACE("Vertex: {0}", v_cstr);
+    KAREN_CORE_TRACE("Fragment: {0}", f_cstr);
     int status_v, status_f;
     m_vs_id = glCall(glCreateShader(GL_VERTEX_SHADER));
     m_fs_id = glCall(glCreateShader(GL_FRAGMENT_SHADER));
@@ -102,5 +102,11 @@ namespace Karen
 	  	m_program_id = 0;
 	  	KAREN_CORE_ERROR("ERROR Linking Shader Program: {0}", message);
 	  }
+  }
+
+  void OpenGlShader::setUniformMat4fv(const std::string& n, const Mat4& v)
+  {
+    glCall(auto lo = glGetUniformLocation(m_program_id, n.c_str()))
+    glCall(glUniformMatrix4fv(lo, 1, 0, glm::value_ptr(v)))
   }
 }

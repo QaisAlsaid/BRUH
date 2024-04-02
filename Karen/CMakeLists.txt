@@ -24,7 +24,8 @@ set(KAREN_SRC src/Karen/App.cpp src/Karen/Log.cpp src/Platforms/Linux/LinuxWindo
   src/Platforms/OpenGl/OpenGlVertexArray.cpp src/Render/API/Shader.cpp
   src/Platforms/OpenGl/OpenGlShader.cpp src/Karen/CommanUtils/FileLoader.cpp
   src/Render/API/Renderer.cpp src/Render/API/RenderCommands.cpp
-  src/Platforms/OpenGl/OpenGlRendererAPI.cpp
+  src/Platforms/OpenGl/OpenGlRendererAPI.cpp  src/Render/OrthographicCamera.cpp
+
   )
 else()
   set(KAREN_SRC src/Karen/App.cpp src/Karen/Log.cpp src/Platforms/Windows/WindowsWindow.cpp src/Karen/Layers/Layer.cpp
@@ -35,7 +36,7 @@ else()
   src/Platforms/OpenGl/OpenGlVertexArray.cpp src/Render/API/Shader.cpp
   src/Platforms/OpenGl/OpenGlShader.cpp src/Karen/CommanUtils/FileLoader.cpp
   src/Render/API/Renderer.cpp src/Render/API/RenderCommands.cpp
-  src/Platforms/OpenGl/OpenGlRendererAPI.cpp
+  src/Platforms/OpenGl/OpenGlRendererAPI.cpp src/Render/OrthographicCamera.cpp
   )
 endif()
 set(KAREN_SRC_H src/Karen/App.h src/Karen/Log.h src/Platforms/Windows/WindowsWindow.h src/Karen/Layers/Layer.h
@@ -47,7 +48,8 @@ set(KAREN_SRC_H src/Karen/App.h src/Karen/Log.h src/Platforms/Windows/WindowsWin
   src/Platforms/OpenGl/OpenGlShader.h src/Karen/CommanUtils/FileLoader.h
   src/Render/API/Renderer.h src/Render/API/RenderCommands.h
   src/Platforms/OpenGl/OpenGlRendererAPI.h
-  src/Karen/Core.h src/Karen/Window.h src/Platforms/Linux/LinuxInput.h Platforms/Linux/LinuxWindow.h)
+  src/Karen/Core.h src/Karen/Window.h src/Platforms/Linux/LinuxInput.h Platforms/Linux/LinuxWindow.h  src/Render/OrthographicCamera.h
+)
 set(KAREN_PUBLIC_INCLUDE_DIRS
   ${CMAKE_CURRENT_SOURCE_DIR}/include/
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include/ 

@@ -28,35 +28,7 @@ namespace Karen
     m_window->setEventCallbackFunction(BIND_EVENT_FUNCTION(App::onEvent));
     m_gui_layer = new GuiLayer;
     pushOverlay(m_gui_layer);
-
-    uint32_t f,v;
-    const char* fs = R"(
-    #version 330 core \n
-    out vec4 fc;\n
-    void main()
-    {
-      fc = vec4(1);
-    }
-    )";
-    const char* vs = R"(
-    #version 330 core \n
-    layout (location = 0) in vec3 p;\n
-    void main()
-    {
-      gl_Position = vec4(p, 1.0);
-    }
-    )";
-    f=glCreateShader(GL_FRAGMENT_SHADER);
-    v=glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(f,1,&fs,0);
-    glShaderSource(v,1,&vs,0);
-    glCompileShader(f);
-    glCompileShader(v);
-    m_p=glCreateProgram();
-    glAttachShader(m_p, v);
-    glAttachShader(m_p, f);
-    glLinkProgram(m_p);
-  }
+   }
 
   App::~App()
   {
@@ -84,8 +56,6 @@ namespace Karen
 
   void App::run()
   {
-    glUseProgram(m_p);
-    RenderCommands::clear(Vec4(1.0f));
     while(m_running)
     {
       for(Layer* layer : m_layers)

@@ -6,6 +6,7 @@
 #include "Render/API/VertexArray.h"
 #include "Render/API/VertexBuffer.h"
 #include "Render/API/Shader.h"
+#include "Render/OrthographicCamera.h"
 //////
 
 #include "Karen/Core.h"
@@ -35,12 +36,13 @@ namespace Karen
       return stat_instance;
     }
   private:
-    uint32_t m_p;
+    ARef<Shader> m_p;
     std::unique_ptr<Window> m_window;
     GuiLayer* m_gui_layer = nullptr;
     bool m_running = true;
     LayerStack m_layers;
     static App* stat_instance;
+    OrthographicCamera m_ortho = OrthographicCamera(-1.0f, 1.0f, -1.0f, 1.0f);
   protected:
     void pushLayer(Layer* layer);
     void pushOverlay(Layer* layer);

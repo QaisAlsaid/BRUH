@@ -1,8 +1,7 @@
 #version 330 core
 layout (location = 0) in vec3 posin;
-out vec4 fcol;
+uniform mat4 u_pv;
 void main()
 {
-  gl_Position = vec4(posin, 1.0);
-  fcol = vec4(0.5, 0.4, 0.6, 1.0f);
+  gl_Position = u_pv * vec4(posin, 1.0);
 }

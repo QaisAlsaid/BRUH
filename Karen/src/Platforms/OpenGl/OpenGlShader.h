@@ -15,6 +15,7 @@ namespace Karen
     void bind()   const override;
     void unbind() const override;
     void loadFromFile(const std::string& vp, const std::string& fp) override;
+    void setUniformMat4fv(const std::string& name, const Mat4& value) override;
   private:
     void compileShaders(const std::string& vs, const std::string& fs);
     void createProgram();
