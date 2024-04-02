@@ -30,7 +30,7 @@ namespace Karen
     m_proj = glm::ortho(m_left/m_zoom, m_right/m_zoom, m_bottom/m_zoom, m_top/m_zoom, -1.0f, 1.0f);
   
     Mat4 trans = glm::translate(Mat4(1.0f), -m_pos); 
-    trans = glm::rotate(trans, glm::radians(m_rotation), Vec3(1, 0, 0));
+    trans = glm::rotate(trans, glm::radians(m_rotation), Vec3(0, 0, 1));
     m_view = trans;
     
     m_pv = m_proj * m_view;

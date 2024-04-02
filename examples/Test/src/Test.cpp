@@ -1,3 +1,4 @@
+#include "Karen/ButtonsAndKeyCodes.h"
 #include <Karen.h>
 
 class mLayer : public Karen::Layer
@@ -32,25 +33,29 @@ public:
   void onUpdate()        override 
   {
     if(Karen::Input::isKeyPressed(Karen::Keyboard::W))
-      m_ortho.setPosition(Karen::Vec3(m_ortho.getPosition().x, m_ortho.getPosition().y + 0.00005f, 0.0f));
+      m_ortho.setPosition(Karen::Vec3(m_ortho.getPosition().x, m_ortho.getPosition().y + 0.005f, 0.0f));
     if(Karen::Input::isKeyPressed(Karen::Keyboard::S))
-      m_ortho.setPosition(Karen::Vec3(m_ortho.getPosition().x, m_ortho.getPosition().y - 0.00005f, 0.0f));
+      m_ortho.setPosition(Karen::Vec3(m_ortho.getPosition().x, m_ortho.getPosition().y - 0.005f, 0.0f));
     if(Karen::Input::isKeyPressed(Karen::Keyboard::D))
-      m_ortho.setPosition(Karen::Vec3(m_ortho.getPosition().x + 0.00005f, m_ortho.getPosition().y, 0.0f));
+      m_ortho.setPosition(Karen::Vec3(m_ortho.getPosition().x + 0.005f, m_ortho.getPosition().y, 0.0f));
    if(Karen::Input::isKeyPressed(Karen::Keyboard::A))
-      m_ortho.setPosition(Karen::Vec3(m_ortho.getPosition().x - 0.00005f, m_ortho.getPosition().y, 0.0f));
+      m_ortho.setPosition(Karen::Vec3(m_ortho.getPosition().x - 0.005f, m_ortho.getPosition().y, 0.0f));
    if(Karen::Input::isKeyPressed(Karen::Keyboard::Up))
      m_ortho.setZoom(m_ortho.getZoom() + 0.02f);
    if(Karen::Input::isKeyPressed(Karen::Keyboard::Down))
      m_ortho.setZoom(m_ortho.getZoom() - 0.02f);
-   if(Karen::Input::isKeyPressed(Karen::Keyboard::Q))
+   if(Karen::Input::isKeyPressed(Karen::Keyboard::R))
      m_ortho.setZoom(1.0f);
+   if(Karen::Input::isKeyPressed(Karen::Keyboard::Right))
+     m_ortho.setRotation(m_ortho.getRotation() + 0.5f);
+   if(Karen::Input::isKeyPressed(Karen::Keyboard::Left))
+     m_ortho.setRotation(m_ortho.getRotation() -0.5f);
+   if(Karen::Input::isKeyPressed(Karen::Keyboard::Z))
+     m_ortho.setRotation(0.0f);
    m_ortho.onUpdate(3.0f);
-   m_sh->bind();
-   m_sh->setUniformMat4fv("u_pv", m_ortho.getProjView());
-    Karen::RenderCommands::clear(Karen::Vec4(0.2f, 0.2f, 0.2f, 1.0f));
-    m_r->beginScene();
-    m_r->submit(m_varr);
+  Karen::RenderCommands::clear(Karen::Vec4(0.2f, 0.2f, 0.2f, 1.0f));
+    m_r->beginScene(m_ortho);
+    m_r->submit(m_varr, m_sh);
     m_r->endScene();
   if(Karen::Input::isMouseButtonPressed(Karen::Mouse::ButtonLeft)) KAREN_CORE_TRACE("BU");
   }
