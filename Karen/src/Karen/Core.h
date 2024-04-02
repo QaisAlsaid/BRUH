@@ -3,6 +3,7 @@
 
 #include <memory>
 
+#ifdef KAREN_IS_SHARED
 #if defined(_MSC_VER)
   #ifdef KAREN_BUILD_SHARDE 
     #define KAREN_API __declspec(dllexport)
@@ -19,6 +20,9 @@
   #define KAREN_API
   #pragma warning Unknown dynamic link import/export semantics.
 #endif //_MSC_VER
+#else
+  #define KAREN_API
+#endif
 #define KAREN_ENABLE_ASSERT
 #ifdef KAREN_ENABLE_ASSERT
   #define KAREN_CORE_ASSERT(x, ...) {if(!(x)) KAREN_CORE_CRITICAL("{0}", __VA_ARGS__);}
