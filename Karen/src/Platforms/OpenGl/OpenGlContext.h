@@ -1,7 +1,7 @@
 #ifndef OPENGL_CONTEXT_H
 #define OPENGL_CONTEXT_H
 
-#include "Render/API/Context.h"
+#include "Karen/Render/API/Context.h"
 
 struct GLFWwindow;
 

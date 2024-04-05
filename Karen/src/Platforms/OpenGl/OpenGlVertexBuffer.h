@@ -1,8 +1,8 @@
 #ifndef OPENGL_VERTEX_BUFFER_H
 #define OPENGL_VERTEX_BUFFER_H
 
-#include "Render/API/BufferLayout.h"
-#include "Render/API/VertexBuffer.h"
+#include "Karen/Render/API/BufferLayout.h"
+#include "Karen/Render/API/VertexBuffer.h"
 
 namespace Karen 
 {

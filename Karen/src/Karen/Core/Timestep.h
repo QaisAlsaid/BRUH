@@ -1,7 +1,7 @@
 #ifndef TIMESTEP_H
 #define TIMESTEP_H
 
-#include "Karen/Core.h"
+#include "Karen/Core/Core.h"
 
 
 namespace Karen

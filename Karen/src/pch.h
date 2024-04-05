@@ -16,5 +16,5 @@
 #include <unordered_map>
 #include <algorithm>
 
-#include "Karen/Log.h"
+#include "Karen/Core/Log.h"
 #endif //PCH_H

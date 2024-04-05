@@ -2,8 +2,9 @@
 #define WINDOWS_INPUT_H
 
 #ifdef _WIN32
-#include "Karen/Core.h"
-#include "Karen/Input.h"
+
+#include "Karen/Core/Core.h"
+#include "Karen/Core/Input.h"
 
 namespace Karen
 {
@@ -17,5 +18,5 @@ namespace Karen
     float getMousePosImpl()       override;
   };
 }
-#endif _WIN32
+#endif //_WIN32
 #endif //WINDOWS_INPUT_H

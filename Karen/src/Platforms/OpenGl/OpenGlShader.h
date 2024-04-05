@@ -1,7 +1,7 @@
 #ifndef OPENGL_SHADER_H
 #define OPENGL_SHADER_H
 
-#include "Render/API/Shader.h"
+#include "Karen/Render/API/Shader.h"
 
 namespace Karen
 {

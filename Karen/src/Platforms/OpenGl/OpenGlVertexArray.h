@@ -1,10 +1,10 @@
 #ifndef OPENGL_VERTEX_ARRAY_H
 #define OPENGL_VERTEX_ARRAY_H
 
-#include "Render/API/IndexBuffer.h"
-#include "Render/API/VertexArray.h"
-#include "Karen/Core.h"
-#include "Render/API/VertexBuffer.h"
+#include "Karen/Render/API/IndexBuffer.h"
+#include "Karen/Render/API/VertexArray.h"
+#include "Karen/Core/Core.h"
+#include "Karen/Render/API/VertexBuffer.h"
 namespace Karen
 {
   class OpenGlVertexArray : public VertexArray

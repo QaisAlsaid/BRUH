@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Platforms/Linux/LinuxInput.h"
-#include "Karen/App.h"
+#include "Karen/Core/App.h"
 #include <GLFW/glfw3.h>
 
 namespace Karen

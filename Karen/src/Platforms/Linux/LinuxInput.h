@@ -1,8 +1,8 @@
 #ifndef LINUX_INPUT_H
 #define LINUX_INPUT_H
 
-#include "Karen/Core.h"
-#include "Karen/Input.h"
+#include "Karen/Core/Core.h"
+#include "Karen/Core/Input.h"
 
 namespace Karen
 {

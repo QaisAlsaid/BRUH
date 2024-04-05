@@ -1,10 +1,12 @@
+#ifdef _WIN32
+
 #include "pch.h"
 #include "Platforms/Windows/WindowsWindow.h"
 #include "Platforms/Windows/WindowsInput.h"
 #include "Platforms/OpenGl/OpenGlContext.h"
 
 #include <GLFW/glfw3.h>
-#ifdef _WIN32
+
 
 static bool stat_is_glfw_init = false;
 static void glfwerrorCallback(int code, const char* message)

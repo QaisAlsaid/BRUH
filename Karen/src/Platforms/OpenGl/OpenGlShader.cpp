@@ -1,8 +1,9 @@
-#include "Karen/Log.h"
 #include "pch.h"
+#include "Karen/Core/Log.h"
 #include "Platforms/OpenGl/OpenGlShader.h"
-#include "Karen/CommanUtils/FileLoader.h"
-#include "Karen/Core.h"
+#include "Karen/Core/CommanUtils/FileLoader.h"
+#include "Karen/Core/Core.h"
+
 #include <glad/glad.h>
 
 //HACK:

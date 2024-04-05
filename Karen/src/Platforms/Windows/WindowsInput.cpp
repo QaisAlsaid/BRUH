@@ -1,7 +1,10 @@
+#ifdef _WIN32
+
 #include "pch.h"
 #include "Platforms/Windows/WindowsInput.h"
-#include "Karen/App.h"
+#include "Karen/Core/App.h"
 #include <GLFW/glfw3.h>
+
 
 namespace Karen
 {
@@ -41,3 +44,5 @@ namespace Karen
     return status == GLFW_RELEASE;
   }
 }
+
+#endif //_WIN32

@@ -3,8 +3,8 @@
 
 #ifdef _WIN32
 
-#include "Karen/Window.h"
-#include "Render/API/Context.h"
+#include "Karen/Core/Window.h"
+#include "Karen/Render/API/Context.h"
 
 struct GLFWwindow;
 

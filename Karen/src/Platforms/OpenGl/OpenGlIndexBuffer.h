@@ -1,7 +1,7 @@
 #ifndef OPENGL_INDEX_BUFFER_H
 #define OPENGL_INDEX_BUFFER_H
 
-#include "Render/API/IndexBuffer.h"
+#include "Karen/Render/API/IndexBuffer.h"
 
 namespace Karen 
 {

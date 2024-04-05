@@ -16,16 +16,20 @@ if(GNU)
   set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 endif()
 if(NOT WIN32)
-set(KAREN_SRC src/Karen/App.cpp src/Karen/Log.cpp src/Platforms/Linux/LinuxWindow.cpp src/Karen/Layers/Layer.cpp
-  src/Karen/Layers/LayerStack.cpp src/Karen/Layers/GuiLayer.cpp src/Platforms/Linux/LinuxInput.cpp
-  src/Karen/Input.cpp src/Platforms/OpenGl/OpenGlContext.cpp src/Platforms/OpenGl/OpenGlVertexBuffer.cpp
-  src/Platforms/OpenGl/OpenGlIndexBuffer.cpp src/Render/API/VertexBuffer.cpp src/Render/API/IndexBuffer.cpp
-  src/Render/API/RendererAPI.cpp src/Render/API/VertexArray.cpp
-  src/Platforms/OpenGl/OpenGlVertexArray.cpp src/Render/API/Shader.cpp
-  src/Platforms/OpenGl/OpenGlShader.cpp src/Karen/CommanUtils/FileLoader.cpp
-  src/Render/API/Renderer.cpp src/Render/API/RenderCommands.cpp
-  src/Platforms/OpenGl/OpenGlRendererAPI.cpp  src/Render/OrthographicCamera.cpp
-
+  set(KAREN_SRC src/Karen/Core/App.cpp src/Karen/Core/Log.cpp
+    src/Platforms/Linux/LinuxWindow.cpp src/Karen/Core/Layers/Layer.cpp
+    src/Karen/Core/Layers/LayerStack.cpp src/Karen/Core/Layers/GuiLayer.cpp
+    src/Platforms/Linux/LinuxInput.cpp src/Karen/Core/Input.cpp
+    src/Platforms/OpenGl/OpenGlContext.cpp src/Platforms/OpenGl/OpenGlVertexBuffer.cpp
+    src/Platforms/OpenGl/OpenGlIndexBuffer.cpp src/Karen/Render/API/VertexBuffer.cpp
+    src/Karen/Render/API/IndexBuffer.cpp
+    src/Karen/Render/API/RendererAPI.cpp src/Karen/Render/API/VertexArray.cpp
+    src/Platforms/OpenGl/OpenGlVertexArray.cpp src/Karen/Render/API/Shader.cpp
+    src/Platforms/OpenGl/OpenGlShader.cpp src/Karen/Core/CommanUtils/FileLoader.cpp
+    src/Karen/Render/API/Renderer.cpp src/Karen/Render/API/RenderCommands.cpp
+    src/Platforms/OpenGl/OpenGlRendererAPI.cpp src/Karen/Render/OrthographicCamera.cpp
+    src/Platforms/Windows/WindowsInput.cpp src/Platforms/Windows/WindowsWindow.cpp
+    include/Karen.h
   )
 else()
   set(KAREN_SRC src/Karen/App.cpp src/Karen/Log.cpp src/Platforms/Windows/WindowsWindow.cpp src/Karen/Layers/Layer.cpp
@@ -39,17 +43,17 @@ else()
   src/Platforms/OpenGl/OpenGlRendererAPI.cpp src/Render/OrthographicCamera.cpp
   )
 endif()
-set(KAREN_SRC_H src/Karen/App.h src/Karen/Log.h src/Platforms/Windows/WindowsWindow.h src/Karen/Layers/Layer.h
-    src/Karen/Layers/LayerStack.h src/Karen/Layers/GuiLayer.h src/Platforms/Windows/WindowsInput.h
-  src/Karen/Input.h src/Platforms/OpenGl/OpenGlContext.h src/Platforms/OpenGl/OpenGlVertexBuffer.h
-  src/Platforms/OpenGl/OpenGlIndexBuffer.h src/Render/API/VertexBuffer.h src/Render/API/IndexBuffer.h
-  src/Render/API/RendererAPI.h src/Render/API/VertexArray.h
-  src/Platforms/OpenGl/OpenGlVertexArray.h src/Render/API/Shader.h
-  src/Platforms/OpenGl/OpenGlShader.h src/Karen/CommanUtils/FileLoader.h
-  src/Render/API/Renderer.h src/Render/API/RenderCommands.h
-  src/Platforms/OpenGl/OpenGlRendererAPI.h
-  src/Karen/Core.h src/Karen/Window.h src/Platforms/Linux/LinuxInput.h Platforms/Linux/LinuxWindow.h  src/Render/OrthographicCamera.h
-)
+#set(KAREN_SRC_H src/Karen/App.h src/Karen/Log.h src/Platforms/Windows/WindowsWindow.h src/Karen/Layers/Layer.h
+#    src/Karen/Layers/LayerStack.h src/Karen/Layers/GuiLayer.h src/Platforms/Windows/WindowsInput.h
+#  src/Karen/Input.h src/Platforms/OpenGl/OpenGlContext.h src/Platforms/OpenGl/OpenGlVertexBuffer.h
+#  src/Platforms/OpenGl/OpenGlIndexBuffer.h src/Render/API/VertexBuffer.h src/Render/API/IndexBuffer.h
+#  src/Render/API/RendererAPI.h src/Render/API/VertexArray.h
+#  src/Platforms/OpenGl/OpenGlVertexArray.h src/Render/API/Shader.h
+#  src/Platforms/OpenGl/OpenGlShader.h src/Karen/CommanUtils/FileLoader.h
+#  src/Render/API/Renderer.h src/Render/API/RenderCommands.h
+#  src/Platforms/OpenGl/OpenGlRendererAPI.h
+#  src/Karen/Core.h src/Karen/Window.h src/Platforms/Linux/LinuxInput.h Platforms/Linux/LinuxWindow.h  src/Render/OrthographicCamera.h
+#)
 set(KAREN_PUBLIC_INCLUDE_DIRS
   ${CMAKE_CURRENT_SOURCE_DIR}/include/
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include/ 
@@ -77,12 +81,12 @@ add_subdirectory(vendor/glm)
 set(KAREN_LIBS glm glfw imgui glad)
 
 if(KAREN_IS_SHARED)
-  add_library(${PROJECT_NAME} SHARED ${KAREN_SRC})
+  add_library(${PROJECT_NAME} SHARED ${KAREN_SRC} ${KAREN_SRC_H})
   target_compile_definitions(${PROJECT_NAME} PRIVATE KAREN_BUILD_SHARED KAREN_IS_SHARED)
   set(KAREN_LINK_LIBS ${KAREN_LIBS} PARENT_SCOPE)
 else()
   set(KAREN_LINK_LIBS  PARENT_SCOPE)
-  add_library(${PROJECT_NAME} STATIC ${KAREN_SRC})
+  add_library(${PROJECT_NAME} STATIC ${KAREN_SRC} ${KAREN_SRC_H})
 endif(KAREN_IS_SHARED)
 
 if(KAREN_ENABLE_ASSERT)
