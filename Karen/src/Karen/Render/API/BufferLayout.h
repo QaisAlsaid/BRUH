@@ -1,8 +1,9 @@
 #ifndef BUFFER_LAYOUT_H
 #define BUFFER_LAYOUT_H
 
-#include "pch.h"
 #include "Karen/Core/Core.h"
+#include <string>
+#include <stdint.h>
 
 namespace Karen
 {

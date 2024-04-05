@@ -1,4 +1,3 @@
-#include "Karen/Core/CommanUtils/FileLoader.h"
 #include "Karen/Core/Timestep.h"
 #include "Karen/Core/Events/AppEvents.h"
 #include "Karen/Render/API/RenderCommands.h"
@@ -13,8 +12,16 @@
 #include "Karen/Render/API/IndexBuffer.h"
 #include "Karen/Render/API/BufferLayout.h"
 
+#ifdef KAREN_EMSCRIPTEN
+#include <emscripten.h>
+static void callMain(void* fp)
+{
+  std::function<void()>* func = (std::function<void()>*)fp;
+  (*func)();
+}
+#endif //KAREN_EMSCRIPTEN
+
 //FIXME:remove it
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 namespace Karen
@@ -57,8 +64,12 @@ namespace Karen
 
   void App::run()
   {
+#ifndef KAREN_EMSCRIPTEN
     while(m_running)
     {
+#else 
+      std::function<void()> MainLoop = [&] () {
+#endif
       float time = glfwGetTime();
       float delta_time = time - m_last_time;
       m_last_time = time;
@@ -73,7 +84,12 @@ namespace Karen
         layer->onGuiUpdate();
       m_gui_layer->end();
       m_window->onUpdate();
+#ifndef KAREN_EMSCRIPTEN
     }
+#else 
+    };
+    emscripten_set_main_loop_arg(callMain, &MainLoop, 0, 1);
+#endif //KAREN_EMSCRIPTEN
   }
   bool App::onCloseCall(WindowClosedEvent& event)
   {

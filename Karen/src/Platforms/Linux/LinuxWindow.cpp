@@ -1,10 +1,9 @@
 #include "pch.h"
-#include "Platforms/Linux/LinuxWindow.h"
+#include "LinuxWindow.h"
 #include "Platforms/Linux/LinuxInput.h"
 #include "Platforms/OpenGl/OpenGlContext.h"
-
+#include "Karen/Core/Window.h"
 #include <GLFW/glfw3.h>
-
 static bool stat_is_glfw_init = false;
 static void glfwerrorCallback(int code, const char* message)
 {
@@ -12,7 +11,7 @@ static void glfwerrorCallback(int code, const char* message)
 }
 namespace Karen 
 {
-  Window* Window::create(const WindowSpecs& specs)
+  Karen::Window* Window::create(const WindowSpecs& specs)
   { 
     return new LinuxWindow(specs);
   }

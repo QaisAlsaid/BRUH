@@ -20,7 +20,7 @@ public:
     m_rect_vbuf.reset(Karen::VertexBuffer::create(sizeof(float) * 12, m_rect_verts, 5));
     m_rect_ibuf.reset(Karen::IndexBuffer::create(6, m_rect_inds, 5));
 
-    m_sh->loadFromFile("../res/shaders/vs.glsl", "../res/shaders/fs.glsl");
+    m_sh->loadFromFile("vs_gles.glsl", "fs_gles.glsl");
     Karen::BufferLayout bl = 
     {
       {"pos", Karen::ShaderDataType::Float3}
@@ -79,7 +79,7 @@ public:
 
     Karen::Mat4 rect_trans = glm::translate(Karen::Mat4(1.0f), m_rect_pos);
     rect_trans = glm::scale(rect_trans, Karen::Vec3(0.4f, 0.4f, 0.4f));
-    Karen::RenderCommands::clear(Karen::Vec4(0.2f, 0.2f, 0.2f, 1.0f));
+    Karen::RenderCommands::clear(Karen::Vec4(0.8f, 0.2f, 0.2f, 1.0f));
     m_r->beginScene(m_ortho);
     m_r->submit(m_rect_varr, m_sh, rect_trans);
     m_r->submit(m_tri_varr, m_sh, tri_trans);

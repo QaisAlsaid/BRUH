@@ -20,7 +20,7 @@ namespace Karen
   };
 
 
-  class KAREN_API Window
+  class Window
   {
   public:
     using EventCallbackFunc = std::function<void(Event&)>;

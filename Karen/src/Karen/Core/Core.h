@@ -23,7 +23,6 @@
 #else
   #define KAREN_API
 #endif
-#define KAREN_ENABLE_ASSERT
 #ifdef KAREN_ENABLE_ASSERT
   #define KAREN_CORE_ASSERT(x, ...) {if(!(x)) KAREN_CORE_CRITICAL("{0}", __VA_ARGS__);}
   #define KAREN_ASSERT(x, ...) {if(!(x)) KAREN_CRITICAL("{0}", __VA_ARGS__);}

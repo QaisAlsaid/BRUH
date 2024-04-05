@@ -11,12 +11,21 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 option(KAREN_ENABLE_ASSERT "Enables Assertion" ON)
 option(KAREN_ENABLE_VERIFY "Enables Verify" ON)
 option(KAREN_IS_SHARED "builds as shared lib" OFF)
-if(GNU)
+option(KAREN_EMSCRIPTEN "builds for the web" ON)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  add_compile_options(-Wall -g -O0)
+  set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   add_compile_options(-fPIC -Wall -g -O0)
   set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+  # using Intel C++
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  # using Visual Studio C++
 endif()
-if(NOT WIN32)
-  set(KAREN_SRC src/Karen/Core/App.cpp src/Karen/Core/Log.cpp
+
+set(KAREN_SRC src/Karen/Core/App.cpp src/Karen/Core/Log.cpp
     src/Platforms/Linux/LinuxWindow.cpp src/Karen/Core/Layers/Layer.cpp
     src/Karen/Core/Layers/LayerStack.cpp src/Karen/Core/Layers/GuiLayer.cpp
     src/Platforms/Linux/LinuxInput.cpp src/Karen/Core/Input.cpp
@@ -31,18 +40,6 @@ if(NOT WIN32)
     src/Platforms/Windows/WindowsInput.cpp src/Platforms/Windows/WindowsWindow.cpp
     include/Karen.h
   )
-else()
-  set(KAREN_SRC src/Karen/App.cpp src/Karen/Log.cpp src/Platforms/Windows/WindowsWindow.cpp src/Karen/Layers/Layer.cpp
-    src/Karen/Layers/LayerStack.cpp src/Karen/Layers/GuiLayer.cpp src/Platforms/Windows/WindowsInput.cpp
-  src/Karen/Input.cpp src/Platforms/OpenGl/OpenGlContext.cpp src/Platforms/OpenGl/OpenGlVertexBuffer.cpp
-  src/Platforms/OpenGl/OpenGlIndexBuffer.cpp src/Render/API/VertexBuffer.cpp src/Render/API/IndexBuffer.cpp
-  src/Render/API/RendererAPI.cpp src/Render/API/VertexArray.cpp
-  src/Platforms/OpenGl/OpenGlVertexArray.cpp src/Render/API/Shader.cpp
-  src/Platforms/OpenGl/OpenGlShader.cpp src/Karen/CommanUtils/FileLoader.cpp
-  src/Render/API/Renderer.cpp src/Render/API/RenderCommands.cpp
-  src/Platforms/OpenGl/OpenGlRendererAPI.cpp src/Render/OrthographicCamera.cpp
-  )
-endif()
 #set(KAREN_SRC_H src/Karen/App.h src/Karen/Log.h src/Platforms/Windows/WindowsWindow.h src/Karen/Layers/Layer.h
 #    src/Karen/Layers/LayerStack.h src/Karen/Layers/GuiLayer.h src/Platforms/Windows/WindowsInput.h
 #  src/Karen/Input.h src/Platforms/OpenGl/OpenGlContext.h src/Platforms/OpenGl/OpenGlVertexBuffer.h
@@ -66,19 +63,24 @@ set(KAREN_PUBLIC_INCLUDE_DIRS
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui/backends
   ${OPENGL_INCLUDE_DIRS}
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glad/include
-  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glm/
-  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include 
-   )
-
-
+  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glm
+  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../emsdk/upstream/emscripten/cache/sysroot/include
+  )
+if(NOT KAREN_EMSCRIPTEN)
 add_subdirectory(vendor/glfw)
-add_subdirectory(vendor/imgui)
 add_subdirectory(vendor/glad)
+endif()
+add_subdirectory(vendor/imgui)
 add_subdirectory(vendor/glm)
 
+if(NOT KAREN_EMSCRIPTEN)
 set(KAREN_LIBS glm glfw imgui glad)
+else()
+set(KAREN_LIBS glm imgui)
+endif()
 
 if(KAREN_IS_SHARED)
   add_library(${PROJECT_NAME} SHARED ${KAREN_SRC} ${KAREN_SRC_H})
@@ -96,6 +98,11 @@ endif(KAREN_ENABLE_ASSERT)
 if(KAREN_ENABLE_VERIFY)
   target_compile_definitions(${PROJECT_NAME} PUBLIC KAREN_ENABLE_VERIFY)
 endif(KAREN_ENABLE_VERIFY)
+
+if(KAREN_EMSCRIPTEN)
+  target_compile_definitions(${PROJECT_NAME} PUBLIC KAREN_EMSCRIPTEN)
+  set(KAREN_IS_EMSCRIPTEN ${KAREN_EMSCRIPTEN} PARENT_SCOPE)
+endif()
 
 target_precompile_headers(${PROJECT_NAME} PUBLIC src/pch.h)
 
