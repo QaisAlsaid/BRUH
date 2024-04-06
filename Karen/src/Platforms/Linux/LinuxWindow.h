@@ -1,9 +1,9 @@
 #ifndef LINUX_WINDOW_H
 #define LINUX_WINDOW_H
 
-//#ifdef __linux
+#ifdef __linux
 
-//#ifndef __ANDROID__
+#ifndef __ANDROID__
 
 #include "Karen/Core/Window.h"
 #include "Karen/Render/API/Context.h"
@@ -55,8 +55,8 @@ namespace Karen
 }
 
 
-//#endif //__ANDROID__
+#endif //__ANDROID__
 
-//#endif //__linux
+#endif //__linux
 
 #endif //LINUX_WINDOW_H

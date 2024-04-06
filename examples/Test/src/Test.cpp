@@ -19,8 +19,11 @@ public:
     m_rect_varr.reset(Karen::VertexArray::create());
     m_rect_vbuf.reset(Karen::VertexBuffer::create(sizeof(float) * 12, m_rect_verts, 5));
     m_rect_ibuf.reset(Karen::IndexBuffer::create(6, m_rect_inds, 5));
-
+#ifdef KAREN_EMSCRIPTEN
     m_sh->loadFromFile("vs_gles.glsl", "fs_gles.glsl");
+#else 
+    m_sh->loadFromFile("../res/shaders/vs.glsl", "../res/shaders/fs.glsl");
+#endif //KAREN_EMSCRIPTEN
     Karen::BufferLayout bl = 
     {
       {"pos", Karen::ShaderDataType::Float3}

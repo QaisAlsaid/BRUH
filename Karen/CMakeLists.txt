@@ -11,7 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 option(KAREN_ENABLE_ASSERT "Enables Assertion" ON)
 option(KAREN_ENABLE_VERIFY "Enables Verify" ON)
 option(KAREN_IS_SHARED "builds as shared lib" OFF)
-option(KAREN_EMSCRIPTEN "builds for the web" ON)
+option(KAREN_EMSCRIPTEN "builds for the web" OFF)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   add_compile_options(-Wall -g -O0)
@@ -67,7 +67,6 @@ set(KAREN_PUBLIC_INCLUDE_DIRS
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glad/include
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glm
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include
-  ${CMAKE_CURRENT_SOURCE_DIR}/../../emsdk/upstream/emscripten/cache/sysroot/include
   )
 if(NOT KAREN_EMSCRIPTEN)
 add_subdirectory(vendor/glfw)
@@ -79,6 +78,7 @@ add_subdirectory(vendor/glm)
 if(NOT KAREN_EMSCRIPTEN)
 set(KAREN_LIBS glm glfw imgui glad)
 else()
+set(KAREN_ADDITIONAL_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../../emsdk/upstream/emscripten/cache/sysroot/include)
 set(KAREN_LIBS glm imgui)
 endif()
 
@@ -110,4 +110,4 @@ target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES} ${KAREN_LIBS})
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${KAREN_PRIVATE_INCLUDE_DIRS})
 
-target_include_directories(${PROJECT_NAME} PUBLIC ${KAREN_PUBLIC_INCLUDE_DIRS})
+target_include_directories(${PROJECT_NAME} PUBLIC ${KAREN_PUBLIC_INCLUDE_DIRS} ${KAREN_ADDITIONAL_INCLUDE})
