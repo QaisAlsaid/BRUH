@@ -1,11 +1,7 @@
 #include "pch.h"
 #include "Platforms/OpenGl/OpenGlIndexBuffer.h"
+#include "Platforms/OpenGl/OpenGlCore.h"
 
-#ifndef KAREN_EMSCRIPTEN
-#include <glad/glad.h>
-#else 
-#include <GLES3/gl32.h>
-#endif //KAREN_EMSCRIPTEN
 
 namespace Karen
 {

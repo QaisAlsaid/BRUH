@@ -1,3 +1,4 @@
+#include "Karen/Render/API/BufferLayout.h"
 #include <Karen.h>
 
 class mLayer : public Karen::Layer
@@ -8,31 +9,41 @@ public:
   {
     m_tri_pos = Karen::Vec3(-0.5f, 0.5f, 0.0f);
     m_rect_pos = Karen::Vec3(-0.5f, 0.5f, 0.0f);
-    m_r = new Karen::Renderer();
+    m_r.reset(new Karen::Renderer());
     KAREN_INFO("Layer: {0} Attached", this->getName());
-    m_sh.reset(Karen::Shader::create());
+    m_color_sh.reset(Karen::Shader::create());
+    m_texture_sh.reset(Karen::Shader::create());
     m_tri_varr.reset(Karen::VertexArray::create());
     m_tri_varr->bind();
     m_tri_vbuf.reset(Karen::VertexBuffer::create(sizeof(float) * 9, m_tri_verts, 5));
     m_tri_ibuf.reset(Karen::IndexBuffer::create(3, m_tri_inds, 5));
    
     m_rect_varr.reset(Karen::VertexArray::create());
-    m_rect_vbuf.reset(Karen::VertexBuffer::create(sizeof(float) * 12, m_rect_verts, 5));
+    m_rect_vbuf.reset(Karen::VertexBuffer::create(sizeof(float) * 20, m_rect_verts, 5));
     m_rect_ibuf.reset(Karen::IndexBuffer::create(6, m_rect_inds, 5));
 #ifdef KAREN_EMSCRIPTEN
-    m_sh->loadFromFile("vs_gles.glsl", "fs_gles.glsl");
+    m_color_sh->loadFromFile("res/shaders/color_vs_gles.glsl", "res/shaders/color_fs_gles.glsl");
+    m_texture_sh->loadFromFile("res/shaders/tux_vs_gles.glsl", "res/shaders/tux_fs_gles.glsl");
+    m_tux = Karen::Texture2D::create("res/textuers/img1.png");
 #else 
-    m_sh->loadFromFile("../res/shaders/vs.glsl", "../res/shaders/fs.glsl");
+    m_color_sh->loadFromFile("../res/shaders/color_vs.glsl", "../res/shaders/color_fs.glsl");
+    m_texture_sh->loadFromFile("../res/shaders/tux_vs.glsl", "../res/shaders/tux_fs.glsl");
+    m_tux = Karen::Texture2D::create("../res/textuers/img1.png");
 #endif //KAREN_EMSCRIPTEN
-    Karen::BufferLayout bl = 
+    Karen::BufferLayout rect_bl = 
+    {
+      {"pos", Karen::ShaderDataType::Float3},
+      {"tux_coord", Karen::ShaderDataType::Float2}
+    };
+    Karen::BufferLayout tri_bl = 
     {
       {"pos", Karen::ShaderDataType::Float3}
     };
-    m_tri_vbuf->setLayout(bl);
+    m_tri_vbuf->setLayout(tri_bl);
     m_tri_varr->setIndexBuffer(m_tri_ibuf);
     m_tri_varr->addVertexBuffer(m_tri_vbuf);
     
-    m_rect_vbuf->setLayout(bl);
+    m_rect_vbuf->setLayout(rect_bl);
     m_rect_varr->setIndexBuffer(m_rect_ibuf);
     m_rect_varr->addVertexBuffer(m_rect_vbuf);
     m_ortho.setZoom(1.0f);
@@ -40,12 +51,10 @@ public:
   void onDetach() override
   {
     KAREN_INFO("Layer: {0} Detached", this->getName());
-    delete m_r;
   }
 
   void onUpdate(Karen::Timestep ts) override 
   {
-    KAREN_INFO("delta sec: {0}, delta mil {1}", ts.getTime(), ts.getTimeAsMilliSeconds());
     if(Karen::Input::isKeyPressed(Karen::Keyboard::W))
       m_ortho.setPosition(Karen::Vec3(m_ortho.getPosition().x, m_ortho.getPosition().y + 0.5f * ts, 0.0f));
     if(Karen::Input::isKeyPressed(Karen::Keyboard::S))
@@ -78,32 +87,35 @@ public:
    m_ortho.onUpdate(ts);
 
     Karen::Mat4 tri_trans = glm::translate(Karen::Mat4(1.0f), m_tri_pos);
-    tri_trans = glm::scale(tri_trans, Karen::Vec3(0.7f, 0.7f, 0.7f));
-
+    tri_trans = glm::scale(tri_trans, Karen::Vec3(0.4f, 0.4f, 0.4f));
+    
     Karen::Mat4 rect_trans = glm::translate(Karen::Mat4(1.0f), m_rect_pos);
-    rect_trans = glm::scale(rect_trans, Karen::Vec3(0.4f, 0.4f, 0.4f));
+    rect_trans = glm::scale(rect_trans, Karen::Vec3(1.0f, 1.0f, 1.0f));
     Karen::RenderCommands::clear(Karen::Vec4(0.8f, 0.2f, 0.2f, 1.0f));
     m_r->beginScene(m_ortho);
-    m_r->submit(m_rect_varr, m_sh, rect_trans);
-    m_r->submit(m_tri_varr, m_sh, tri_trans);
+    m_tux->bind(0);
+    m_texture_sh->bind();
+    m_texture_sh->setUniformInt("u_tux", 0);
+    m_r->submit(m_rect_varr, m_texture_sh, rect_trans);
+    m_r->submit(m_tri_varr, m_color_sh, tri_trans);
     m_r->endScene();
-  if(Karen::Input::isMouseButtonPressed(Karen::Mouse::ButtonLeft)) KAREN_CORE_TRACE("BU");
   }
 
   void onEvent(Karen::Event& e) override
   {
-    if(e.getEventType() == Karen::EventType::MouseButtonPressed) KAREN_CORE_TRACE("BE");
   }
 
 private:
-  Karen::Renderer* m_r;
-  Karen::ARef<Karen::Shader> m_sh;
+  Karen::ARef<Karen::Renderer> m_r;
+  Karen::ARef<Karen::Shader> m_color_sh;
+  Karen::ARef<Karen::Shader> m_texture_sh;
   Karen::ARef<Karen::VertexArray> m_tri_varr;
   Karen::ARef<Karen::VertexBuffer> m_tri_vbuf;
   Karen::ARef<Karen::IndexBuffer> m_tri_ibuf;
   Karen::ARef<Karen::VertexBuffer> m_rect_vbuf;
   Karen::ARef<Karen::IndexBuffer> m_rect_ibuf;
   Karen::ARef<Karen::VertexArray> m_rect_varr;
+  Karen::ARef<Karen::Texture2D> m_tux;
   Karen::OrthographicCamera m_ortho = Karen::OrthographicCamera(-1.0f, 1.0f, -1.0f, 1.0f);
   Karen::Vec3 m_tri_pos;
   Karen::Vec3 m_rect_pos;
@@ -112,27 +124,27 @@ private:
   const float m_tri_verts[9] = 
   {
     -0.5f, -0.5f, 0.0f,
-     0.5f,  0.0f, 0.0f,
-     0.0f,  0.5f, 0.0f
+     0.5f, -0.5f, 0.0f,
+     0.5f,  0.5f, 0.0f
   };
 
   const uint32_t m_tri_inds[3] = 
   {
-    0, 2, 1
+    0, 1, 2
   };
 
-  const float m_rect_verts[12]= 
+  const float m_rect_verts[20]= 
   {
-    -0.5f, -0.5f, 0.0f,
-     0.5f,  0.0f, 0.0f,
-     0.0f,  0.5f, 0.0f,
-     0.0f, -0.5f, 0.0f
+    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
+     0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+     0.5f,  0.5f, 0.0f, 1.0f, 1.0f,
+    -0.5f,  0.5f, 0.0f, 0.0f, 1.0f
   };
 
   const uint32_t m_rect_inds[6] = 
   {
     0, 1, 2,
-    0, 1, 3
+    2, 3, 0
   };
 };
 class Sandbox : public Karen::App

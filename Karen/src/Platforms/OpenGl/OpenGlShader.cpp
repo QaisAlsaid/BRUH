@@ -3,24 +3,9 @@
 #include "Platforms/OpenGl/OpenGlShader.h"
 #include "Karen/Core/CommanUtils/FileLoader.h"
 #include "Karen/Core/Core.h"
+#include "Platforms/OpenGl/OpenGlCore.h"
 
-#ifndef KAREN_EMSCRIPTEN
-#include <glad/glad.h>
-#else 
-#include <GLES3/gl32.h>
-#endif //KAREN_EMSCRIPTEN
 
-//HACK:
-#define glCall(x) x; \
-  glPrintErr(#x, __FILE__, __LINE__);
-void glPrintErr(const char* fn, const char* file, int line)
-{
-  while(auto err = glGetError())
-  {
-    KAREN_CORE_CRITICAL("OpenGl Error code {0}, File: {1}, Line: {2}, function: {3}",err, file, line, fn);
-
-  }
-}
 namespace Karen
 {
   OpenGlShader::OpenGlShader()
@@ -113,5 +98,11 @@ namespace Karen
   {
     glCall(auto lo = glGetUniformLocation(m_program_id, n.c_str()))
     glCall(glUniformMatrix4fv(lo, 1, 0, glm::value_ptr(v)))
+  }
+
+  void OpenGlShader::setUniformInt(const std::string& n, int v)
+  {
+    glCall(auto lo = glGetUniformLocation(m_program_id, n.c_str()));
+    glCall(glUniform1i(lo, v));
   }
 }

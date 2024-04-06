@@ -38,6 +38,8 @@ set(KAREN_SRC src/Karen/Core/App.cpp src/Karen/Core/Log.cpp
     src/Karen/Render/API/Renderer.cpp src/Karen/Render/API/RenderCommands.cpp
     src/Platforms/OpenGl/OpenGlRendererAPI.cpp src/Karen/Render/OrthographicCamera.cpp
     src/Platforms/Windows/WindowsInput.cpp src/Platforms/Windows/WindowsWindow.cpp
+    src/Platforms/OpenGl/OpenGlTexture.cpp src/Karen/Render/API/Texture.cpp
+    src/Karen/Core/CommanUtils/ImageLoader.cpp src/Platforms/OpenGl/OpenGlCore.cpp
     include/Karen.h
   )
 #set(KAREN_SRC_H src/Karen/App.h src/Karen/Log.h src/Platforms/Windows/WindowsWindow.h src/Karen/Layers/Layer.h
@@ -67,19 +69,21 @@ set(KAREN_PUBLIC_INCLUDE_DIRS
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glad/include
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glm
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/stb_image
   )
 if(NOT KAREN_EMSCRIPTEN)
 add_subdirectory(vendor/glfw)
 add_subdirectory(vendor/glad)
 endif()
+add_subdirectory(vendor/stb_image)
 add_subdirectory(vendor/imgui)
 add_subdirectory(vendor/glm)
 
 if(NOT KAREN_EMSCRIPTEN)
-set(KAREN_LIBS glm glfw imgui glad)
+set(KAREN_LIBS glm glfw imgui glad stb)
 else()
 set(KAREN_ADDITIONAL_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../../emsdk/upstream/emscripten/cache/sysroot/include)
-set(KAREN_LIBS glm imgui)
+set(KAREN_LIBS glm imgui stb)
 endif()
 
 if(KAREN_IS_SHARED)

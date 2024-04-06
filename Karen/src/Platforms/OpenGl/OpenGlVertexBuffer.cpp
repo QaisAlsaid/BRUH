@@ -1,12 +1,8 @@
 #include "pch.h"
 #include "Karen/Render/API/BufferLayout.h"
 #include "Platforms/OpenGl/OpenGlVertexBuffer.h"
+#include "Platforms/OpenGl/OpenGlCore.h"
 
-#ifndef KAREN_EMSCRIPTEN
-#include <glad/glad.h>
-#else 
-#include <GLES3/gl32.h>
-#endif //KAREN_EMSCRIPTEN
 
 namespace Karen
 {
