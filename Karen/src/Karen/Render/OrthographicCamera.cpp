@@ -11,7 +11,7 @@ namespace Karen
   }
 
   OrthographicCamera::OrthographicCamera(float p_left, float p_right, float p_bottom, float p_top, Vec3 p_pos)
-    : m_right(p_right), m_left(p_left),
+    : m_left(p_left), m_right(p_right),
     m_bottom(p_bottom), m_top(p_top),
     m_pos(p_pos)
   {
@@ -31,6 +31,7 @@ namespace Karen
   
     Mat4 trans = glm::translate(Mat4(1.0f), -m_pos); 
     trans = glm::rotate(trans, glm::radians(m_rotation), Vec3(0, 0, 1));
+
     m_view = trans;
     
     m_pv = m_proj * m_view;

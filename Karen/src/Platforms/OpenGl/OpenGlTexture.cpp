@@ -18,11 +18,13 @@ namespace Karen
     {
       case 3:
         fmt = GL_RGB;
+        break;
       case 4:
         fmt = GL_RGBA;
+        break;
     }
     KAREN_CORE_ASSERT(m_image.getColorChannels() > 2 && m_image.getColorChannels() < 5, "Unsupported Image format");
-    KAREN_CORE_TRACE("image: {0} fmt:{1}", file_path, m_image.getColorChannels());
+    
     glCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
     glCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
     glCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));

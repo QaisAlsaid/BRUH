@@ -1,3 +1,4 @@
+#include "Karen/Render/API/Shader.h"
 #include "pch.h"
 #include "Karen/Core/Log.h"
 #include "Platforms/OpenGl/OpenGlShader.h"
@@ -8,13 +9,21 @@
 
 namespace Karen
 {
+  template<char Remove> bool BothAre(char lhs, char rhs)
+  {
+    return lhs == rhs && lhs == Remove;
+  }
+
+  void split(const std::string& str, std::vector<std::string>& cont, char sep = ' '); 
+ 
+
   OpenGlShader::OpenGlShader()
   {
   }
 
   OpenGlShader::OpenGlShader(const std::string& vp, const std::string& fp)
   {
-    glCall(loadFromFile(vp, fp));
+    loadFromFile(vp, fp);
   }
 
   OpenGlShader::~OpenGlShader()
@@ -34,11 +43,14 @@ namespace Karen
 
   void OpenGlShader::loadFromFile(const std::string& vp, const std::string& fp)
   {
-    compileShaders(FileLoader::LoadFromFile(vp), FileLoader::LoadFromFile(fp));
+    std::string vs = FileLoader::LoadFromFile(vp);
+    std::string fs = FileLoader::LoadFromFile(fp);
+    compileShaders(vs, fs);
     createProgram();
+    cacheUniforms(vs, fs);
   }
 
-  void OpenGlShader::compileShaders(const std::string& vs, const std::string& fs)
+  void OpenGlShader::compileShaders(std::string& vs, std::string& fs)
   {
     const char *v_cstr = vs.c_str(), *f_cstr = fs.c_str();
     KAREN_CORE_TRACE("Vertex: {0}", v_cstr);
@@ -94,15 +106,74 @@ namespace Karen
 	  }
   }
 
+  void OpenGlShader::cacheUniforms(std::string& vs, std::string& fs)
+  {
+    std::vector<std::string> vs_toks, fs_toks;
+    vs.erase(std::unique(vs.begin(), vs.end(), BothAre<' '>), vs.end());
+    fs.erase(std::unique(fs.begin(), fs.end(), BothAre<' '>), fs.end());
+   
+    vs_toks.reserve(vs.size()/2);
+    fs_toks.reserve(fs.size()/2);
+
+    split(vs, vs_toks);
+    split(fs, fs_toks);
+
+    findUniformsAndData(vs_toks);
+    findUniformsAndData(fs_toks);
+
+    for(auto const& [key, val] : m_uniforms)
+    {
+      std::cout<<"name: "<<key<< "location: "<<val.location<<"type: "<<(int)val.type<<"\n";
+    }
+  }
+
+  void OpenGlShader::findUniformsAndData(const std::vector<std::string>& t)
+  {
+    for(size_t i = 0; i < t.size(); ++i)
+    {
+      if(t.at(i) == "uniform")
+      {
+        KAREN_CORE_INFO("{0}, {1}, {2}", t.at(i - 1), t.at(i), t.at(i + 1));
+        uint8_t type_location = 0;
+        std::string name;
+        UniformData data;
+        if(GLES)
+        {
+          name = t.at(i + 3);
+          type_location = 2;
+        }
+        else
+        {
+          name = t.at(i + 2);
+          type_location = 1;
+        }
+        data.type = getTypeFromHash(hashType(t.at(i + type_location)));
+        glCall(auto loc = glGetUniformLocation(m_program_id, name.c_str()));
+        data.location = loc;
+        m_uniforms[name] = data;
+      }
+    }
+  } 
+
   void OpenGlShader::setUniformMat4fv(const std::string& n, const Mat4& v)
   {
-    glCall(auto lo = glGetUniformLocation(m_program_id, n.c_str()))
-    glCall(glUniformMatrix4fv(lo, 1, 0, glm::value_ptr(v)))
+    glCall(glUniformMatrix4fv(m_uniforms.at(n).location, 1, 0, glm::value_ptr(v)))
   }
 
   void OpenGlShader::setUniformInt(const std::string& n, int v)
   {
-    glCall(auto lo = glGetUniformLocation(m_program_id, n.c_str()));
-    glCall(glUniform1i(lo, v));
+    glCall(glUniform1i(m_uniforms.at(n).location, v));
+  }
+
+  void split(const std::string& str, std::vector<std::string>& cont, char sep) 
+  {
+    std::stringstream ss(str);
+    std::string token;
+    while(ss >> token)
+    {
+      token.erase(std::remove(token.begin(), token.end(), ';'), token.end());
+      KAREN_CORE_INFO("{0}", token);
+      cont.push_back(token);
+    }
   }
 }

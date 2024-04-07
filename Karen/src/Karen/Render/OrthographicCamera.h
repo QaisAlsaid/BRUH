@@ -61,7 +61,7 @@ namespace Karen
     }
 
     inline float getRotation() const
-    {
+   {
       return m_rotation;
     }
   private:

@@ -3,8 +3,10 @@
 
 #ifndef KAREN_EMSCRIPTEN
 #include <glad/glad.h>
+#define GLES 0
 #else 
 #include <GLES3/gl32.h>
+#define GLES 1
 #endif //KAREN_EMSCRIPTEN
 
 #define glCall(x) x; \

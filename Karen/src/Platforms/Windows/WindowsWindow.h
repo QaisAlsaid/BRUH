@@ -1,6 +1,5 @@
 #ifndef WINDOWS_WINDOW_H
 #define WINDOWS_WINDOW_H
-
 #ifdef _WIN32
 
 #include "Karen/Core/Window.h"
@@ -52,7 +51,5 @@ namespace Karen
   };
 }
 
-
 #endif //_WIN32
-
 #endif //WINDOWS_WINDOW_H

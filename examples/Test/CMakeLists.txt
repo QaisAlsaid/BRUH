@@ -3,6 +3,8 @@ project(Test)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
+set(KAREN_EMSCRIPTEN OFF CACHE BOOL "enable build for the web")
+
 add_subdirectory(../../Karen/ ../../Karen/build/)
 add_executable(${PROJECT_NAME} src/Test.cpp)
 #target_include_directories(${PROJECT_NAME} PRIVATE ../../Karen/include/
@@ -15,5 +17,10 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${KAREN_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} Karen)
 if(${KAREN_IS_EMSCRIPTEN})
   set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".html"
-    LINK_FLAGS "-sUSE_GLFW=3 -sWASM=0 -sFULL_ES3  --embed-file ${CMAKE_CURRENT_SOURCE_DIR}/res/shaders/vs_gles.glsl@vs_gles.glsl --embed-file ${CMAKE_CURRENT_SOURCE_DIR}/res/shaders/fs_gles.glsl@fs_gles.glsl --bind -DKAREN_EMSCRIPTEN")
+    LINK_FLAGS "-sUSE_GLFW=3 -sWASM=0 -sFULL_ES3 --preload-file ../res --embed-file ./imgui.ini --bind -DKAREN_EMSCRIPTEN"
+
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+)
 endif()

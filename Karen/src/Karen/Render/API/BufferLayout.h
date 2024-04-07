@@ -2,89 +2,12 @@
 #define BUFFER_LAYOUT_H
 
 #include "Karen/Core/Core.h"
+#include "Karen/Render/API/Shader.h"
 #include <string>
 #include <stdint.h>
 
 namespace Karen
-{
-  enum class ShaderDataType : uint8_t
-  {
-    None = 0,
-    Int, Int2, Int3, Int4,
-    Float, Float2, Float3, Float4,
-    Mat2, Mat3, Mat4,
-    Bool
-  };
-
-  static std::string ShaderDataTypeToString(ShaderDataType type)
-  {
-    switch(type)
-    {
-      case ShaderDataType::None:
-          return "None";
-        case ShaderDataType::Int:
-          return "Int";
-        case ShaderDataType::Int2:
-          return "Int2";
-        case ShaderDataType::Int3:
-          return "Int3";
-        case ShaderDataType::Int4:
-          return "Int4";
-        case ShaderDataType::Float:
-          return "Float1";
-        case ShaderDataType::Float2:
-          return "Float2";
-        case ShaderDataType::Float3:
-          return "Float3";
-        case ShaderDataType::Float4:
-          return "Float4";
-        case ShaderDataType::Mat2:
-          return "Mat2";
-        case ShaderDataType::Mat3:
-          return "Mat3";
-        case ShaderDataType::Mat4:
-          return "Mat4";
-        case ShaderDataType::Bool:
-          return "Bool";
-    }
-    return std::string("Unknown, code: ") + std::to_string((uint32_t)type);
-  }
-
-  static uint32_t getTypeSize(ShaderDataType type)
-  {
-    switch(type)
-    {
-      case ShaderDataType::None:
-        return 0;
-      case ShaderDataType::Int:
-        return sizeof(int);
-      case ShaderDataType::Int2:
-        return sizeof(int) * 2;
-      case ShaderDataType::Int3:
-        return sizeof(int) * 3;
-      case ShaderDataType::Int4:
-        return sizeof(int) * 4;
-      case ShaderDataType::Float:
-        return sizeof(float);
-      case ShaderDataType::Float2:
-        return sizeof(float) * 2;
-      case ShaderDataType::Float3:
-        return sizeof(float) * 3;
-      case ShaderDataType::Float4:
-        return sizeof(float) * 4;
-      case ShaderDataType::Mat2:
-        return sizeof(float) * 2 * 2;
-      case ShaderDataType::Mat3:
-        return sizeof(float) * 3 * 3;
-      case ShaderDataType::Mat4:
-        return sizeof(float) * 4 * 4;
-      case ShaderDataType::Bool:
-        return sizeof(bool);
-    }
-    KAREN_CORE_ASSERT(false, "No Matching ShaderDataType To:{0}",ShaderDataTypeToString((type)));
-    return 0;
-  }
-
+{ 
   static uint32_t getComponentCount(ShaderDataType type)
   {
     switch(type)

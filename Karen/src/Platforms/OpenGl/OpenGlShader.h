@@ -17,12 +17,16 @@ namespace Karen
     void loadFromFile(const std::string& vp, const std::string& fp) override;
     void setUniformMat4fv(const std::string& name, const Mat4& value) override;
     void setUniformInt(const std::string& name, int value) override;
+    
   private:
-    void compileShaders(const std::string& vs, const std::string& fs);
+    void compileShaders(std::string& vs, std::string& fs);
     void createProgram();
+    void cacheUniforms(std::string& vs, std::string& fs);
+    void findUniformsAndData(const std::vector<std::string>& tokens);
   private:
     std::string vertex_src;
     std::string fragment_src;
+    std::unordered_map<std::string, UniformData> m_uniforms;
     uint32_t    m_program_id, m_vs_id, m_fs_id;
   };
 }

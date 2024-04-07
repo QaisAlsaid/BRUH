@@ -7,10 +7,31 @@
 
 namespace Karen
 {
+
+  enum class ShaderDataType : uint8_t
+  {
+    None = 0,
+    Int, Int2, Int3, Int4,
+    Float, Float2, Float3, Float4,
+    Mat2, Mat3, Mat4,
+    Sampler2D, Bool
+  };
+
   enum class ShaderType : uint8_t
   {
     None = 0, Vertex, Fragment
   };
+
+  struct UniformData
+  {
+    uint32_t location = 0;
+    ShaderDataType type;
+  };
+
+  std::string ShaderDataTypeToString(ShaderDataType type);
+  uint32_t getTypeSize(ShaderDataType type); 
+  uint32_t hashType(const std::string& type_name);
+  ShaderDataType getTypeFromHash(uint32_t hash);
 
 
   class KAREN_API Shader

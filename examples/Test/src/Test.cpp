@@ -95,7 +95,7 @@ public:
     m_r->beginScene(m_ortho);
     m_tux->bind(0);
     m_texture_sh->bind();
-    m_texture_sh->setUniformInt("u_tux", 0);
+    //m_texture_sh->setUniformInt("u_tux", 0);
     m_r->submit(m_rect_varr, m_texture_sh, rect_trans);
     m_r->submit(m_tri_varr, m_color_sh, tri_trans);
     m_r->endScene();

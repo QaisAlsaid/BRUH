@@ -4,6 +4,8 @@
 #include "Platforms/OpenGl/OpenGlContext.h"
 #include "Karen/Core/Window.h"
 #include <GLFW/glfw3.h>
+
+
 static bool stat_is_glfw_init = false;
 static void glfwerrorCallback(int code, const char* message)
 {
