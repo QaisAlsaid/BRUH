@@ -38,6 +38,8 @@ namespace Karen
         return 4 * 4;
       case ShaderDataType::Bool:
         return 1;
+      case ShaderDataType::Sampler2D:
+        return 1;
     }
     KAREN_CORE_ASSERT(false, "No Matching ShaderDataType To:{0}", ShaderDataTypeToString(type));
     return 0;

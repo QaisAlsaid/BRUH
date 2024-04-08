@@ -1,0 +1,9 @@
+<ShadersList>
+  <Shader>
+    <Name>color</Name>
+    <Path>
+      <VertPath>../res/shaders/color_vs.glsl</VertPath>
+      <FragPath>../res/shaders/color_fs.glsl</FragPath>
+    </Path>
+  </Shader>
+</ShadersList>

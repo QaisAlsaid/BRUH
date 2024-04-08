@@ -53,8 +53,6 @@ namespace Karen
   void OpenGlShader::compileShaders(std::string& vs, std::string& fs)
   {
     const char *v_cstr = vs.c_str(), *f_cstr = fs.c_str();
-    KAREN_CORE_TRACE("Vertex: {0}", v_cstr);
-    KAREN_CORE_TRACE("Fragment: {0}", f_cstr);
     int status_v, status_f;
     m_vs_id = glCall(glCreateShader(GL_VERTEX_SHADER));
     m_fs_id = glCall(glCreateShader(GL_FRAGMENT_SHADER));
@@ -133,7 +131,6 @@ namespace Karen
     {
       if(t.at(i) == "uniform")
       {
-        KAREN_CORE_INFO("{0}, {1}, {2}", t.at(i - 1), t.at(i), t.at(i + 1));
         uint8_t type_location = 0;
         std::string name;
         UniformData data;
@@ -155,12 +152,12 @@ namespace Karen
     }
   } 
 
-  void OpenGlShader::setUniformMat4fv(const std::string& n, const Mat4& v)
+  void OpenGlShader::setUniform(const std::string& n, const Mat4& v)
   {
     glCall(glUniformMatrix4fv(m_uniforms.at(n).location, 1, 0, glm::value_ptr(v)))
   }
 
-  void OpenGlShader::setUniformInt(const std::string& n, int v)
+  void OpenGlShader::setUniform(const std::string& n, int v)
   {
     glCall(glUniform1i(m_uniforms.at(n).location, v));
   }
@@ -172,7 +169,6 @@ namespace Karen
     while(ss >> token)
     {
       token.erase(std::remove(token.begin(), token.end(), ';'), token.end());
-      KAREN_CORE_INFO("{0}", token);
       cont.push_back(token);
     }
   }

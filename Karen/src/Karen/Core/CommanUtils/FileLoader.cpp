@@ -12,7 +12,7 @@ namespace Karen
     if(!fs)
     {
       KAREN_CORE_ASSERT(false, std::string("Could Not Open File: ") + fn);
-      return "Error Openning File:";
+      return "";
     }
 
     while(std::getline(fs, line))

@@ -30,7 +30,7 @@ namespace Karen
   {
     vb->bind();
     const auto& bl = vb->getLayout();
-    for(int i = 0; i < bl.getElements().size(); ++i)
+    for(uint32_t i = 0; i < bl.getElements().size(); ++i)
     {
       glEnableVertexAttribArray(i);
       glVertexAttribPointer(i,

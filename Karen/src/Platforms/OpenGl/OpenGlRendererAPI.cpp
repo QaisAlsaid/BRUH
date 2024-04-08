@@ -4,6 +4,12 @@
 
 namespace Karen
 {
+  void OpenGLRendererAPI::init()
+  {
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  }
+
   void OpenGLRendererAPI::drawIndexed(const ARef<VertexArray>& p_varr)
   { 
     p_varr->bind();

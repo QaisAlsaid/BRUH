@@ -38,7 +38,7 @@ namespace Karen
     if(!stat_is_glfw_init)
     {
       int glfw_init_status = glfwInit();
-      KAREN_CORE_ASSERT(glfw_init_status, "Failed Initializing GLFW Window")
+      KAREN_CORE_ASSERT(glfw_init_status, "Failed Initializing GLFW Window");
       stat_is_glfw_init = true;
       glfwSetErrorCallback(glfwerrorCallback);
     }

@@ -8,16 +8,6 @@ namespace Karen
 {
   RendererAPI* RenderCommands::s_API = new OpenGLRendererAPI; 
   
-  void RenderCommands::clear(const Vec4& p_cc)
-  {
-    s_API->clear(p_cc);
-  }
-
-  void RenderCommands::drawIndexed(const ARef<VertexArray>& varr)
-  {
-    s_API->drawIndexed(varr);
-  }
-
   //TODO: Make it happen :) idk how
  /* switch(RendererAPI::getAPI())
   {

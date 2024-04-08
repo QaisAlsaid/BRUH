@@ -1,4 +1,5 @@
 #include "Karen/Render/API/BufferLayout.h"
+#include "Karen/Render/ShaderManager.h"
 #include <Karen.h>
 
 class mLayer : public Karen::Layer
@@ -7,12 +8,13 @@ public:
   mLayer() : Layer("Test") {}
   void onAttach() override 
   {
+    m_r->init();
     m_tri_pos = Karen::Vec3(-0.5f, 0.5f, 0.0f);
     m_rect_pos = Karen::Vec3(-0.5f, 0.5f, 0.0f);
     m_r.reset(new Karen::Renderer());
     KAREN_INFO("Layer: {0} Attached", this->getName());
-    m_color_sh.reset(Karen::Shader::create());
-    m_texture_sh.reset(Karen::Shader::create());
+    m_color_sh = Karen::Shader::create();
+    m_texture_sh = Karen::Shader::create();
     m_tri_varr.reset(Karen::VertexArray::create());
     m_tri_varr->bind();
     m_tri_vbuf.reset(Karen::VertexBuffer::create(sizeof(float) * 9, m_tri_verts, 5));
@@ -47,6 +49,8 @@ public:
     m_rect_varr->setIndexBuffer(m_rect_ibuf);
     m_rect_varr->addVertexBuffer(m_rect_vbuf);
     m_ortho.setZoom(1.0f);
+    
+    m_color_sh = m_shaders.get("color");
   }
   void onDetach() override
   {
@@ -106,6 +110,7 @@ public:
   }
 
 private:
+  Karen::ShaderManager m_shaders = Karen::ShaderManager("../res/shaders/config.xml");
   Karen::ARef<Karen::Renderer> m_r;
   Karen::ARef<Karen::Shader> m_color_sh;
   Karen::ARef<Karen::Shader> m_texture_sh;

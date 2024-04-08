@@ -40,6 +40,7 @@ set(KAREN_SRC src/Karen/Core/App.cpp src/Karen/Core/Log.cpp
     src/Platforms/Windows/WindowsInput.cpp src/Platforms/Windows/WindowsWindow.cpp
     src/Platforms/OpenGl/OpenGlTexture.cpp src/Karen/Render/API/Texture.cpp
     src/Karen/Core/CommanUtils/ImageLoader.cpp src/Platforms/OpenGl/OpenGlCore.cpp
+    src/Karen/Render/ShaderManager.cpp
     include/Karen.h
   )
 #set(KAREN_SRC_H src/Karen/App.h src/Karen/Log.h src/Platforms/Windows/WindowsWindow.h src/Karen/Layers/Layer.h
@@ -70,6 +71,7 @@ set(KAREN_PUBLIC_INCLUDE_DIRS
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glm
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/stb_image
+  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/pugixml/src
   )
 if(NOT KAREN_EMSCRIPTEN)
 add_subdirectory(vendor/glfw)
@@ -78,9 +80,10 @@ endif()
 add_subdirectory(vendor/stb_image)
 add_subdirectory(vendor/imgui)
 add_subdirectory(vendor/glm)
+add_subdirectory(vendor/pugixml)
 
 if(NOT KAREN_EMSCRIPTEN)
-set(KAREN_LIBS glm glfw imgui glad stb)
+set(KAREN_LIBS glm glfw imgui glad stb pugixml)
 else()
 set(KAREN_ADDITIONAL_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../../emsdk/upstream/emscripten/cache/sysroot/include)
 set(KAREN_LIBS glm imgui stb)

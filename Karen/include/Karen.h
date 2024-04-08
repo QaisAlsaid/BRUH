@@ -17,5 +17,7 @@
 #include "Karen/Render/API/RendererAPI.h"
 #include "Karen/Render/OrthographicCamera.h"
 #include "Karen/Render/API/Texture.h"
+#include "Karen/Render/ShaderManager.h"
+
 
 #endif //KAREN_H

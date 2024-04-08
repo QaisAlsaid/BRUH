@@ -10,3 +10,6 @@
 [submodule "Karen/vendor/imgui"]
 	path = Karen/vendor/imgui
 	url = https://github.com/QaisAlsaid/imgui.git
+[submodule "Karen/vendor/pugixml"]
+	path = Karen/vendor/pugixml
+	url = https://github.com/zeux/pugixml.git

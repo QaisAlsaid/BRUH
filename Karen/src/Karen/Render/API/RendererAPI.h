@@ -17,7 +17,9 @@ namespace Karen
      NONE = 0, OpenGl = 1
     };
   public:
-    virtual ~RendererAPI() {}
+    virtual ~RendererAPI() = default;
+    
+    virtual void init() = 0;
     virtual void clear(const Vec4& p_clear_color) = 0;
     virtual void drawIndexed(const ARef<VertexArray>& p_varr) = 0;
 

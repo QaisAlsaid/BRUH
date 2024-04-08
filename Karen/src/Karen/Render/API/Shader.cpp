@@ -6,7 +6,7 @@
 
 namespace Karen
 {
-  Shader* create(const std::string& vp, const std::string& fp)
+  ARef<Shader> Shader::create(const std::string& vp, const std::string& fp)
   {
     switch(RendererAPI::getAPI())
     {
@@ -14,13 +14,13 @@ namespace Karen
         KAREN_CORE_ASSERT(false, "Renderer API: 'NONE' Not suported at the moment");
         return nullptr;
       case RendererAPI::API::OpenGl:
-        return new OpenGlShader(vp, fp);
+        return std::make_shared<OpenGlShader>(vp, fp);
     }
     KAREN_CORE_ASSERT(false, "Unknown Renderer API");
     return nullptr;
   }
   
-  Shader* Shader::create()
+  ARef<Shader> Shader::create()
   {
     switch(RendererAPI::getAPI())
     {
@@ -28,7 +28,7 @@ namespace Karen
         KAREN_CORE_ASSERT(false, "Render API: 'NONE' Not suported at the moment");
         return nullptr;
       case RendererAPI::API::OpenGl:
-        return new OpenGlShader;
+        return std::make_shared<OpenGlShader>();
     }
     KAREN_CORE_ASSERT(false, "Unknown RendererAPI");
     return nullptr;
@@ -143,5 +143,18 @@ namespace Karen
     }
     KAREN_CORE_ASSERT(false, "Unknown ShaderDataType Hash");
     return ShaderDataType::None;
+  }
+
+  std::string ShaderTypetoString(ShaderType p_t)
+  {
+    switch(p_t)
+    {
+      case ShaderType::None:
+        return "None";
+      case ShaderType::Vertex:
+        return "Vertex";
+      case ShaderType::Fragment:
+        return "Fragment";
+    }
   }
 }

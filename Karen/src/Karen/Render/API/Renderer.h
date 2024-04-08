@@ -11,6 +11,8 @@ namespace Karen
   class KAREN_API Renderer
   {
   public:
+    void init();
+
     void beginScene(const OrthographicCamera& p_camera);
     void submit(const ARef<VertexArray>& p_varray, const ARef<Shader>& p_shader, const Mat4& p_transform = Mat4(1.0f));
     void endScene();

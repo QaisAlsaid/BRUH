@@ -9,8 +9,9 @@ namespace Karen
   class KAREN_API OpenGLRendererAPI : public RendererAPI
   {
   public:
-    OpenGLRendererAPI()  {}
-    ~OpenGLRendererAPI() {}
+    OpenGLRendererAPI()  = default;
+    ~OpenGLRendererAPI() = default;
+    void init() override;
     void clear(const Vec4& p_clear_color) override;
     void drawIndexed(const ARef<VertexArray>& p_varr) override;
   };
