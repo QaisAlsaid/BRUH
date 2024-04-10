@@ -29,12 +29,13 @@ namespace Karen
   App* App::stat_instance = nullptr;
   App::App()
   {
+    KAREN_CORE_INFO("App Created");
     RendererAPI::setAPI(RendererAPI::API::OpenGl);
     KAREN_CORE_ASSERT(!stat_instance, "App Exist");
     stat_instance = this;
     m_window = std::unique_ptr<Window>(Window::create());
     m_window->setEventCallbackFunction(BIND_EVENT_FUNCTION(App::onEvent));
-    m_gui_layer = new GuiLayer;
+    m_gui_layer = new GuiLayer("Base GuiLayer");
     pushOverlay(m_gui_layer);
    }
 
@@ -46,20 +47,19 @@ namespace Karen
   {
     EventDispatcher dp(event);
     dp.dispatch<WindowClosedEvent>(BIND_EVENT_FUNCTION(App::onCloseCall));
-  
-    dp.dispatch<WindowResizeEvent>(BIND_EVENT_FUNCTION(App::onResizeCall));
+    //dp.dispatch<WindowResizeEvent>(BIND_EVENT_FUNCTION(App::onResizeCall));
     
-    for(auto it = m_layers.end(); it != m_layers.end();)
+    for(auto it = m_layers.end(); it != m_layers.begin();)
     {
-      (*--it)->onEvent(event);
-      if(event.isHandled())
-        break;
+      --it;
+      if((*it)->isActive())
+      {
+        if(event.isHandled())
+          break;
+        (*it)->onEvent(event);
+        KAREN_CORE_INFO("Layer: {0}, isActive: {1} Recived an Event",(*it)->getName(), (*it)->isActive());
+      }
     }
-    
-    for(Layer* l : m_layers)
-    {
-      l->onEvent(event);
-    }  
   }
 
   void App::run()
@@ -74,15 +74,37 @@ namespace Karen
       float delta_time = time - m_last_time;
       m_last_time = time;
       Timestep ts(delta_time);
-      for(Layer* layer : m_layers)
+      for(auto it = m_layers.end(); it != m_layers.begin();)
       {
-        layer->onUpdate(ts);
+        --it;
+        if((*it)->isActive())
+        {
+          (*it)->onUpdate(ts);
+          KAREN_CORE_INFO("called onUpdate for Layer: {0}, isActive: {1}",(*it)->getName(), (*it)->isActive());
+        }
       }
 
       m_gui_layer->begin();
-      for(auto& layer : m_layers)
-        layer->onGuiUpdate();
+      for(auto it = m_layers.end(); it != m_layers.begin();)
+      {
+        --it;
+        if((*it)->isActive() && (*it)->isGuiActive())
+        {
+          (*it)->onGuiUpdate();
+          KAREN_CORE_INFO("called onGuiUpdate for Layer: {0}, isActive: {1}, isGuiActive: {2}",(*it)->getName(), (*it)->isActive(), (*it)->isGuiActive());
+        }
+      }
       m_gui_layer->end();
+
+      for(auto it = m_layers.end(); it != m_layers.begin();)
+      {
+        --it;
+        if((*it)->isActive() && (*it)->isVisible())
+        {
+          (*it)->onRender();
+          KAREN_CORE_INFO("called onRender for Layer: {0}, isActive: {1}, isGuiActive: {2}",(*it)->getName(), (*it)->isActive(), (*it)->isVisible());
+        }
+      }
       m_window->onUpdate();
 #ifndef KAREN_EMSCRIPTEN
     }
@@ -99,8 +121,7 @@ namespace Karen
 
   bool App::onResizeCall(WindowResizeEvent& event)
   {
-    //glViewport(0,0,event.getWidth(),event.getHeight());
-    return true;  
+    return true;
   }
   
   void App::pushLayer(Layer* layer)

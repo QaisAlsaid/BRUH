@@ -40,8 +40,8 @@ set(KAREN_SRC src/Karen/Core/App.cpp src/Karen/Core/Log.cpp
     src/Platforms/Windows/WindowsInput.cpp src/Platforms/Windows/WindowsWindow.cpp
     src/Platforms/OpenGl/OpenGlTexture.cpp src/Karen/Render/API/Texture.cpp
     src/Karen/Core/CommanUtils/ImageLoader.cpp src/Platforms/OpenGl/OpenGlCore.cpp
-    src/Karen/Render/ShaderManager.cpp
-    include/Karen.h
+    src/Karen/Render/ShaderManager.cpp src/Karen/Render/OrthographicCameraController.cpp src/Karen/Render/Renderer2D/Renderer2D.cpp
+    include/Karen/Karen.h
   )
 #set(KAREN_SRC_H src/Karen/App.h src/Karen/Log.h src/Platforms/Windows/WindowsWindow.h src/Karen/Layers/Layer.h
 #    src/Karen/Layers/LayerStack.h src/Karen/Layers/GuiLayer.h src/Platforms/Windows/WindowsInput.h

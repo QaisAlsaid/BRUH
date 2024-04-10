@@ -18,7 +18,7 @@ namespace Karen
     virtual void setLayout(const BufferLayout& layout) = 0;
     virtual const BufferLayout& getLayout() const = 0;
     
-    static VertexBuffer* create(uint32_t size, const float* data, uint16_t usage);
+    static ARef<VertexBuffer> create(uint32_t size, const float* data, uint16_t usage);
   };
 }
 

@@ -16,6 +16,10 @@ namespace Karen
     {
       s_API->init();
     }
+    inline static void setViewPort(uint32_t left, uint32_t bottom, uint32_t right, uint32_t top)
+    {
+      s_API->setViewPort(left, bottom, right, top);
+    }
     inline static void clear(const Vec4& p_clear_color)
     {
       s_API->clear(p_clear_color);

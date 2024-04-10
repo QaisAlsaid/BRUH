@@ -10,6 +10,11 @@ namespace Karen
     RenderCommands::init();
   }
 
+  void Renderer::onWindowResize(uint32_t left, uint32_t bottom, uint32_t right, uint32_t top)
+  {
+    RenderCommands::setViewPort(left, bottom, right, top);
+  }
+
   void Renderer::beginScene(const OrthographicCamera& m_camera)
   {
     m_scene_data.proj_view = m_camera.getProjView();

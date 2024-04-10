@@ -10,6 +10,11 @@ namespace Karen
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   }
 
+  void OpenGLRendererAPI::setViewPort(uint32_t left, uint32_t bottom, uint32_t right, uint32_t top)
+  {
+    glViewport(left, bottom, right, top);
+  }
+
   void OpenGLRendererAPI::drawIndexed(const ARef<VertexArray>& p_varr)
   { 
     p_varr->bind();

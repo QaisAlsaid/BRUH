@@ -156,5 +156,7 @@ namespace Karen
       case ShaderType::Fragment:
         return "Fragment";
     }
+    KAREN_CORE_ASSERT(false, "Not a valid ShaderType");
+    return "";
   }
 }

@@ -13,7 +13,7 @@ namespace Karen
     GuiLayer(const std::string& name = DEFAULT_LAYER_NAME);
     virtual ~GuiLayer();
     virtual void onAttach()      override;
-    virtual void onDetach()     override;
+    virtual void onDetach()      override;
     virtual void onGuiUpdate()   override;
     void         begin();
     void         end();

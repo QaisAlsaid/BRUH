@@ -6,9 +6,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 set(KAREN_EMSCRIPTEN OFF CACHE BOOL "enable build for the web")
 
 add_subdirectory(../../Karen/ ../../Karen/build/)
-add_executable(${PROJECT_NAME} src/Test.cpp)
-#target_include_directories(${PROJECT_NAME} PRIVATE ../../Karen/include/
-#  ../../Karen/src/ ../../Karen/vendor/spdlog/include/)
+add_executable(${PROJECT_NAME} src/Sandbox.cpp
+  src/Sandbox2D.cpp src/App.cpp)
 #target_include_directories(${PROJECT_NAME} PUBLIC ${KAREN_PUBLIC_INCLUDE_DIRS})
 message("==========================")
 message("include dirs:" ${KAREN_INCLUDE_DIRS})

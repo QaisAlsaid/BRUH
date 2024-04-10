@@ -14,14 +14,15 @@ namespace Karen
 
     void bind()   const override;
     void unbind() const override;
+    //TODO: make it bool
     void loadFromFile(const std::string& vp, const std::string& fp) override;
     void setUniform(const std::string& name, const Mat4& value) override;
     void setUniform(const std::string& name, int value) override;
-
+    void setUniform(const std::string& name, const Vec4& value) override;
     
   private:
-    void compileShaders(std::string& vs, std::string& fs);
-    void createProgram();
+    bool compileShaders(std::string& vs, std::string& fs);
+    bool createProgram();
     void cacheUniforms(std::string& vs, std::string& fs);
     void findUniformsAndData(const std::vector<std::string>& tokens);
   private:

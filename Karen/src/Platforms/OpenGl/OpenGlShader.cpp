@@ -45,13 +45,16 @@ namespace Karen
   {
     std::string vs = FileLoader::LoadFromFile(vp);
     std::string fs = FileLoader::LoadFromFile(fp);
-    compileShaders(vs, fs);
-    createProgram();
-    cacheUniforms(vs, fs);
+    if(compileShaders(vs, fs))
+      if(createProgram())
+        cacheUniforms(vs, fs);
+      else {KAREN_CORE_WARN("Error Creating Shader Program No Uniforms Will Be Cached");}
+    else {KAREN_CORE_WARN("Error Compiling Shader No Uniforms Will Be Cached");}
   }
 
-  void OpenGlShader::compileShaders(std::string& vs, std::string& fs)
+  bool OpenGlShader::compileShaders(std::string& vs, std::string& fs)
   {
+    bool _status = true;
     const char *v_cstr = vs.c_str(), *f_cstr = fs.c_str();
     int status_v, status_f;
     m_vs_id = glCall(glCreateShader(GL_VERTEX_SHADER));
@@ -69,6 +72,7 @@ namespace Karen
       glCall(glGetShaderInfoLog(m_vs_id, mlength, &mlength, message));
 
 		  KAREN_CORE_ERROR("ERROR Compiling Vertex Shader: {0}", message);
+      _status = false;
     }
 
     glCall(glShaderSource(m_fs_id, 1, &f_cstr, nullptr));
@@ -82,11 +86,14 @@ namespace Karen
       glCall(glGetShaderInfoLog(m_fs_id, mlength, &mlength, message));
 
 		  KAREN_CORE_ERROR("ERROR Compiling Fragment Shader: {0}", message);
+      _status = false;
     }
+    return _status;
   }
 
-  void OpenGlShader::createProgram()
+  bool OpenGlShader::createProgram()
   {
+    bool _status = true;
     int status;
     m_program_id = glCall(glCreateProgram());
     glCall(glAttachShader(m_program_id, m_vs_id));
@@ -101,7 +108,9 @@ namespace Karen
 	  	glCall(glGetProgramInfoLog(m_program_id, mlength, &mlength, message));
 	  	m_program_id = 0;
 	  	KAREN_CORE_ERROR("ERROR Linking Shader Program: {0}", message);
-	  }
+	    _status = false;
+    }
+    return _status;
   }
 
   void OpenGlShader::cacheUniforms(std::string& vs, std::string& fs)
@@ -121,7 +130,7 @@ namespace Karen
 
     for(auto const& [key, val] : m_uniforms)
     {
-      std::cout<<"name: "<<key<< "location: "<<val.location<<"type: "<<(int)val.type<<"\n";
+      std::cout<<"name: "<<key<< " location: "<<val.location<<" type: "<<(int)val.type<<"\n";
     }
   }
 
@@ -154,12 +163,27 @@ namespace Karen
 
   void OpenGlShader::setUniform(const std::string& n, const Mat4& v)
   {
-    glCall(glUniformMatrix4fv(m_uniforms.at(n).location, 1, 0, glm::value_ptr(v)))
+    if(m_uniforms.find(n) != m_uniforms.end())
+    {
+      glCall(glUniformMatrix4fv(m_uniforms.at(n).location, 1, 0, glm::value_ptr(v)))
+    }
   }
+  
+  void OpenGlShader::setUniform(const std::string& n, const Vec4& v)
+  {
+    if(m_uniforms.find(n) != m_uniforms.end())
+    {
+      glCall(glUniform4fv(m_uniforms.at(n).location, 1, glm::value_ptr(v)))
+    }
+  }
+
 
   void OpenGlShader::setUniform(const std::string& n, int v)
   {
-    glCall(glUniform1i(m_uniforms.at(n).location, v));
+    if(m_uniforms.find(n) != m_uniforms.end())
+    {
+      glCall(glUniform1i(m_uniforms.at(n).location, v));
+    }
   }
 
   void split(const std::string& str, std::vector<std::string>& cont, char sep) 

@@ -15,7 +15,7 @@ namespace Karen
     virtual void unbind() const = 0;
     virtual void setData(uint32_t count, const uint32_t* data, uint16_t usage) = 0;
     virtual uint32_t getCount() const = 0;
-    static IndexBuffer* create(uint32_t count, const uint32_t* data, uint16_t usage);
+    static ARef<IndexBuffer> create(uint32_t count, const uint32_t* data, uint16_t usage);
   };
 }
 

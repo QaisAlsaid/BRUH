@@ -4,9 +4,6 @@
 #include "Karen/Core/Core.h"
 #include "Karen/Core/Math/math.h"
 
-#define ZOOM 45.0f
-#define MIN_ZOOM 1.0f
-#define MAX_ZOOM 90.0f
 
 namespace Karen
 {
@@ -17,6 +14,10 @@ namespace Karen
     OrthographicCamera();
 
     void setRect(float p_left, float p_right, float p_bottom, float p_top);
+    inline Vec4 getRect() 
+    {
+      return Vec4(m_left, m_right, m_bottom, m_top);
+    }
     void onUpdate(float delta);
     inline const Mat4& getView() const
     {
@@ -45,8 +46,8 @@ namespace Karen
 
     inline void setZoom(float p_zoom)
     {
-      if(p_zoom > MAX_ZOOM) m_zoom = MAX_ZOOM;
-      else if(p_zoom < MIN_ZOOM) m_zoom = MIN_ZOOM;
+      if(p_zoom > m_min_zoom) m_zoom = m_min_zoom;
+      else if(p_zoom < m_min_zoom) m_zoom = m_min_zoom;
       else m_zoom = p_zoom;
     }
 
@@ -61,12 +62,25 @@ namespace Karen
     }
 
     inline float getRotation() const
-   {
+    {
       return m_rotation;
+    }
+    inline void setZoomLimits(float min_zoom, float max_zoom)
+    {
+      m_min_zoom = min_zoom;
+      m_max_zoom = max_zoom;
+    }
+    inline float getMinZoom()
+    {
+      return m_min_zoom;
+    }
+    inline float getMaxZoom()
+    {
+      return m_max_zoom;
     }
   private:
     float m_left = -1.0f, m_right = 1.0f, m_bottom = -1.0f, m_top = 1.0f;
-    float m_zoom = ZOOM;
+    float m_zoom = 1.0f, m_min_zoom = 0.25f, m_max_zoom = 10.0f;
     float m_rotation = 0.0f;
     Vec3 m_pos   = { 0.0f, 0.0f, 0.0f };
     Mat4 m_proj;

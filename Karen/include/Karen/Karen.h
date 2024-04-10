@@ -3,7 +3,6 @@
 
 #include "Karen/Core/Core.h"
 #include "Karen/Core/App.h"
-#include "Karen/Core/EntryPoint.h"
 #include "Karen/Core/Log.h"
 #include "Karen/Core/Layers/Layer.h"
 #include "Karen/Core/Input.h"
@@ -16,8 +15,9 @@
 #include "Karen/Render/API/RenderCommands.h"
 #include "Karen/Render/API/RendererAPI.h"
 #include "Karen/Render/OrthographicCamera.h"
+#include "Karen/Render/OrthographicCameraController.h"
 #include "Karen/Render/API/Texture.h"
 #include "Karen/Render/ShaderManager.h"
-
+#include "Karen/Render/Renderer2D/Renderer2D.h"
 
 #endif //KAREN_H

@@ -12,6 +12,7 @@ namespace Karen
     OpenGLRendererAPI()  = default;
     ~OpenGLRendererAPI() = default;
     void init() override;
+    void setViewPort(uint32_t left, uint32_t bottom, uint32_t right, uint32_t top) override;
     void clear(const Vec4& p_clear_color) override;
     void drawIndexed(const ARef<VertexArray>& p_varr) override;
   };

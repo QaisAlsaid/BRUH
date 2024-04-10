@@ -11,13 +11,13 @@ namespace Karen
 
   }
 
-  IndexBuffer* IndexBuffer::create(uint32_t count, const uint32_t* data, uint16_t usage)
+  ARef<IndexBuffer> IndexBuffer::create(uint32_t count, const uint32_t* data, uint16_t usage)
   {
     switch(RendererAPI::getAPI())
     {
       case RendererAPI::API::OpenGl:
       {
-        return new OpenGlIndexBuffer(count, data, usage);
+        return std::make_shared<OpenGlIndexBuffer>(count, data, usage);
         break;
       }
       case RendererAPI::API::NONE:

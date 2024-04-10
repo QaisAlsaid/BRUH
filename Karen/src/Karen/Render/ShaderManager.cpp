@@ -15,12 +15,15 @@ namespace Karen
 
   void ShaderManager::LoadConfig(const std::string& p_config_file_path)
   {
+
+    KAREN_CORE_INFO("Started Loading Shaders from config");
     pugi::xml_document doc;
     pugi::xml_parse_result result = doc.load_file(p_config_file_path.c_str(),
     pugi::parse_default|pugi::parse_declaration);
     if (!result)
     {
-        KAREN_CORE_ERROR("Parse Error at: {0}, offset: {1}",result.description(), result.offset);
+      KAREN_CORE_ERROR("Parse Error at: {0}, offset: {1}",result.description(), result.offset);
+      return;
     }
     pugi::xml_node list = doc.child("ShadersList");
     uint32_t index = 0;
@@ -63,6 +66,7 @@ namespace Karen
       KAREN_CORE_INFO("Shader number: {0} Name: {1} VertPath: {2} FragPath: {3}", index, name, vert_path, frag_path);
       if(is_path)
       {
+
         ARef<Shader> sh = Shader::create(vert_path, frag_path);
         m_shaders[name] = sh; 
       }
