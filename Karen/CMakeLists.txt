@@ -40,7 +40,9 @@ set(KAREN_SRC src/Karen/Core/App.cpp src/Karen/Core/Log.cpp
     src/Platforms/Windows/WindowsInput.cpp src/Platforms/Windows/WindowsWindow.cpp
     src/Platforms/OpenGl/OpenGlTexture.cpp src/Karen/Render/API/Texture.cpp
     src/Karen/Core/CommanUtils/ImageLoader.cpp src/Platforms/OpenGl/OpenGlCore.cpp
-    src/Karen/Render/ShaderManager.cpp src/Karen/Render/OrthographicCameraController.cpp src/Karen/Render/Renderer2D/Renderer2D.cpp
+    src/Karen/Render/ShaderManager.cpp src/Karen/Render/OrthographicCameraController.cpp
+    src/Karen/Render/Renderer2D/Renderer2D.cpp src/Karen/Physics/Physics2D/RigidBody.cpp 
+    src/Karen/Physics/Physics2D/PhysicsWorld2D.cpp src/Karen/Physics/Physics2D/Collisions.cpp
     include/Karen/Karen.h
   )
 #set(KAREN_SRC_H src/Karen/App.h src/Karen/Log.h src/Platforms/Windows/WindowsWindow.h src/Karen/Layers/Layer.h
@@ -86,7 +88,7 @@ if(NOT KAREN_EMSCRIPTEN)
 set(KAREN_LIBS glm glfw imgui glad stb pugixml)
 else()
 set(KAREN_ADDITIONAL_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../../emsdk/upstream/emscripten/cache/sysroot/include)
-set(KAREN_LIBS glm imgui stb)
+set(KAREN_LIBS glm imgui stb pugixml)
 endif()
 
 if(KAREN_IS_SHARED)

@@ -45,7 +45,7 @@ namespace Karen
   void OrthographicCameraController::onEvent(Event& e)
   {
     EventDispatcher dp(e); 
-    KAREN_CORE_INFO("Event sent to dispatcer [from Camera controler onEvent()] : {0}", e);
+    KAREN_CORE_TRACE("Event sent to dispatcher [from Camera controler onEvent()] : {0}", e);
     dp.dispatch<WindowResizeEvent>(BIND_EVENT_FUNCTION(OrthographicCameraController::onWindowResizeEvent));
     dp.dispatch<MouseScrolledEvent>(BIND_EVENT_FUNCTION(OrthographicCameraController::onMouseScrollEvent));
   }
@@ -61,18 +61,10 @@ namespace Karen
   
   bool OrthographicCameraController::onWindowResizeEvent(WindowResizeEvent& e)
   {
-    if(!m_construct_with_values)
-    {
-      m_aspect_ratio = (float)e.getWidth()/(float)e.getHeight();
-      setRect(-m_aspect_ratio * m_zoom, m_aspect_ratio * m_zoom, -m_zoom, m_zoom);
-    }
-    else 
-    {
-      setRect(0, 0, e.getWidth(), e.getHeight());
-    }
+    m_aspect_ratio = (float)e.getWidth()/(float)e.getHeight();
+    setRect(0.0f, e.getWidth(), 0.0f, e.getHeight());
     RenderCommands::setViewPort(0.0f, 0.0f, e.getWidth(), e.getHeight());
-    KAREN_CORE_INFO("ViewPort: ({0}, {1}, {2}, {3}), aspect_ratio: {4}", 0.0f, 0.0f, e.getWidth(), e.getHeight(), m_aspect_ratio);
-    return false;
+    KAREN_CORE_TRACE("ViewPort: ({0}, {1}, {2}, {3}), aspect_ratio: {4}", 0.0f, 0.0f, e.getWidth(), e.getHeight(), m_aspect_ratio);
+    return true;
   }
-
 }

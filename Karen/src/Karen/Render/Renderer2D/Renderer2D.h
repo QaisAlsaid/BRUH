@@ -26,10 +26,11 @@ namespace Karen
     
     static void drawQuad(const Vec3& pos = Vec3(0.0f), const Vec2& size = Vec2(1.0f), float rotation = 0.0f, const Vec4& color = Vec4(1.0f)); 
     static void drawQuad(const Vec2& pos = Vec2(0.0f), const Vec2& size = Vec2(1.0f), float rotation = 0.0f, const Vec4& color = Vec4(1.0f));
-     static void drawQuad(const Vec3& pos = Vec3(0.0f), const Vec2& size = Vec2(1.0f), float rotation = 0.0f, const ARef<Texture2D>& tux = nullptr, const Vec4& color = Vec4(1.0f));
-     static void drawQuad(const Vec2& pos = Vec2(0.0f), const Vec2& size = Vec2(1.0f), float rotation = 0.0f, const ARef<Texture2D>& tux = nullptr, const Vec4& color = Vec4(1.0f));
-
-     static void endScene();
+     
+    static void drawTexturedQuad(const Vec3& pos = Vec3(0.0f), const Vec2& size = Vec2(1.0f), float rotation = 0.0f, const ARef<Texture2D>& tux = nullptr, const Vec4& color = Vec4(1.0f));
+    static void drawTexturedQuad(const Vec2& pos = Vec2(0.0f), const Vec2& size = Vec2(1.0f), float rotation = 0.0f, const ARef<Texture2D>& tux = nullptr, const Vec4& color = Vec4(1.0f));
+     
+    static void endScene();
   
      static void deinit();
   private:

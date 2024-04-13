@@ -19,5 +19,7 @@
 #include "Karen/Render/API/Texture.h"
 #include "Karen/Render/ShaderManager.h"
 #include "Karen/Render/Renderer2D/Renderer2D.h"
-
+#include "Karen/Physics/Physics2D/RigidBody.h"
+#include "Karen/Physics/Physics2D/PhysicsWorld2D.h"
+#include "Karen/Physics/Physics2D/Collisions.h"
 #endif //KAREN_H

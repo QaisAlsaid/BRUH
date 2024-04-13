@@ -28,8 +28,7 @@ namespace Karen
   void OrthographicCamera::onUpdate(float delta)
   {
     m_proj = glm::ortho(m_left * 1/m_zoom, m_right * 1/m_zoom, m_bottom * 1/m_zoom, m_top * 1/m_zoom, -1.0f, 1.0f);
-    
-    m_view = Mat4(1.0f);
+    m_view = Mat4(1.0f); 
     m_view = glm::translate(m_view, -m_pos);
     m_view = glm::rotate(m_view, glm::radians(m_rotation), Vec3(0, 0, 1)); 
     m_pv = m_proj * m_view;

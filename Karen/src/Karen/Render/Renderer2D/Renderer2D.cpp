@@ -83,7 +83,7 @@ namespace Karen
     KAREN_CORE_INFO("draw quad vec2 exited None tux");
   }
 
-  void Renderer2D::drawQuad(const Vec3& pos, const Vec2& size, float rotation, const ARef<Texture2D>& tux, const Vec4& color)
+  void Renderer2D::drawTexturedQuad(const Vec3& pos, const Vec2& size, float rotation, const ARef<Texture2D>& tux, const Vec4& color)
   {
     KAREN_CORE_INFO("draw quad called vec3 tux");
     Mat4 trans = glm::translate(Mat4(1.0f), pos);
@@ -98,7 +98,7 @@ namespace Karen
     RenderCommands::drawIndexed(s_data->quad_vertex_arr);
   }
   
-  void Renderer2D::drawQuad(const Vec2& pos, const Vec2& size, float rotation, const ARef<Texture2D>& tux, const Vec4& color)
+  void Renderer2D::drawTexturedQuad(const Vec2& pos, const Vec2& size, float rotation, const ARef<Texture2D>& tux, const Vec4& color)
   {
     KAREN_CORE_INFO("draw quad vec2 called tux");
     Mat4 trans = glm::translate(Mat4(1.0f), Vec3(pos.x, pos.y, 0.0f));
@@ -113,7 +113,7 @@ namespace Karen
     RenderCommands::drawIndexed(s_data->quad_vertex_arr);
     KAREN_CORE_INFO("draw quad vec2 exited tux");
   }
-    
+  
   void Renderer2D::endScene()
   {
     KAREN_CORE_INFO("Scene end");

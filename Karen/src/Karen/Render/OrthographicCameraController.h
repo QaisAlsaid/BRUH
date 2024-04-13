@@ -87,7 +87,7 @@ namespace Karen
     bool onMouseScrollEvent(MouseScrolledEvent& e);
     bool onWindowResizeEvent(WindowResizeEvent& e); 
   private:
-    float m_aspect_ratio = (float)1280 / (float)720;
+    float m_aspect_ratio = 1280.0f / 720.0f;
     float m_zoom = 1.0f, m_zoom_speed = 3.0f, m_rotation_speed = 180.0f;
     Vec2 m_speed = { 5.0f, 5.0f };
     bool m_can_control = true;

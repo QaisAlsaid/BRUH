@@ -6,7 +6,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 set(KAREN_EMSCRIPTEN OFF CACHE BOOL "enable build for the web")
 
 add_subdirectory(../../Karen/ ../../Karen/build/)
-add_executable(${PROJECT_NAME} src/Sandbox.cpp
+add_executable(${PROJECT_NAME} #src/Sandbox.cpp
   src/Sandbox2D.cpp src/App.cpp)
 #target_include_directories(${PROJECT_NAME} PUBLIC ${KAREN_PUBLIC_INCLUDE_DIRS})
 message("==========================")
@@ -16,10 +16,10 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${KAREN_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} Karen)
 if(${KAREN_IS_EMSCRIPTEN})
   set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".html"
-    LINK_FLAGS "-sUSE_GLFW=3 -sWASM=0 -sFULL_ES3 --preload-file ../res --embed-file ./imgui.ini --bind -DKAREN_EMSCRIPTEN"
+    LINK_FLAGS "-sUSE_GLFW=3 -sWASM=0 -sFULL_ES3 --preload-file ../res --bind -DKAREN_EMSCRIPTEN --shell-file template.html"
 
-    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/"
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+    #ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/"
+    #LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    #RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
 endif()

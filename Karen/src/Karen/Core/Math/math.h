@@ -1,5 +1,6 @@
 #ifndef MATH_H
 #define MATH_H
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/fwd.hpp>
 #include <glm/ext.hpp>
