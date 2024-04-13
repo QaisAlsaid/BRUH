@@ -186,6 +186,14 @@ namespace Karen
     }
   }
 
+  void OpenGlShader::setUniform(const std::string& n, const Vec2& v)
+  {
+    if(m_uniforms.find(n) != m_uniforms.end())
+    {
+      glCall(glUniform2fv(m_uniforms.at(n).location, 1, glm::value_ptr(v)));
+    }
+  }
+
   void split(const std::string& str, std::vector<std::string>& cont, char sep) 
   {
     std::stringstream ss(str);

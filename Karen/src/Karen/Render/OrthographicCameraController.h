@@ -75,6 +75,10 @@ namespace Karen
     }
     void onUpdate(Timestep ts);
     void onEvent(Event& e);
+    void setInitial(Vec4 p_initial)
+    {
+      m_initial = p_initial;
+    }
   public:
     enum class CameraDirections : uint8_t
     {
@@ -90,6 +94,7 @@ namespace Karen
     float m_aspect_ratio = 1280.0f / 720.0f;
     float m_zoom = 1.0f, m_zoom_speed = 3.0f, m_rotation_speed = 180.0f;
     Vec2 m_speed = { 5.0f, 5.0f };
+    Vec4 m_initial = {-1.0f, 1.0f, -1.0f, 1.0f};
     bool m_can_control = true;
     bool m_control_zoom_with_mouse_scroll = true;
     bool m_construct_with_values = false;

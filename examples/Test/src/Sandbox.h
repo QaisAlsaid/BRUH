@@ -30,11 +30,11 @@ public:
   Karen::Vec3 m_rect_pos;
   const float m_tri_speed  = 0.3f;
   const float m_rect_speed = 0.2f;
-  const float m_tri_verts[9] = 
+  const float m_tri_verts[15] = 
   {
-    -0.5f, -0.5f, 0.0f,
-     0.0f,  0.5f, 0.0f,
-     0.5f,  0.5f, 0.0f
+    -0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
+     0.0f,  0.5f, 0.0f, 0.0f, 1.0f,
+     0.5f,  0.5f, 0.0f, 0.0f, 1.0f
   };
 
   const uint32_t m_tri_inds[3] = 

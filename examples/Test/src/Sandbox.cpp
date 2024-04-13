@@ -1,4 +1,5 @@
 #include "Sandbox.h"
+#include "Karen/Render/API/Shader.h"
 
 SandboxLayer::SandboxLayer()
   : Karen::Layer("Sandbox")
@@ -7,15 +8,16 @@ SandboxLayer::SandboxLayer()
 
 void SandboxLayer::onAttach() 
   {
-    //activate();
+    activate();
     m_ortho.getCamera().setZoomLimits(1.0f, 100.0f);
     m_r->init();
     m_rect_pos = Karen::Vec3(0.0f, 0.0f, 0.0f);
+    m_tri_pos = Karen::Vec3(0.0f);
     m_r.reset(new Karen::Renderer());
     KAREN_INFO("Layer: {0} Attached", this->getName());
     m_tri_varr = (Karen::VertexArray::create());
     m_tri_varr->bind();
-    m_tri_vbuf = (Karen::VertexBuffer::create(sizeof(float) * 9, m_tri_verts, 5));
+    m_tri_vbuf = (Karen::VertexBuffer::create(sizeof(float) * 15, m_tri_verts, 5));
     m_tri_ibuf = (Karen::IndexBuffer::create(3, m_tri_inds, 5));
    
     m_rect_varr = (Karen::VertexArray::create());
@@ -35,7 +37,8 @@ void SandboxLayer::onAttach()
     };
     Karen::BufferLayout tri_bl = 
     {
-      {"pos", Karen::ShaderDataType::Float3}
+      {"pos", Karen::ShaderDataType::Float3},
+      {"normals", Karen::ShaderDataType::Float2}
     };
     m_tri_vbuf->setLayout(tri_bl);
     m_tri_varr->setIndexBuffer(m_tri_ibuf);
@@ -60,12 +63,18 @@ void SandboxLayer::onAttach()
     m_tri_pos.x += m_tri_speed * ts;
   if(Karen::Input::isKeyPressed(Karen::Keyboard::J))
     m_tri_pos.x -= m_tri_speed * ts;
-  if(Karen::Input::isKeyPressed(Karen::Keyboard::NumPad6))
-    m_rect_pos.x += m_rect_speed * ts;
-  if(Karen::Input::isKeyPressed(Karen::Keyboard::NumPad4))
-    m_rect_pos.x -= m_rect_speed * ts;
+  if(Karen::Input::isKeyPressed(Karen::Keyboard::W))
+    m_rect_pos.y += m_tri_speed * ts;
+  if(Karen::Input::isKeyPressed(Karen::Keyboard::S))
+    m_rect_pos.y -= m_tri_speed * ts;
+  if(Karen::Input::isKeyPressed(Karen::Keyboard::D))
+    m_rect_pos.x += m_tri_speed * ts;
+  if(Karen::Input::isKeyPressed(Karen::Keyboard::A))
+    m_rect_pos.x -= m_tri_speed * ts;
+ 
+
   if(Karen::Input::isKeyPressed(Karen::Keyboard::V))
-    this->active = active == true ? false : true;
+    this->visible = this->visible == true ? false : true;
    
   m_ortho.onUpdate(ts);
   
@@ -79,9 +88,15 @@ void SandboxLayer::onAttach()
   m_r->beginScene(m_ortho.getCamera());
   m_tux->bind(0);
   const auto& t_sh = m_shaders.get("tux_shader");
-  const auto& c_sh = m_shaders.get("color_shader");
+  const auto& c_sh = m_shaders.get("lightning_shader");
   m_r->submit(m_rect_varr, t_sh, rect_trans);
-  m_r->submit(m_tri_varr, c_sh, tri_trans);
+  c_sh->bind();
+  c_sh->setUniform("u_light_pos", m_rect_pos);
+  c_sh->setUniform("u_light_color", Karen::Vec4(1.0f));
+  c_sh->setUniform("u_proj_view", m_ortho.getCamera().getProjView());
+  c_sh->setUniform("u_trans", tri_trans);
+  c_sh->setUniform("u_tint_color", Karen::Vec4(0.2f, 0.3f, 0.8f, 1.0f));
+  Karen::RenderCommands::drawIndexed(m_tri_varr);
   m_r->endScene();
   }
 

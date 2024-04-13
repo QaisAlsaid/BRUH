@@ -13,4 +13,11 @@
       <FragPath>../res/shaders/tux_fs.glsl</FragPath>
     </Path>
   </Shader>
+  <Shader>
+    <Name>lightning_shader</Name>
+    <Path>
+      <VertPath>../res/shaders/Shaders2D/tux_shader.lightning.vs.glsl</VertPath>
+      <FragPath>../res/shaders/Shaders2D/tux_shader.lightning.fs.glsl</FragPath>
+    </Path>
+  </Shader>
 </ShadersList>

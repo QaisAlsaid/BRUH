@@ -44,6 +44,7 @@ namespace Karen
     virtual void unbind() const = 0;
     virtual void loadFromFile(const std::string& vp, const std::string& fp) = 0;
     virtual void setUniform(const std::string& name, const Mat4& value) = 0;
+    virtual void setUniform(const std::string& name, const Vec2& value) = 0;
     virtual void setUniform(const std::string& name, int value) = 0;
     virtual void setUniform(const std::string& name, const Vec4& value) = 0;
 

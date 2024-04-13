@@ -1,7 +1,7 @@
 #include <Karen/EntryPoint.h>
 #include <Karen/Karen.h>
 
-//#include "Sandbox.h"
+#include "Sandbox.h"
 #include "Sandbox2D.h"
 
 class ClientApp : public Karen::App
@@ -11,7 +11,7 @@ public:
   {
     KAREN_INFO("APP Created");
     KAREN_INFO("{0}", s);
-    //pushLayer(new SandboxLayer());
+    pushLayer(new SandboxLayer());
     pushLayer(new Sandbox2DLayer());
   }
   ~ClientApp()

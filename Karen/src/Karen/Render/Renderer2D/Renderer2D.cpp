@@ -34,7 +34,7 @@ namespace Karen
     Karen::BufferLayout bl = 
     {
       {"pos", Karen::ShaderDataType::Float3},
-      {"tux_coord", Karen::ShaderDataType::Float2}
+      {"tux_coord", Karen::ShaderDataType::Float2},
     };
 
     vb->setLayout(bl);

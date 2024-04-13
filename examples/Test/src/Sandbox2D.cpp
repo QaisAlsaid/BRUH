@@ -20,18 +20,19 @@ Sandbox2DLayer::Sandbox2DLayer()
 void Sandbox2DLayer::onAttach()
 { 
   srand(time(0));
-  activate();
+  //activate();
   Karen::Renderer2D::init("../res/shaders/Shaders2D/config.xml");
   m_tux = Karen::Texture2D::create("../res/textuers/img1.png");
-  for(int i = 0; i < 200; ++i)
+  /*for(int i = 0; i < 5; ++i)
   {
     Karen::ARef<Karen::RigidBody2D> b;
     if(!(i%2))
-      b = Karen::RigidBody2D::createRectangle(Karen::ShapeProps(), Karen::Vec2(100.0f), Karen::Vec2((float)(rand()%1000)), 0.0f);
+      b = Karen::RigidBody2D::createRectangle(Karen::ShapeProps(), Karen::Vec2(0.2f), Karen::Vec2((float)(rand()%7)), 0.0f);
     else
-      b = Karen::RigidBody2D::createCircle(Karen::ShapeProps(), m_tux->getWidth(), Karen::Vec2((float)1/float(rand()%1500)), 0.0f);
+      b = Karen::RigidBody2D::createCircle(Karen::ShapeProps(), 1.0f/m_tux->getWidth(), Karen::Vec2((float)1/float(rand()%7)), 0.0f);
     m_bodys.push_back(b);
-  }
+  }*/
+  m_bodys.push_back(Karen::RigidBody2D::createRectangle(Karen::ShapeProps(), Karen::Vec2(1.0f), Karen::Vec2(), 0.0f));
   KAREN_INFO("Layer: {0} Attached", name);
   m_rect_pos = Karen::Vec2(0.0f);
   m_circle_pos = Karen::Vec2(0.0f);
@@ -39,7 +40,7 @@ void Sandbox2DLayer::onAttach()
 
 void Sandbox2DLayer::onUpdate(Karen::Timestep ts)
 {
-  Karen::Vec2 m_rect_speed(1000.0f, 500.0f);
+  Karen::Vec2 m_rect_speed(100.0f, 100.5f);
   m_ortho.onUpdate(ts); 
   if(Karen::Input::isKeyPressed(Karen::Keyboard::Right))
     m_rect_pos.x += m_rect_speed.x * ts;
@@ -60,9 +61,9 @@ void Sandbox2DLayer::onUpdate(Karen::Timestep ts)
   if(Karen::Input::isKeyPressed(Karen::Keyboard::K))
     m_circle_pos.y -= m_rect_speed.x * ts;
     
-  m_bodys.at(2)->setPosition(m_rect_pos);
-  m_bodys.at(3)->setPosition(m_circle_pos);
-  for(uint32_t i = 0; i < m_bodys.size() - 1; ++i)
+  m_bodys.at(0)->setPosition(m_rect_pos);
+  //m_bodys.at(3)->setPosition(m_circle_pos);
+  /*for(uint32_t i = 0; i < m_bodys.size() - 1; ++i)
   {
     auto& b1 = m_bodys.at(i);
     b1->setRotation(b1->getRotation() + 90.0f * ts.getTime());
@@ -94,7 +95,7 @@ void Sandbox2DLayer::onUpdate(Karen::Timestep ts)
         }
       }
     }
-  }
+  }*/
 }
 
 void Sandbox2DLayer::onRender()

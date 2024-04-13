@@ -19,6 +19,10 @@ namespace Karen
   : m_camera(left, right, bottom, top)
   {
     m_construct_with_values = true;
+    m_initial.x = left;
+    m_initial.y = right;
+    m_initial.z = bottom;
+    m_initial.w = top;
   } 
     
   void OrthographicCameraController::onUpdate(Timestep ts)
@@ -62,7 +66,21 @@ namespace Karen
   bool OrthographicCameraController::onWindowResizeEvent(WindowResizeEvent& e)
   {
     m_aspect_ratio = (float)e.getWidth()/(float)e.getHeight();
-    setRect(0.0f, e.getWidth(), 0.0f, e.getHeight());
+    const auto& r = m_camera.getRect();
+    Vec4 current = m_initial;
+    if(m_aspect_ratio > 1.0f)
+    {
+      current.x *= m_aspect_ratio;
+      current.y *= m_aspect_ratio;
+    }
+    else
+    {
+      current.z = current.x / m_aspect_ratio;
+      current.w = current.y / m_aspect_ratio;
+    }
+    setRect(current.x, current.y, current.z, current.w);
+    //setRect(r.x, r.y * m_aspect_ratio, r.z, r.w);
+    //setRect(0.0f, m_aspect_ratio * e.getWidth(), 0.0f, e.getHeight());
     RenderCommands::setViewPort(0.0f, 0.0f, e.getWidth(), e.getHeight());
     KAREN_CORE_TRACE("ViewPort: ({0}, {1}, {2}, {3}), aspect_ratio: {4}", 0.0f, 0.0f, e.getWidth(), e.getHeight(), m_aspect_ratio);
     return true;

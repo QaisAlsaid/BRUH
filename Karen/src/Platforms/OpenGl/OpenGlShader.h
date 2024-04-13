@@ -19,7 +19,7 @@ namespace Karen
     void setUniform(const std::string& name, const Mat4& value) override;
     void setUniform(const std::string& name, int value) override;
     void setUniform(const std::string& name, const Vec4& value) override;
-    
+    void setUniform(const std::string& name, const Vec2& value) override;
   private:
     bool compileShaders(std::string& vs, std::string& fs);
     bool createProgram();
