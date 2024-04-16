@@ -1,12 +1,5 @@
 <ShadersList>
   <Shader>
-    <Name>color_shader</Name>
-    <Path>
-      <VertPath>../res/shaders/Shaders2D/color_shader.vs.glsl</VertPath>
-      <FragPath>../res/shaders/Shaders2D/color_shader.fs.glsl</FragPath>
-    </Path>
-  </Shader>
-  <Shader>
     <Name>tux_shader</Name>
     <Path>
       <VertPath>../res/shaders/Shaders2D/tux_shader.vs.glsl</VertPath>

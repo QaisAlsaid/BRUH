@@ -7,54 +7,55 @@ SandboxLayer::SandboxLayer()
 }
 
 void SandboxLayer::onAttach() 
-  {
-    activate();
-    m_ortho.getCamera().setZoomLimits(1.0f, 100.0f);
-    m_r->init();
-    m_rect_pos = Karen::Vec3(0.0f, 0.0f, 0.0f);
-    m_tri_pos = Karen::Vec3(0.0f);
-    m_r.reset(new Karen::Renderer());
-    KAREN_INFO("Layer: {0} Attached", this->getName());
-    m_tri_varr = (Karen::VertexArray::create());
-    m_tri_varr->bind();
-    m_tri_vbuf = (Karen::VertexBuffer::create(sizeof(float) * 15, m_tri_verts, 5));
-    m_tri_ibuf = (Karen::IndexBuffer::create(3, m_tri_inds, 5));
+{
+  //activate();
+  m_ortho.getCamera().setZoomLimits(1.0f, 100.0f);
+  m_r->init();
+  m_rect_pos = Karen::Vec3(0.0f, 0.0f, 0.0f);
+  m_tri_pos = Karen::Vec3(0.0f);
+  m_r.reset(new Karen::Renderer());
+  KAREN_INFO("Layer: {0} Attached", this->getName());
+  m_tri_varr = (Karen::VertexArray::create());
+  m_tri_varr->bind();
+  m_tri_vbuf = (Karen::VertexBuffer::create(sizeof(float) * 15, m_tri_verts, 5));
+  m_tri_ibuf = (Karen::IndexBuffer::create(3, m_tri_inds, 5));
    
-    m_rect_varr = (Karen::VertexArray::create());
-    m_rect_vbuf = (Karen::VertexBuffer::create(sizeof(float) * 20, m_rect_verts, 5));
-    m_rect_ibuf = (Karen::IndexBuffer::create(6, m_rect_inds, 5));
+  m_rect_varr = (Karen::VertexArray::create());
+  m_rect_vbuf = (Karen::VertexBuffer::create(sizeof(float) * 20, m_rect_verts, 5));
+  m_rect_ibuf = (Karen::IndexBuffer::create(6, m_rect_inds, 5));
 #ifdef KAREN_EMSCRIPTEN
-    m_color_sh->loadFromFile("res/shaders/color_vs_gles.glsl", "res/shaders/color_fs_gles.glsl");
-    m_texture_sh->loadFromFile("res/shaders/tux_vs_gles.glsl", "res/shaders/tux_fs_gles.glsl");
-    m_tux = Karen::Texture2D::create("res/textuers/img1.png");
+  m_color_sh->loadFromFile("res/shaders/color_vs_gles.glsl", "res/shaders/color_fs_gles.glsl");
+  m_texture_sh->loadFromFile("res/shaders/tux_vs_gles.glsl", "res/shaders/tux_fs_gles.glsl");
+  m_tux = Karen::Texture2D::create("res/textuers/img1.png");
 #else 
-    m_tux = Karen::Texture2D::create("../res/textuers/img1.png");
+  m_tux = Karen::Texture2D::create("../res/textuers/img1.png");
 #endif //KAREN_EMSCRIPTEN
-    Karen::BufferLayout rect_bl = 
-    {
-      {"pos", Karen::ShaderDataType::Float3},
-      {"tux_coord", Karen::ShaderDataType::Float2}
-    };
-    Karen::BufferLayout tri_bl = 
-    {
-      {"pos", Karen::ShaderDataType::Float3},
-      {"normals", Karen::ShaderDataType::Float2}
-    };
-    m_tri_vbuf->setLayout(tri_bl);
-    m_tri_varr->setIndexBuffer(m_tri_ibuf);
-    m_tri_varr->addVertexBuffer(m_tri_vbuf);
+  Karen::BufferLayout rect_bl = 
+  {
+    {"pos", Karen::ShaderDataType::Float3},
+    {"tux_coord", Karen::ShaderDataType::Float2}
+  };
+  Karen::BufferLayout tri_bl = 
+  {
+    {"pos", Karen::ShaderDataType::Float3},
+    {"normals", Karen::ShaderDataType::Float2}
+  };
+  m_tri_vbuf->setLayout(tri_bl);
+  m_tri_varr->setIndexBuffer(m_tri_ibuf);
+  m_tri_varr->addVertexBuffer(m_tri_vbuf);
     
-    m_rect_vbuf->setLayout(rect_bl);
-    m_rect_varr->setIndexBuffer(m_rect_ibuf);
-    m_rect_varr->addVertexBuffer(m_rect_vbuf); 
-  }
-  void SandboxLayer::onDetach()
-  {
-    KAREN_INFO("Layer: {0} Detached", this->getName());
-  }
+  m_rect_vbuf->setLayout(rect_bl);
+  m_rect_varr->setIndexBuffer(m_rect_ibuf);
+  m_rect_varr->addVertexBuffer(m_rect_vbuf); 
+}
 
-  void SandboxLayer::onUpdate(Karen::Timestep ts)
-  {
+void SandboxLayer::onDetach()
+{
+  KAREN_INFO("Layer: {0} Detached", this->getName());
+}
+
+void SandboxLayer::onUpdate(Karen::Timestep ts)
+{
   if(Karen::Input::isKeyPressed(Karen::Keyboard::I))
     m_tri_pos.y += m_tri_speed * ts;
   if(Karen::Input::isKeyPressed(Karen::Keyboard::K))
@@ -98,7 +99,7 @@ void SandboxLayer::onAttach()
   c_sh->setUniform("u_tint_color", Karen::Vec4(0.2f, 0.3f, 0.8f, 1.0f));
   Karen::RenderCommands::drawIndexed(m_tri_varr);
   m_r->endScene();
-  }
+}
 
 void SandboxLayer::onRender()
 {

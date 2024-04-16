@@ -6,7 +6,6 @@
 #include "Karen/Render/API/VertexBuffer.h"
 #include "glm/ext/matrix_transform.hpp"
 
-
 namespace Karen
 {
   Renderer2D::Data* Renderer2D::s_data = new Renderer2D::Data;
@@ -14,6 +13,9 @@ namespace Karen
   void Renderer2D::init(const std::string& shaders_2d_config_path)
   {
     s_data->shaders.LoadConfig(shaders_2d_config_path);
+    
+    uint32_t wh_data = 0xffffffff;
+    s_data->wh_tux = Texture2D::create(1, 1, sizeof(wh_data), &wh_data);
 
     const float verts[20] =
     {
@@ -46,9 +48,6 @@ namespace Karen
   void Renderer2D::beginScene(const OrthographicCamera& camera)
   {
     KAREN_CORE_INFO("beginScene called scene");
-    s_data->shaders.get("color_shader")->bind();
-    s_data->shaders.get("color_shader")->setUniform("u_proj_view", camera.getProjView());
-
     s_data->shaders.get("tux_shader")->bind();
     s_data->shaders.get("tux_shader")->setUniform("u_proj_view", camera.getProjView());
 
@@ -61,10 +60,11 @@ namespace Karen
     Mat4 trans = glm::translate(Mat4(1.0f), pos);
     trans = glm::rotate(trans, glm::radians(rotation), Vec3(0, 0, 1));
     trans = glm::scale(trans, Vec3(size.x, size.y, 1.0f));
-    const ARef<Shader>& shader = s_data->shaders.get("color_shader");
-    shader->bind();
+    const ARef<Shader>& shader = s_data->shaders.get("tux_shader");
+    s_data->wh_tux->bind(0);
+    shader->setUniform("u_tux", 0);
     shader->setUniform("u_trans", trans);
-    shader->setUniform("u_color", color);
+    shader->setUniform("u_tint_color", color);
     RenderCommands::drawIndexed(s_data->quad_vertex_arr);
     KAREN_CORE_INFO("draw quad vec3 exited None tux");
   }
@@ -75,10 +75,11 @@ namespace Karen
     Mat4 trans = glm::translate(Mat4(1.0f), Vec3(pos.x, pos.y, 0.0f));
     trans = glm::rotate(trans, glm::radians(rotation), Vec3(0, 0, 1));
     trans = glm::scale(trans, Vec3(size.x, size.y, 1.0f));
-    const ARef<Shader>& shader = s_data->shaders.get("color_shader");
-    shader->bind();
+    const ARef<Shader>& shader = s_data->shaders.get("tux_shader");
+    s_data->wh_tux->bind(0);
+    shader->setUniform("u_tux", 0);
     shader->setUniform("u_trans", trans);
-    shader->setUniform("u_color", color);
+    shader->setUniform("u_tint_color", color);
     RenderCommands::drawIndexed(s_data->quad_vertex_arr);
     KAREN_CORE_INFO("draw quad vec2 exited None tux");
   }
@@ -91,7 +92,6 @@ namespace Karen
     trans = glm::scale(trans, Vec3(size.x, size.y, 1.0f));
     const ARef<Shader>& shader = s_data->shaders.get("tux_shader");
     tux->bind(0);
-    shader->bind();
     shader->setUniform("u_trans", trans);
     shader->setUniform("u_tint_color", color);
     shader->setUniform("u_tux", 0);
@@ -106,7 +106,6 @@ namespace Karen
     trans = glm::scale(trans, Vec3(size.x, size.y, 1.0f));
     const ARef<Shader>& shader = s_data->shaders.get("tux_shader"); 
     tux->bind(0);
-    shader->bind();
     shader->setUniform("u_trans", trans);
     shader->setUniform("u_tint_color", color);
     shader->setUniform("u_tux", 0);

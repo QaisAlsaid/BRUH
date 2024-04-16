@@ -37,6 +37,7 @@ namespace Karen
      struct Data
      {
        ARef<VertexArray> quad_vertex_arr;
+       ARef<Texture2D> wh_tux;
        ShaderManager shaders;
      };
 

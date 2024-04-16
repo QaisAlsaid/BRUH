@@ -17,4 +17,19 @@ namespace Karen
     KAREN_CORE_ASSERT(false, "Unknown API");
     return nullptr;
   }
+
+
+  ARef<Texture2D> Texture2D::create(uint32_t height, uint32_t width, size_t data_size, const void* data)
+  {
+    switch(RendererAPI::getAPI())
+    {
+      case RendererAPI::API::NONE:
+        KAREN_CORE_ASSERT(false, "Render API None not supported at the moment");
+      case RendererAPI::API::OpenGl:
+        return std::make_shared<OpenGlTexture2D>(height, width, data_size, data);
+    }
+    KAREN_CORE_ASSERT(false, "Unknown API");
+    return nullptr;
+
+  }
 }
