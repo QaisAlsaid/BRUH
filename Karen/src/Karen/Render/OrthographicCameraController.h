@@ -16,7 +16,7 @@ namespace Karen
   class OrthographicCameraController
   {
   public:
-    OrthographicCameraController(float apect_ratio);
+    OrthographicCameraController(float apect_ratio, const Vec4& initial = Vec4(-1.0f, 1.0f, -1.0f, 1.0f));
     OrthographicCameraController(float left, float right, float bottom, float top);
 
     
@@ -97,7 +97,6 @@ namespace Karen
     Vec4 m_initial = {-1.0f, 1.0f, -1.0f, 1.0f};
     bool m_can_control = true;
     bool m_control_zoom_with_mouse_scroll = true;
-    bool m_construct_with_values = false;
     OrthographicCamera m_camera;
   };
 }

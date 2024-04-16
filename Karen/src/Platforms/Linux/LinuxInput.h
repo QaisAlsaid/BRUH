@@ -13,7 +13,7 @@ namespace Karen
     bool isMouseButtonPressedImpl(int button_code)  override;
     bool isKeyReleasedImpl(int key_code)            override;
     bool isMouseButtonReleasedImpl(int button_code) override;          
-    float getMousePosImpl()       override;
+    Vec2 getMousePosImpl()       override;
   };
 }
 

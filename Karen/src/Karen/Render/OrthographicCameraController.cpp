@@ -9,16 +9,15 @@
 
 namespace Karen
 {
-  OrthographicCameraController::OrthographicCameraController(float aspect_ratio)
-    : m_aspect_ratio(aspect_ratio), m_camera(-m_aspect_ratio * m_zoom, m_aspect_ratio * m_zoom,
-      -m_zoom, m_zoom)
+  OrthographicCameraController::OrthographicCameraController(float aspect_ratio, const Vec4& initial)
+    : m_aspect_ratio(aspect_ratio), m_initial(initial)
   {
-    m_construct_with_values = false;
+     m_camera.setRect(m_aspect_ratio * m_initial.x, m_aspect_ratio * m_initial.y,
+      m_initial.z, m_initial.w);
   }
   OrthographicCameraController::OrthographicCameraController(float left, float right, float bottom, float top)
   : m_camera(left, right, bottom, top)
   {
-    m_construct_with_values = true;
     m_initial.x = left;
     m_initial.y = right;
     m_initial.z = bottom;
@@ -35,10 +34,6 @@ namespace Karen
       move(Vec3(0.0f, 1.0f, 0.0f) * (m_speed.x * ts));
     if(Input::isKeyPressed(Keyboard::S))
       move(Vec3(0.0f, -1.0f, 0.0f) * (m_speed.x * ts));
-    if(Input::isKeyPressed(Keyboard::Up))
-      zoom(m_zoom_speed * ts);
-    if(Input::isKeyPressed(Keyboard::Down))
-      zoom(-m_zoom_speed * ts);
     if(Input::isKeyPressed(Keyboard::E))
       rotate(m_rotation_speed * ts);
     if(Input::isKeyPressed(Keyboard::Q))
@@ -66,7 +61,6 @@ namespace Karen
   bool OrthographicCameraController::onWindowResizeEvent(WindowResizeEvent& e)
   {
     m_aspect_ratio = (float)e.getWidth()/(float)e.getHeight();
-    const auto& r = m_camera.getRect();
     Vec4 current = m_initial;
     if(m_aspect_ratio > 1.0f)
     {
@@ -79,7 +73,6 @@ namespace Karen
       current.w = current.y / m_aspect_ratio;
     }
     setRect(current.x, current.y, current.z, current.w);
-    //setRect(r.x, r.y * m_aspect_ratio, r.z, r.w);
     //setRect(0.0f, m_aspect_ratio * e.getWidth(), 0.0f, e.getHeight());
     RenderCommands::setViewPort(0.0f, 0.0f, e.getWidth(), e.getHeight());
     KAREN_CORE_TRACE("ViewPort: ({0}, {1}, {2}, {3}), aspect_ratio: {4}", 0.0f, 0.0f, e.getWidth(), e.getHeight(), m_aspect_ratio);

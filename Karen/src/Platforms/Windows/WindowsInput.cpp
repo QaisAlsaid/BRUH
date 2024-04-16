@@ -20,7 +20,7 @@ namespace Karen
     auto* window = (GLFWwindow*)App::get()->getWindow().getNativeWindow();
     double x, y;
     glfwGetCursorPos(window, &x, &y);
-    return (float) x;
+    return Vec2((float)x, (float)y);
   }
 
   bool WindowsInput::isMouseButtonPressedImpl(int button_code)
