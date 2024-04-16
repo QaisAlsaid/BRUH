@@ -41,8 +41,7 @@ set(KAREN_SRC src/Karen/Core/App.cpp src/Karen/Core/Log.cpp
     src/Platforms/OpenGl/OpenGlTexture.cpp src/Karen/Render/API/Texture.cpp
     src/Karen/Core/CommanUtils/ImageLoader.cpp src/Platforms/OpenGl/OpenGlCore.cpp
     src/Karen/Render/ShaderManager.cpp src/Karen/Render/OrthographicCameraController.cpp
-    src/Karen/Render/Renderer2D/Renderer2D.cpp src/Karen/Physics/Physics2D/RigidBody.cpp 
-    src/Karen/Physics/Physics2D/PhysicsWorld2D.cpp src/Karen/Physics/Physics2D/Collisions.cpp
+    src/Karen/Render/Renderer2D/Renderer2D.cpp
     include/Karen/Karen.h
   )
 #set(KAREN_SRC_H src/Karen/App.h src/Karen/Log.h src/Platforms/Windows/WindowsWindow.h src/Karen/Layers/Layer.h

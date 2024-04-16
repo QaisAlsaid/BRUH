@@ -18,8 +18,6 @@ public:
 
  private:
   bool onResize(Karen::WindowResizeEvent& e);
-  Karen::Vec2 m_rect_pos, m_circle_pos;
-  std::vector<Karen::ARef<Karen::RigidBody2D>> m_bodys;
   Karen::ARef<Karen::Texture2D> m_tux;
   Karen::OrthographicCameraController m_ortho = Karen::OrthographicCameraController(0.0f, 12.8f, 0.0f, 7.20f);
 };
