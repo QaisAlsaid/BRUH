@@ -10,7 +10,7 @@ namespace Karen
     glCall(glGenTextures(1, &m_renderer_id));
     glCall(glActiveTexture(GL_TEXTURE0));
     glCall(glBindTexture(GL_TEXTURE_2D, m_renderer_id));
-
+    ImageLoader m_image;
     bool status = m_image.loadFromFile(file_path, flip_v);
     KAREN_CORE_ASSERT(status, std::string("Failed to load Texture from file: ") + file_path);
     uint32_t fmt = 0;
@@ -35,7 +35,6 @@ namespace Karen
         , 0, fmt, GL_UNSIGNED_BYTE, m_image.getImageData()));
     m_width = m_image.getWidth();
     m_height = m_image.getHeight();
-    m_image.~ImageLoader();
   }
 
   OpenGlTexture2D::OpenGlTexture2D(uint32_t w, uint32_t h, size_t ds, const void* d)

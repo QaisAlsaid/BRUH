@@ -2,7 +2,7 @@
 #include "pch.h"
 #include "Karen/Core/Log.h"
 #include "Platforms/OpenGl/OpenGlShader.h"
-#include "Karen/Core/CommanUtils/FileLoader.h"
+#include "Karen/Core/Utils/FileLoader.h"
 #include "Karen/Core/Core.h"
 #include "Platforms/OpenGl/OpenGlCore.h"
 

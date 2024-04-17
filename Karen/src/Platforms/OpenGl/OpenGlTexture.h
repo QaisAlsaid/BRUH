@@ -2,7 +2,7 @@
 #define OPENGL_TEXTURE_H
 
 #include "Karen/Render/API/Texture.h"
-#include "Karen/Core/CommanUtils/ImageLoader.h"
+#include "Karen/Core/Utils/ImageLoader.h"
 
 
 namespace Karen
@@ -30,7 +30,6 @@ namespace Karen
     uint32_t m_height = 0;
     uint32_t m_renderer_id = 0;
     uint32_t m_data_format, m_internal_format;
-    ImageLoader m_image;
   };
 }
 #endif //OPENGL_TEXTURE_H

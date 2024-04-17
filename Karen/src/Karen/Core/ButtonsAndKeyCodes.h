@@ -6,7 +6,7 @@
 
 namespace Karen
 {
-  enum Keyboard
+  enum class Keyboard
   {
     Space          = 32,
     Apostrophe     = 39,
@@ -130,7 +130,7 @@ namespace Karen
     Menu           = 348
   };
 
-  enum Mouse
+  enum class Mouse
   {
     ButtonLeft   = 0,
     ButtonRight  = 1,

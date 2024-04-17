@@ -34,12 +34,12 @@ set(KAREN_SRC src/Karen/Core/App.cpp src/Karen/Core/Log.cpp
     src/Karen/Render/API/IndexBuffer.cpp
     src/Karen/Render/API/RendererAPI.cpp src/Karen/Render/API/VertexArray.cpp
     src/Platforms/OpenGl/OpenGlVertexArray.cpp src/Karen/Render/API/Shader.cpp
-    src/Platforms/OpenGl/OpenGlShader.cpp src/Karen/Core/CommanUtils/FileLoader.cpp
+    src/Platforms/OpenGl/OpenGlShader.cpp src/Karen/Core/Utils/FileLoader.cpp
     src/Karen/Render/API/Renderer.cpp src/Karen/Render/API/RenderCommands.cpp
     src/Platforms/OpenGl/OpenGlRendererAPI.cpp src/Karen/Render/OrthographicCamera.cpp
     src/Platforms/Windows/WindowsInput.cpp src/Platforms/Windows/WindowsWindow.cpp
     src/Platforms/OpenGl/OpenGlTexture.cpp src/Karen/Render/API/Texture.cpp
-    src/Karen/Core/CommanUtils/ImageLoader.cpp src/Platforms/OpenGl/OpenGlCore.cpp
+    src/Karen/Core/Utils/ImageLoader.cpp src/Platforms/OpenGl/OpenGlCore.cpp
     src/Karen/Render/ShaderManager.cpp src/Karen/Render/OrthographicCameraController.cpp
     src/Karen/Render/Renderer2D/Renderer2D.cpp
     include/Karen/Karen.h
@@ -50,7 +50,7 @@ set(KAREN_SRC src/Karen/Core/App.cpp src/Karen/Core/Log.cpp
 #  src/Platforms/OpenGl/OpenGlIndexBuffer.h src/Render/API/VertexBuffer.h src/Render/API/IndexBuffer.h
 #  src/Render/API/RendererAPI.h src/Render/API/VertexArray.h
 #  src/Platforms/OpenGl/OpenGlVertexArray.h src/Render/API/Shader.h
-#  src/Platforms/OpenGl/OpenGlShader.h src/Karen/CommanUtils/FileLoader.h
+#  src/Platforms/OpenGl/OpenGlShader.h src/Karen/Utils/FileLoader.h
 #  src/Render/API/Renderer.h src/Render/API/RenderCommands.h
 #  src/Platforms/OpenGl/OpenGlRendererAPI.h
 #  src/Karen/Core.h src/Karen/Window.h src/Platforms/Linux/LinuxInput.h Platforms/Linux/LinuxWindow.h  src/Render/OrthographicCamera.h
