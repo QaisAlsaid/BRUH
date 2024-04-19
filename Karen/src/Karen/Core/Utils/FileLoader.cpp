@@ -1,6 +1,5 @@
 #include "pch.h"
-#include "Karen/Core/CommanUtils/FileLoader.h"
-
+#include "FileLoader.h"
 
 namespace Karen
 {
@@ -11,7 +10,7 @@ namespace Karen
     std::stringstream ss;
     if(!fs)
     {
-      KAREN_CORE_ASSERT(false, std::string("Could Not Open File: ") + fn);
+      KAREN_CORE_ASSERT_MSG(false, std::string("Could Not Open File: ") + fn);
       return "";
     }
 

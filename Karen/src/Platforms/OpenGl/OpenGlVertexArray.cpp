@@ -8,26 +8,31 @@ namespace Karen
 {
   OpenGlVertexArray::OpenGlVertexArray()
   {
+    KAREN_PROFILE_FUNCTION();
     glGenVertexArrays(1, &m_renderer_id); 
   }
 
   OpenGlVertexArray::~OpenGlVertexArray()
   {
+    KAREN_PROFILE_FUNCTION();
     glDeleteVertexArrays(1, &m_renderer_id);
   }
 
   void OpenGlVertexArray::bind() const
   {
+    KAREN_PROFILE_FUNCTION();
     glBindVertexArray(m_renderer_id);
   }
 
   void OpenGlVertexArray::unbind() const
   {
+    KAREN_PROFILE_FUNCTION();
     glBindVertexArray(0);
   }
 
-  void OpenGlVertexArray::addVertexBuffer(const std::shared_ptr<VertexBuffer>& vb)
+  void OpenGlVertexArray::addVertexBuffer(const Karen::ARef<VertexBuffer>& vb)
   {
+    KAREN_PROFILE_FUNCTION();
     vb->bind();
     const auto& bl = vb->getLayout();
     for(uint32_t i = 0; i < bl.getElements().size(); ++i)
@@ -43,19 +48,20 @@ namespace Karen
     glBindVertexArray(0);
   }
 
-  void OpenGlVertexArray::setIndexBuffer(const std::shared_ptr<IndexBuffer>& ib)
+  void OpenGlVertexArray::setIndexBuffer(const Karen::ARef<IndexBuffer>& ib)
   {
+    KAREN_PROFILE_FUNCTION();
     glBindVertexArray(m_renderer_id);
     m_index_buff = ib;
     ib->bind();
   }
 
-  const std::shared_ptr<IndexBuffer>& OpenGlVertexArray::getIndexBuffer()
+  const Karen::ARef<IndexBuffer>& OpenGlVertexArray::getIndexBuffer()
   {
     return m_index_buff;
   }
 
-  const std::vector<std::shared_ptr<VertexBuffer>>& OpenGlVertexArray::getVertexBuffers()
+  const std::vector<Karen::ARef<VertexBuffer>>& OpenGlVertexArray::getVertexBuffers()
   {
     return m_vertex_buffs;
   }

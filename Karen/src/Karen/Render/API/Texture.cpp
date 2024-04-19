@@ -10,11 +10,11 @@ namespace Karen
     switch(RendererAPI::getAPI())
     {
       case RendererAPI::API::NONE:
-        KAREN_CORE_ASSERT(false, "Render API None not supported at the moment");
+        KAREN_CORE_ASSERT_MSG(false, "Render API None not supported at the moment");
       case RendererAPI::API::OpenGl:
-        return std::make_shared<OpenGlTexture2D>(file_path, flip_v);
+        return Karen::createARef<OpenGlTexture2D>(file_path, flip_v);
     }
-    KAREN_CORE_ASSERT(false, "Unknown API");
+    KAREN_CORE_ASSERT_MSG(false, "Unknown API");
     return nullptr;
   }
 
@@ -24,11 +24,11 @@ namespace Karen
     switch(RendererAPI::getAPI())
     {
       case RendererAPI::API::NONE:
-        KAREN_CORE_ASSERT(false, "Render API None not supported at the moment");
+        KAREN_CORE_ASSERT_MSG(false, "Render API None not supported at the moment");
       case RendererAPI::API::OpenGl:
-        return std::make_shared<OpenGlTexture2D>(height, width, data_size, data);
+        return Karen::createARef<OpenGlTexture2D>(height, width, data_size, data);
     }
-    KAREN_CORE_ASSERT(false, "Unknown API");
+    KAREN_CORE_ASSERT_MSG(false, "Unknown API");
     return nullptr;
 
   }

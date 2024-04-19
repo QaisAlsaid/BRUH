@@ -1,4 +1,4 @@
-#include <Karen/EntryPoint.h>
+#include <Karen/Core/EntryPoint.h>
 #include <Karen/Karen.h>
 
 #include "Sandbox.h"

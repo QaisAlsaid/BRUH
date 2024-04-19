@@ -25,7 +25,6 @@ namespace Karen
     }
   private:
     uint32_t m_renderer_id;
-    float* m_data = nullptr;
     BufferLayout m_layout;
   };
 }

@@ -12,17 +12,20 @@ namespace Karen
 
   void OpenGLRendererAPI::setViewPort(uint32_t left, uint32_t bottom, uint32_t right, uint32_t top)
   {
+    KAREN_PROFILE_FUNCTION();
     glCall(glViewport(left, bottom, right, top));
   }
 
   void OpenGLRendererAPI::drawIndexed(const ARef<VertexArray>& p_varr)
   { 
+    KAREN_PROFILE_FUNCTION();
     p_varr->bind();
     glCall(glDrawElements(GL_TRIANGLES, p_varr->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr));
   }
 
   void OpenGLRendererAPI::clear(const Vec4& col)
   {
+    KAREN_PROFILE_FUNCTION();
     glCall(glClearColor(col.x, col.y, col.z, col.w));
     glCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
   }

@@ -17,4 +17,6 @@
 #include <algorithm>
 
 #include "Karen/Core/Log.h"
+#include "Karen/Core/Instrumentor.h"
+
 #endif //PCH_H

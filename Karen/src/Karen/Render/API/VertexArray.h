@@ -16,11 +16,11 @@ namespace Karen
     virtual void bind()   const = 0;
     virtual void unbind() const = 0;
 
-    virtual void addVertexBuffer(const std::shared_ptr<VertexBuffer>&) = 0;
-    virtual void setIndexBuffer(const std::shared_ptr<IndexBuffer>&)   = 0;
+    virtual void addVertexBuffer(const Karen::ARef<VertexBuffer>&) = 0;
+    virtual void setIndexBuffer(const Karen::ARef<IndexBuffer>&)   = 0;
 
-    virtual const std::vector<std::shared_ptr<VertexBuffer>>& getVertexBuffers() = 0;
-    virtual const std::shared_ptr<IndexBuffer>& getIndexBuffer() = 0;
+    virtual const std::vector<Karen::ARef<VertexBuffer>>& getVertexBuffers() = 0;
+    virtual const Karen::ARef<IndexBuffer>& getIndexBuffer() = 0;
   
     static ARef<VertexArray> create();
   };

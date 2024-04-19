@@ -1,14 +1,8 @@
 #ifndef APP_H
 #define APP_H
 
-///////TODO:remove it
-#include "Karen/Core/Timestep.h"
-#include "Karen/Render/API/IndexBuffer.h"
-#include "Karen/Render/API/VertexArray.h"
-#include "Karen/Render/API/VertexBuffer.h"
 #include "Karen/Render/API/Shader.h"
 #include "Karen/Render/OrthographicCamera.h"
-//////
 
 #include "Karen/Core/Core.h"
 #include "Karen/Core/Window.h"
@@ -33,7 +27,7 @@ namespace Karen
     }
     inline static App* get()
     {
-      KAREN_CORE_ASSERT(stat_instance, "No App Created");
+      KAREN_CORE_ASSERT_MSG(stat_instance, "No App Created");
       return stat_instance;
     }
   private:

@@ -2,9 +2,9 @@
 #define CORE_H
 
 #include <memory>
-#include <utility>
-
 #include "Assertion.h"
+#include "Macros.h"
+
 
 #ifdef KAREN_IS_SHARED
 #if defined(_MSC_VER)
@@ -15,7 +15,7 @@
   #endif //KAREN_BUILD_SHARDE
 #elif defined(__GNUC__)
   #ifdef KAREN_BUILD_SHARDE
-    #define KAREN_API /*__attribute__((visibility("default")))*/
+    #define KAREN_API __attribute__((visibility("default")))
   #else
     #define KAREN_API
   #endif //KAREN_BUILD_SHARDE
@@ -27,15 +27,24 @@
   #define KAREN_API
 #endif //KAREN_IS_SHARED
 
-#define BITSHL(x) (1 << x)
-#define BIND_EVENT_FUNCTION(x) std::bind(&x, this, std::placeholders::_1)
-
 namespace Karen
 {
   template<typename T>
-  using ARef = std::shared_ptr<T>;
-  template<typename T>
-  using Scoped = std::unique_ptr<T>;
+	using Scoped = std::unique_ptr<T>;
+	template<typename T, typename... Args>
+	constexpr Scoped<T> createScoped(Args&& ... args)
+	{
+		return std::make_unique<T>(std::forward<Args>(args)...);
+	}
+
+
+	template<typename T>
+	using ARef = std::shared_ptr<T>;
+	template<typename T, typename ... Args>
+	constexpr ARef<T> createARef(Args&&... args)
+	{
+		return std::make_shared<T>(std::forward<Args>(args)...);
+	}
 }
 
 #endif //CORE_H

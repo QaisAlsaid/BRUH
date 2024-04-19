@@ -4,11 +4,11 @@
 
 namespace Karen
 {
-  Input* Input::stat_instance = nullptr;
+  Input* Input::s_instance = nullptr;
 
   void Input::create(Input* instance)
   {
-    KAREN_CORE_ASSERT(!stat_instance, "Input Has been created");
-    stat_instance = instance;
+    KAREN_CORE_ASSERT_MSG(!s_instance, "Input Has been created");
+    s_instance = instance;
   }
 }

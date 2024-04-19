@@ -17,17 +17,17 @@ namespace Karen
     {
       case RendererAPI::API::OpenGl:
       {
-        return std::make_shared<OpenGlIndexBuffer>(count, data, usage);
+        return Karen::createARef<OpenGlIndexBuffer>(count, data, usage);
         break;
       }
       case RendererAPI::API::NONE:
       {
         return nullptr;
-        KAREN_CORE_ASSERT(false, "Not supported RenderAPI: 'RenderAPI:NONE' at the moment");
+        KAREN_CORE_ASSERT_MSG(false, "Not supported RenderAPI: 'RenderAPI:NONE' at the moment");
         break;
       }
     }
-    KAREN_CORE_ASSERT(false, "Unknown RendererAPI");
+    KAREN_CORE_ASSERT_MSG(false, "Unknown RendererAPI");
     return nullptr;
   }
 }

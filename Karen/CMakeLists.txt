@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 option(KAREN_ENABLE_ASSERT "Enables Assertion" ON)
 option(KAREN_ENABLE_VERIFY "Enables Verify" ON)
+option(KAREN_ENABLE_INSTRUMENTATION "Enables Profiling" ON)
 option(KAREN_IS_SHARED "builds as shared lib" OFF)
 option(KAREN_EMSCRIPTEN "builds for the web" OFF)
 
@@ -42,6 +43,7 @@ set(KAREN_SRC src/Karen/Core/App.cpp src/Karen/Core/Log.cpp
     src/Karen/Core/Utils/ImageLoader.cpp src/Platforms/OpenGl/OpenGlCore.cpp
     src/Karen/Render/ShaderManager.cpp src/Karen/Render/OrthographicCameraController.cpp
     src/Karen/Render/Renderer2D/Renderer2D.cpp
+    src/Karen/Core/Instrumentor.cpp
     include/Karen/Karen.h
   )
 #set(KAREN_SRC_H src/Karen/App.h src/Karen/Log.h src/Platforms/Windows/WindowsWindow.h src/Karen/Layers/Layer.h
@@ -110,6 +112,11 @@ endif(KAREN_ENABLE_VERIFY)
 if(KAREN_EMSCRIPTEN)
   target_compile_definitions(${PROJECT_NAME} PUBLIC KAREN_EMSCRIPTEN)
   set(KAREN_IS_EMSCRIPTEN ${KAREN_EMSCRIPTEN} PARENT_SCOPE)
+endif()
+
+if(KAREN_ENABLE_INSTRUMENTATION)
+  target_compile_definitions(${PROJECT_NAME} PUBLIC KAREN_ENABLE_INSTRUMENTATION)
+  set(KAREN_INSTRUMENTATION ${KAREN_ENABLE_INSTRUMENTATION} PARENT_SCOPE)
 endif()
 
 target_precompile_headers(${PROJECT_NAME} PUBLIC src/pch.h)

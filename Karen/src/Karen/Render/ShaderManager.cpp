@@ -121,7 +121,7 @@ namespace Karen
   {
     if(m_shaders.find(p_name) == m_shaders.end())
     {
-      KAREN_CORE_ASSERT(false, std::string("Shader with name: ") + p_name + "Not found");
+      KAREN_CORE_ASSERT_MSG(false, std::string("Shader with name: ") + p_name + "Not found");
       return nullptr;
     }
     else

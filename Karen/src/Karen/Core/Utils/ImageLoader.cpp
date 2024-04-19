@@ -1,11 +1,12 @@
-#include"Karen/Core/CommanUtils/ImageLoader.h"
+#include "pch.h"
+#include "ImageLoader.h"
 
 namespace Karen
 {
   ImageLoader::ImageLoader(const std::string& file_path, bool flip)
   {
     bool status = loadFromFile(file_path, flip);
-    KAREN_CORE_ASSERT(status, std::string("Failed to load image from file: ") + file_path);
+    KAREN_CORE_ASSERT_MSG(status, std::string("Failed to load image from file: ") + file_path);
     	std::cout<<"ERROR Loadind Image From File : "<<file_path<<std::endl;
   }
 

@@ -17,7 +17,6 @@ namespace Karen
     uint32_t inline getCount() const override {return m_count;}
   private:
     uint32_t m_renderer_id;
-    uint32_t* m_data = nullptr;
     uint32_t m_count = 0;
   };
 }

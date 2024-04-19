@@ -5,10 +5,10 @@
 
 namespace Karen
 {
-  bool LinuxInput::isKeyPressedImpl(int key_code)
+  bool LinuxInput::isKeyPressedImpl(Keyboard key)
   {
     auto* window = (GLFWwindow*)App::get()->getWindow().getNativeWindow();
-    auto  status = glfwGetKey(window, key_code);
+    auto  status = glfwGetKey(window, (int)key);
     return (status == GLFW_PRESS || status == GLFW_REPEAT);
   }
 
@@ -20,24 +20,24 @@ namespace Karen
     return Vec2((float)x, (float)y);
   }
 
-  bool LinuxInput::isMouseButtonPressedImpl(int button_code)
+  bool LinuxInput::isMouseButtonPressedImpl(Mouse button)
   {
     auto* window = (GLFWwindow*)App::get()->getWindow().getNativeWindow();
-    auto status = glfwGetMouseButton(window, button_code);
+    auto status = glfwGetMouseButton(window, (int)button);
     return (status == GLFW_PRESS);
   }
 
-  bool LinuxInput::isKeyReleasedImpl(int key_code)
+  bool LinuxInput::isKeyReleasedImpl(Keyboard key)
   {
     auto* window = (GLFWwindow*)App::get()->getWindow().getNativeWindow();
-    auto status = glfwGetKey(window, key_code);
+    auto status = glfwGetKey(window, (int)key);
     return status == GLFW_RELEASE;
   }
 
-  bool LinuxInput::isMouseButtonReleasedImpl(int button_code)
+  bool LinuxInput::isMouseButtonReleasedImpl(Mouse button)
   {
     auto* window = (GLFWwindow*)App::get()->getWindow().getNativeWindow();
-    auto status = glfwGetMouseButton(window, button_code);
+    auto status = glfwGetMouseButton(window, (int)button);
     return status == GLFW_RELEASE;
   }
 }

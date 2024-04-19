@@ -11,12 +11,12 @@ namespace Karen
     switch(RendererAPI::getAPI())
     {
       case RendererAPI::API::NONE:
-        KAREN_CORE_ASSERT(false, "Renderer API: 'NONE' Not suported at the moment");
+        KAREN_CORE_ASSERT_MSG(false, "Renderer API: 'NONE' Not suported at the moment");
         return nullptr;
       case RendererAPI::API::OpenGl:
-        return std::make_shared<OpenGlShader>(vp, fp);
+        return Karen::createARef<OpenGlShader>(vp, fp);
     }
-    KAREN_CORE_ASSERT(false, "Unknown Renderer API");
+    KAREN_CORE_ASSERT_MSG(false, "Unknown Renderer API");
     return nullptr;
   }
   
@@ -25,12 +25,12 @@ namespace Karen
     switch(RendererAPI::getAPI())
     {
       case RendererAPI::API::NONE:
-        KAREN_CORE_ASSERT(false, "Render API: 'NONE' Not suported at the moment");
+        KAREN_CORE_ASSERT_MSG(false, "Render API: 'NONE' Not suported at the moment");
         return nullptr;
       case RendererAPI::API::OpenGl:
-        return std::make_shared<OpenGlShader>();
+        return Karen::createARef<OpenGlShader>();
     }
-    KAREN_CORE_ASSERT(false, "Unknown RendererAPI");
+    KAREN_CORE_ASSERT_MSG(false, "Unknown RendererAPI");
     return nullptr;
   }
 
@@ -104,7 +104,7 @@ namespace Karen
       case ShaderDataType::Sampler2D:
         return sizeof(int);
     }
-    KAREN_CORE_ASSERT(false, "No Matching ShaderDataType To:{0}",ShaderDataTypeToString((type)));
+    KAREN_CORE_ASSERT_MSG(false, "No Matching ShaderDataType To:{0}",ShaderDataTypeToString((type)));
     return 0;
   }
 
@@ -141,7 +141,7 @@ namespace Karen
       case ('s' + 'a' + 'm' + 'p' + 'l' + 'e' + 'r' + '2' + 'D'):
         return ShaderDataType::Sampler2D;
     }
-    KAREN_CORE_ASSERT(false, "Unknown ShaderDataType Hash");
+    KAREN_CORE_ASSERT_MSG(false, "Unknown ShaderDataType Hash");
     return ShaderDataType::None;
   }
 
@@ -156,7 +156,7 @@ namespace Karen
       case ShaderType::Fragment:
         return "Fragment";
     }
-    KAREN_CORE_ASSERT(false, "Not a valid ShaderType");
+    KAREN_CORE_ASSERT_MSG(false, "Not a valid ShaderType");
     return "";
   }
 }

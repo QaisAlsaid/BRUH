@@ -1,16 +1,9 @@
+#include "pch.h"
 #include "Karen/Core/Timestep.h"
 #include "Karen/Core/Events/AppEvents.h"
-#include "Karen/Render/API/RenderCommands.h"
-#include "Karen/Render/API/VertexArray.h"
-#include "pch.h"
 #include "Karen/Core/App.h"
 #include "Karen/Core/Log.h"
-#include "Karen/Core/Input.h"
-#include "Karen/Core/Math/math.h"
 #include "Karen/Render/API/RendererAPI.h"
-#include "Karen/Render/API/VertexBuffer.h"
-#include "Karen/Render/API/IndexBuffer.h"
-#include "Karen/Render/API/BufferLayout.h"
 
 #ifdef KAREN_EMSCRIPTEN
 #include <emscripten.h>
@@ -31,7 +24,7 @@ namespace Karen
   {
     KAREN_CORE_INFO("App Created");
     RendererAPI::setAPI(RendererAPI::API::OpenGl);
-    KAREN_CORE_ASSERT(!stat_instance, "App Exist");
+    KAREN_CORE_ASSERT_MSG(!stat_instance, "App Exist");
     stat_instance = this;
     m_window = std::unique_ptr<Window>(Window::create());
     m_window->setEventCallbackFunction(BIND_EVENT_FUNCTION(App::onEvent));
@@ -47,7 +40,7 @@ namespace Karen
   {
     EventDispatcher dp(event);
     dp.dispatch<WindowClosedEvent>(BIND_EVENT_FUNCTION(App::onCloseCall));
-    //dp.dispatch<WindowResizeEvent>(BIND_EVENT_FUNCTION(App::onResizeCall));
+    dp.dispatch<WindowResizeEvent>(BIND_EVENT_FUNCTION(App::onResizeCall));
     
     for(auto it = m_layers.end(); it != m_layers.begin();)
     {
@@ -121,7 +114,7 @@ namespace Karen
 
   bool App::onResizeCall(WindowResizeEvent& event)
   {
-    return true;
+    return false;
   }
   
   void App::pushLayer(Layer* layer)

@@ -8,7 +8,7 @@
 #include <GLFW/glfw3.h>
 
 
-static bool stat_is_glfw_init = false;
+static bool s_is_glfw_init = false;
 static void glfwerrorCallback(int code, const char* message)
 {
   KAREN_CORE_CRITICAL("GLFW ERROE: {0} : {1}", code, message);
@@ -32,16 +32,17 @@ namespace Karen
     
   void WindowsWindow::init(const WindowSpecs& specs)
   {
+    KAREN_PRKAREN_PROFILE_FUNCTION();
     Input::create(new WindowsInput);
     m_data.title  = specs.title;
     m_data.width  = specs.width;
     m_data.height = specs.height;
     
-    if(!stat_is_glfw_init)
+    if(!s_is_glfw_init)
     {
       int glfw_init_status = glfwInit();
-      KAREN_CORE_ASSERT(glfw_init_status, "Failed Initializing GLFW Window")
-      stat_is_glfw_init = true;
+      KAREN_CORE_ASSERT_MSG(glfw_init_status, "Failed Initializing GLFW Window")
+      s_is_glfw_init = true;
       glfwSetErrorCallback(glfwerrorCallback);
     }
     m_window = glfwCreateWindow(int(specs.width), int(specs.height), specs.title.c_str(), nullptr, nullptr);

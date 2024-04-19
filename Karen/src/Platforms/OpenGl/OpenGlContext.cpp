@@ -23,10 +23,11 @@ namespace Karen
 
   void OpenGlContext::init()
   {
+    KAREN_PROFILE_FUNCTION();
 #ifndef KAREN_EMSCRIPTEN 
     glfwMakeContextCurrent(m_window);
     int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-    KAREN_CORE_ASSERT(status, "ERROR Loading OpenGl Function Pointers");
+    KAREN_CORE_ASSERT_MSG(status, "ERROR Loading OpenGl Function Pointers");
 #else 
   EmscriptenWebGLContextAttributes attrs;
     attrs.antialias = true;
@@ -46,6 +47,7 @@ namespace Karen
   
   void OpenGlContext::swapBuffers()
   {
+    KAREN_PROFILE_FUNCTION();
     glfwSwapBuffers(m_window);
   }
 }

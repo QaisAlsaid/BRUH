@@ -28,23 +28,30 @@ namespace Karen
 
   OpenGlShader::~OpenGlShader()
   {
+    KAREN_PROFILE_FUNCTION();
     glCall(glDeleteProgram(m_program_id));
   }
 
   void OpenGlShader::bind() const
   {
+    KAREN_PROFILE_FUNCTION();
     glCall(glUseProgram(m_program_id));
   }
 
   void OpenGlShader::unbind() const
   {
+    KAREN_PROFILE_FUNCTION();
     glCall(glUseProgram(0));
   }
 
   void OpenGlShader::loadFromFile(const std::string& vp, const std::string& fp)
   {
-    std::string vs = FileLoader::LoadFromFile(vp);
-    std::string fs = FileLoader::LoadFromFile(fp);
+    std::string vs, fs;
+    {
+      KAREN_PROFILE_SCOPE("FileLoader::LoadFromFile(VERTEX_SHADER, FRAGMENT_SHADER)");
+      vs = FileLoader::LoadFromFile(vp);
+      fs = FileLoader::LoadFromFile(fp);
+    }
     if(compileShaders(vs, fs))
       if(createProgram())
         cacheUniforms(vs, fs);
@@ -54,45 +61,54 @@ namespace Karen
 
   bool OpenGlShader::compileShaders(std::string& vs, std::string& fs)
   {
+    KAREN_PROFILE_FUNCTION();
     bool _status = true;
     const char *v_cstr = vs.c_str(), *f_cstr = fs.c_str();
     int status_v, status_f;
-    m_vs_id = glCall(glCreateShader(GL_VERTEX_SHADER));
-    m_fs_id = glCall(glCreateShader(GL_FRAGMENT_SHADER));
-
-    glCall(glShaderSource(m_vs_id, 1, &v_cstr, nullptr));
-    glCall(glCompileShader(m_vs_id));
-    glCall(glGetShaderiv(m_vs_id, GL_COMPILE_STATUS, &status_v));
-    if(status_v == GL_FALSE)
     {
-      std::string shader_type;
-      int mlength;
-      glCall(glGetShaderiv(m_vs_id, GL_INFO_LOG_LENGTH, &mlength));
-      char* message = (char*)alloca(mlength * sizeof(char));
-      glCall(glGetShaderInfoLog(m_vs_id, mlength, &mlength, message));
-
-		  KAREN_CORE_ERROR("ERROR Compiling Vertex Shader: {0}", message);
-      _status = false;
+      KAREN_PROFILE_SCOPE("VERTEX_SHADER + FRAGMENT_SHADER Creating");
+      m_vs_id = glCall(glCreateShader(GL_VERTEX_SHADER));
+      m_fs_id = glCall(glCreateShader(GL_FRAGMENT_SHADER));
     }
-
-    glCall(glShaderSource(m_fs_id, 1, &f_cstr, nullptr));
-    glCall(glCompileShader(m_fs_id));
-    glCall(glGetShaderiv(m_fs_id, GL_COMPILE_STATUS, &status_f));
-    if(status_f == GL_FALSE)
     {
-      int mlength;
-      glCall(glGetShaderiv(m_fs_id, GL_INFO_LOG_LENGTH, &mlength));
-      char* message = (char*)alloca(mlength * sizeof(char));
-      glCall(glGetShaderInfoLog(m_fs_id, mlength, &mlength, message));
+      KAREN_PROFILE_SCOPE("Vertex Shader Compiling");
+      glCall(glShaderSource(m_vs_id, 1, &v_cstr, nullptr));
+      glCall(glCompileShader(m_vs_id));
+      glCall(glGetShaderiv(m_vs_id, GL_COMPILE_STATUS, &status_v));
+      if(status_v == GL_FALSE)
+      {
+        std::string shader_type;
+        int mlength;
+        glCall(glGetShaderiv(m_vs_id, GL_INFO_LOG_LENGTH, &mlength));
+        char* message = (char*)alloca(mlength * sizeof(char));
+        glCall(glGetShaderInfoLog(m_vs_id, mlength, &mlength, message));
 
-		  KAREN_CORE_ERROR("ERROR Compiling Fragment Shader: {0}", message);
-      _status = false;
+		    KAREN_CORE_ERROR("ERROR Compiling Vertex Shader: {0}", message);
+        _status = false;
+      }
+    }
+    {
+      KAREN_PROFILE_SCOPE("FRAGMENT_SHADER Compiling");
+      glCall(glShaderSource(m_fs_id, 1, &f_cstr, nullptr));
+      glCall(glCompileShader(m_fs_id));
+      glCall(glGetShaderiv(m_fs_id, GL_COMPILE_STATUS, &status_f));
+      if(status_f == GL_FALSE)
+      {
+        int mlength;
+        glCall(glGetShaderiv(m_fs_id, GL_INFO_LOG_LENGTH, &mlength));
+        char* message = (char*)alloca(mlength * sizeof(char));
+        glCall(glGetShaderInfoLog(m_fs_id, mlength, &mlength, message));
+
+		    KAREN_CORE_ERROR("ERROR Compiling Fragment Shader: {0}", message);
+        _status = false;
+      }
     }
     return _status;
   }
 
   bool OpenGlShader::createProgram()
   {
+    KAREN_PROFILE_FUNCTION();
     bool _status = true;
     int status;
     m_program_id = glCall(glCreateProgram());
@@ -115,6 +131,7 @@ namespace Karen
 
   void OpenGlShader::cacheUniforms(std::string& vs, std::string& fs)
   {
+    KAREN_PROFILE_FUNCTION();
     std::vector<std::string> vs_toks, fs_toks;
     vs.erase(std::unique(vs.begin(), vs.end(), BothAre<' '>), vs.end());
     fs.erase(std::unique(fs.begin(), fs.end(), BothAre<' '>), fs.end());
@@ -136,6 +153,7 @@ namespace Karen
 
   void OpenGlShader::findUniformsAndData(const std::vector<std::string>& t)
   {
+    KAREN_PROFILE_FUNCTION();
     for(size_t i = 0; i < t.size(); ++i)
     {
       if(t.at(i) == "uniform")
@@ -163,6 +181,7 @@ namespace Karen
 
   void OpenGlShader::setUniform(const std::string& n, const Mat4& v)
   {
+    KAREN_PROFILE_FUNCTION();
     if(m_uniforms.find(n) != m_uniforms.end())
     {
       glCall(glUniformMatrix4fv(m_uniforms.at(n).location, 1, 0, glm::value_ptr(v)))
@@ -171,6 +190,7 @@ namespace Karen
   
   void OpenGlShader::setUniform(const std::string& n, const Vec4& v)
   {
+    KAREN_PROFILE_FUNCTION();
     if(m_uniforms.find(n) != m_uniforms.end())
     {
       glCall(glUniform4fv(m_uniforms.at(n).location, 1, glm::value_ptr(v)))
@@ -180,6 +200,7 @@ namespace Karen
 
   void OpenGlShader::setUniform(const std::string& n, int v)
   {
+    KAREN_PROFILE_FUNCTION();
     if(m_uniforms.find(n) != m_uniforms.end())
     {
       glCall(glUniform1i(m_uniforms.at(n).location, v));
@@ -188,6 +209,7 @@ namespace Karen
 
   void OpenGlShader::setUniform(const std::string& n, const Vec2& v)
   {
+    KAREN_PROFILE_FUNCTION();
     if(m_uniforms.find(n) != m_uniforms.end())
     {
       glCall(glUniform2fv(m_uniforms.at(n).location, 1, glm::value_ptr(v)));
@@ -196,6 +218,7 @@ namespace Karen
 
   void split(const std::string& str, std::vector<std::string>& cont, char sep) 
   {
+    KAREN_PROFILE_FUNCTION();
     std::stringstream ss(str);
     std::string token;
     while(ss >> token)

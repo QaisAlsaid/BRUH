@@ -8,15 +8,14 @@
 
 namespace Karen
 {
-  //TODO: MAKE the renderer static , After you solve the renderer storge
   class KAREN_API Renderer
   {
   public:
-    void init();
-    void onWindowResize(uint32_t left, uint32_t bottom, uint32_t right, uint32_t top);
-    void beginScene(const OrthographicCamera& p_camera);
-    void submit(const ARef<VertexArray>& p_varray, const ARef<Shader>& p_shader, const Mat4& p_transform = Mat4(1.0f));
-    void endScene();
+    static void init();
+    static void onWindowResize(uint32_t left, uint32_t bottom, uint32_t right, uint32_t top);
+    static void beginScene(const OrthographicCamera& p_camera);
+    static void submit(const ARef<VertexArray>& p_varray, const ARef<Shader>& p_shader, const Mat4& p_transform = Mat4(1.0f));
+    static void endScene();
     inline static RendererAPI::API getAPI()
     {
       return RendererAPI::getAPI();
@@ -32,6 +31,6 @@ namespace Karen
     {
       Mat4 proj_view;
     };
-    sceneData m_scene_data;
+    static sceneData* s_scene_data;
   };
 }
