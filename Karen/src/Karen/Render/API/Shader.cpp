@@ -1,3 +1,4 @@
+#include "Karen/Core/Assertion.h"
 #include "pch.h"
 #include "Karen/Render/API/Shader.h"
 #include "Karen/Render/API/RendererAPI.h"
@@ -68,7 +69,8 @@ namespace Karen
         case ShaderDataType::Sampler2D:
           return "Sampler2D";
     }
-    return std::string("Unknown, code: ") + std::to_string((uint32_t)type);
+    KAREN_CORE_ASSERT_MSG("Unknown, code: {0}", (uint32_t)type);
+    return "";
   }
 
   uint32_t getTypeSize(ShaderDataType type)
@@ -108,41 +110,33 @@ namespace Karen
     return 0;
   }
 
-  uint32_t hashType(const std::string & tn)
+  ShaderDataType getTypeFromString(const std::string&  p_tn)
   {
-    uint32_t t_id = 0;
-    for(auto ch : tn)
+    if(p_tn == "int")
+      return ShaderDataType::Int;
+    else if(p_tn == "float")
+      return ShaderDataType::Float;
+    else if(p_tn == "vec2")
+      return ShaderDataType::Float2;
+    else if(p_tn == "vec3")
+      return ShaderDataType::Float3;
+    else if(p_tn == "vec4")
+      return ShaderDataType::Float4;
+    else if(p_tn == "mat2")
+      return ShaderDataType::Mat2;
+    else if(p_tn == "mat3")
+      return ShaderDataType::Mat3;
+    else if(p_tn == "mat4")
+      return ShaderDataType::Mat4;
+    else if(p_tn == "sampler2D")
+      return ShaderDataType::Sampler2D;
+    else if(p_tn == "bool")
+      return ShaderDataType::Bool;
+    else
     {
-      t_id += ch;
+      KAREN_CORE_ASSERT_MSG(false, "Unknown ShaderDataType {0}", p_tn);
+      return ShaderDataType::None;
     }
-    return t_id;
-  }
-
-  ShaderDataType getTypeFromHash(uint32_t h)
-  {
-    switch(h)
-    {
-      case ('i' + 'n' + 't'):
-        return ShaderDataType::Int;
-      case ('f' + 'l' + 'o' + 't'):
-        return ShaderDataType::Float;
-      case ('v' + 'e' + 'c' + '2'):
-        return ShaderDataType::Float2;
-      case ('v' + 'e' + 'c' + '3'):
-        return ShaderDataType::Float3;
-      case ('v' + 'e' + 'c' + '4'):
-        return ShaderDataType::Float4;
-      case ('m' + 'a' + 't' + '2'):
-        return ShaderDataType::Mat2;
-      case ('m' + 'a' + 't' + '3'):
-        return ShaderDataType::Mat3;
-      case ('m' + 'a' + 't' + '4'):
-        return ShaderDataType::Mat4;
-      case ('s' + 'a' + 'm' + 'p' + 'l' + 'e' + 'r' + '2' + 'D'):
-        return ShaderDataType::Sampler2D;
-    }
-    KAREN_CORE_ASSERT_MSG(false, "Unknown ShaderDataType Hash");
-    return ShaderDataType::None;
   }
 
   std::string ShaderTypetoString(ShaderType p_t)

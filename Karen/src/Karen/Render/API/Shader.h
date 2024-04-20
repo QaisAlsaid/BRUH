@@ -31,7 +31,7 @@ namespace Karen
   std::string ShaderDataTypeToString(ShaderDataType type);
   uint32_t getTypeSize(ShaderDataType type); 
   uint32_t hashType(const std::string& type_name);
-  ShaderDataType getTypeFromHash(uint32_t hash);
+  ShaderDataType getTypeFromString(const std::string& type_name);
   std::string ShaderTypetoString(ShaderType type);
 
 

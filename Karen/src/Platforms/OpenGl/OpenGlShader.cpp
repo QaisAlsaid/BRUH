@@ -1,4 +1,3 @@
-#include "Karen/Render/API/Shader.h"
 #include "pch.h"
 #include "Karen/Core/Log.h"
 #include "Platforms/OpenGl/OpenGlShader.h"
@@ -147,7 +146,7 @@ namespace Karen
 
     for(auto const& [key, val] : m_uniforms)
     {
-      std::cout<<"name: "<<key<< " location: "<<val.location<<" type: "<<(int)val.type<<"\n";
+      KAREN_CORE_TRACE("Uniform: Name: {0} Location: {1} Type: {2}", key, val.location, ShaderDataTypeToString(val.type));
     }
   }
 
@@ -171,7 +170,7 @@ namespace Karen
           name = t.at(i + 2);
           type_location = 1;
         }
-        data.type = getTypeFromHash(hashType(t.at(i + type_location)));
+        data.type = getTypeFromString(t.at(i + type_location));
         glCall(auto loc = glGetUniformLocation(m_program_id, name.c_str()));
         data.location = loc;
         m_uniforms[name] = data;
