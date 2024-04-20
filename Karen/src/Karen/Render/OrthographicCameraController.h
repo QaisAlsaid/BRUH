@@ -1,12 +1,9 @@
 #ifndef ORTHOGERAPHIC_CAMERA_CONTROLLER_H
 #define ORTHOGERAPHIC_CAMERA_CONTROLLER_H
 
-#include "Karen/Core/Events/AppEvents.h"
-#include "Karen/Core/Events/Event.h"
-#include "Karen/Core/Events/MouseEvents.h"
+#include "Karen/Core/Events/Events.h"
 #include "Karen/Core/Timestep.h"
 #include "Karen/Render/OrthographicCamera.h"
-#include "Karen/Core/ButtonsAndKeyCodes.h"
 #include <unordered_map>
 
 
@@ -16,19 +13,11 @@ namespace Karen
   class OrthographicCameraController
   {
   public:
+    OrthographicCameraController(const Vec3& center, const Vec2& size);
     OrthographicCameraController(float apect_ratio, const Vec4& initial = Vec4(-1.0f, 1.0f, -1.0f, 1.0f));
     OrthographicCameraController(float left, float right, float bottom, float top);
 
     
-    inline void setZoom(float zoom)
-    {
-      if(zoom > m_camera.getMaxZoom())
-        zoom = m_camera.getMaxZoom();
-      else if(zoom < m_camera.getMinZoom())
-        zoom = m_camera.getMinZoom();
-      else 
-        m_zoom = zoom;
-    }
     inline void setRotation(float angle)
     {
       m_camera.setRotation(angle);

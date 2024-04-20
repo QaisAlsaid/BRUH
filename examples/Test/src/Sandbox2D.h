@@ -20,4 +20,5 @@ public:
   bool onResize(Karen::WindowResizeEvent& e);
   Karen::ARef<Karen::Texture2D> m_tux;
   Karen::OrthographicCameraController m_ortho;
+  Karen::Vec2 m_quad_pos = {0.0f, 0.0f};
 };

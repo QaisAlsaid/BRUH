@@ -1,8 +1,6 @@
-#include "glm/ext/matrix_transform.hpp"
-#include "glm/matrix.hpp"
 #include "pch.h"
 #include "Karen/Render/OrthographicCamera.h"
-
+#include <glm/ext/matrix_transform.hpp>
 
 namespace Karen
 {
