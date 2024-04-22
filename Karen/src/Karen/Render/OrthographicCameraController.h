@@ -24,11 +24,7 @@ namespace Karen
     }
     inline void zoom(float dzoom)
     {
-      m_zoom += dzoom;
-      if(m_zoom > m_camera.getMaxZoom())
-        m_zoom = m_camera.getMaxZoom();
-      else if(m_zoom < m_camera.getMinZoom())
-        m_zoom = m_camera.getMinZoom();
+      m_camera.setZoom(m_camera.getZoom() + dzoom);
     }
     inline void setPos(Vec3 pos)
     {
@@ -62,6 +58,10 @@ namespace Karen
     {
       return m_camera;
     }
+    inline void setSpeed(const Vec2& p_speed)
+    {
+      m_speed = p_speed;
+    }
     void onUpdate(Timestep ts);
     void onEvent(Event& e);
     void setInitial(Vec4 p_initial)
@@ -81,7 +81,7 @@ namespace Karen
     bool onWindowResizeEvent(WindowResizeEvent& e); 
   private:
     float m_aspect_ratio = 1280.0f / 720.0f;
-    float m_zoom = 1.0f, m_zoom_speed = 3.0f, m_rotation_speed = 180.0f;
+    float m_zoom_speed = 3.0f, m_rotation_speed = 180.0f;
     Vec2 m_speed = { 5.0f, 5.0f };
     Vec4 m_initial = {-1.0f, 1.0f, -1.0f, 1.0f};
     bool m_can_control = true;

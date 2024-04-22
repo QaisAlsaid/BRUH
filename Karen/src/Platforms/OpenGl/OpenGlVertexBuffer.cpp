@@ -1,17 +1,20 @@
 #include "pch.h"
-#include "Karen/Render/API/BufferLayout.h"
 #include "Platforms/OpenGl/OpenGlVertexBuffer.h"
 #include "Platforms/OpenGl/OpenGlCore.h"
 
 
 namespace Karen
 {
-  OpenGlVertexBuffer::OpenGlVertexBuffer(uint32_t size, const float* data, uint16_t usage)
+  OpenGlVertexBuffer::OpenGlVertexBuffer(uint32_t size, const float* data)
   {
     KAREN_PROFILE_FUNCTION();
     glGenBuffers(1, &m_renderer_id);
     glBindBuffer(GL_ARRAY_BUFFER, m_renderer_id);
-    setData(size, data, usage);
+    if(data != nullptr)
+      glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+    else
+      glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
+
   }
 
   OpenGlVertexBuffer::~OpenGlVertexBuffer()
@@ -33,10 +36,9 @@ namespace Karen
     glBindBuffer(GL_ARRAY_BUFFER, 0);
   }
 
-  void OpenGlVertexBuffer::setData(uint32_t size, const float* data, uint16_t usage)
+  void OpenGlVertexBuffer::setData(uint32_t size, const void* data)
   {
-    //TODO: make the usage work
-    KAREN_PROFILE_FUNCTION();
-    glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, m_renderer_id);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
   }
 }

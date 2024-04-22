@@ -47,7 +47,6 @@ namespace Karen
       rotate(m_rotation_speed * ts);
     if(Input::isKeyPressed(Keyboard::Q))
       rotate(-m_rotation_speed * ts);
-    m_camera.setZoom(m_zoom);
     m_camera.onUpdate(ts);
   }
   void OrthographicCameraController::onEvent(Event& e)
@@ -62,7 +61,7 @@ namespace Karen
   {
     if(m_control_zoom_with_mouse_scroll)
     {
-      zoom(-e.getYoffset());
+      zoom(-e.getYoffset() * 0.25);
     }
     return false;
   }

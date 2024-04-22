@@ -47,7 +47,7 @@ namespace Karen
     virtual void setUniform(const std::string& name, const Vec2& value) = 0;
     virtual void setUniform(const std::string& name, int value) = 0;
     virtual void setUniform(const std::string& name, const Vec4& value) = 0;
-
+    virtual void setUniform(const std::string& name, const int* value, uint32_t count) = 0;
     static ARef<Shader> create();
     static ARef<Shader> create(const std::string& vp, const std::string& fp);
   };

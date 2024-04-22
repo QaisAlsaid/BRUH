@@ -6,13 +6,13 @@
 
 namespace Karen
 {
-   ARef<VertexBuffer> VertexBuffer::create(uint32_t size, const float* data, uint16_t usage)
+   ARef<VertexBuffer> VertexBuffer::create(uint32_t size, const float* data)
   {
     switch(RendererAPI::getAPI())
     {
       case RendererAPI::API::OpenGl:
       {
-        return Karen::createARef<OpenGlVertexBuffer>(size, data, usage);
+        return Karen::createARef<OpenGlVertexBuffer>(size, data);
         break;
       }
       case RendererAPI::API::NONE:

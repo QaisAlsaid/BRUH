@@ -16,6 +16,7 @@ public:
 
   void onEvent(Karen::Event& e) override;
 
+  void onGuiUpdate() override;
  private:
   bool onResize(Karen::WindowResizeEvent& e);
   Karen::ARef<Karen::Texture2D> m_tux;

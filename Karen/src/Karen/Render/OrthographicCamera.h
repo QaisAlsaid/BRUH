@@ -46,8 +46,8 @@ namespace Karen
 
     inline void setZoom(float p_zoom)
     {
-      if(p_zoom > m_min_zoom) m_zoom = m_min_zoom;
-      else if(p_zoom < m_min_zoom) m_zoom = m_min_zoom;
+      if(p_zoom < m_min_zoom) m_zoom = m_min_zoom;
+      else if(p_zoom > m_max_zoom) m_zoom = m_max_zoom;
       else m_zoom = p_zoom;
     }
 

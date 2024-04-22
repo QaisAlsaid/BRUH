@@ -16,11 +16,12 @@ namespace Karen
     glCall(glViewport(left, bottom, right, top));
   }
 
-  void OpenGLRendererAPI::drawIndexed(const ARef<VertexArray>& p_varr)
+  void OpenGLRendererAPI::drawIndexed(const ARef<VertexArray>& p_varr, uint32_t p_index_count)
   { 
     KAREN_PROFILE_FUNCTION();
+    const uint32_t count = p_index_count == 0 ? p_varr->getIndexBuffer()->getCount() : p_index_count;
     p_varr->bind();
-    glCall(glDrawElements(GL_TRIANGLES, p_varr->getIndexBuffer()->getCount(), GL_UNSIGNED_INT, nullptr));
+    glCall(glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr));
   }
 
   void OpenGLRendererAPI::clear(const Vec4& col)

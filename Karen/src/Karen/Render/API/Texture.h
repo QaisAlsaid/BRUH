@@ -16,6 +16,7 @@ namespace Karen
 
     virtual void setData(size_t data_size, const void* data) = 0;
     virtual void bind(uint8_t slot = 0) const = 0;
+    virtual bool operator==(const Texture& rhs) const = 0;
   };
 
 
@@ -25,7 +26,9 @@ namespace Karen
     static ARef<Texture2D> create(const std::string& file_path, bool flip_v = true);
     static ARef<Texture2D> create(uint32_t height = 1, uint32_t width = 1, size_t data_size = 0, const void* data = nullptr);
   };
-}
+
+  bool isEqual(const ARef<Texture>& lhs, const ARef<Texture>& rhs);
+ }
 
 
 #endif //TEXTURE_H

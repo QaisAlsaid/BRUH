@@ -215,6 +215,18 @@ namespace Karen
     }
   }
 
+  void OpenGlShader::setUniform(const std::string& n, const int* v, uint32_t c)
+  {
+    std::stringstream vv;
+    for(int i = 0; i < c; ++i)
+      vv << std::to_string(i) << ", ";
+    KAREN_CORE_INFO("name: {0} values: {1}, count: {2}", n, vv.str(), c);
+    if(m_uniforms.find(n) != m_uniforms.end())
+    {
+      glCall(glUniform1iv(m_uniforms.at(n).location, c, v));
+    }
+  }
+
   void split(const std::string& str, std::vector<std::string>& cont, char sep) 
   {
     KAREN_PROFILE_FUNCTION();

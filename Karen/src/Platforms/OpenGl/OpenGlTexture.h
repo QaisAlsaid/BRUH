@@ -25,6 +25,10 @@ namespace Karen
     {
       return m_height;
     }
+    bool operator==(const Texture& rhs) const override
+    {
+      return this->m_renderer_id == ((OpenGlTexture2D&)rhs).m_renderer_id;
+    }
   private:
     uint32_t m_width  = 0;
     uint32_t m_height = 0;

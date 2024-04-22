@@ -66,7 +66,6 @@ namespace Karen
       KAREN_CORE_INFO("Shader number: {0} Name: {1} VertPath: {2} FragPath: {3}", index, name, vert_path, frag_path);
       if(is_path)
       {
-
         ARef<Shader> sh = Shader::create(vert_path, frag_path);
         m_shaders[name] = sh; 
       }
@@ -86,35 +85,25 @@ namespace Karen
 
   void ShaderManager::Add(const std::string& p_name, const ARef<Shader>& p_shader)
   {
-   if(m_shaders.find(p_name) != m_shaders.end())
-   {
-     auto new_name = p_name + "_" + p_name;
-     KAREN_CORE_WARN("Shader with name: {0} already exist Shader will be added as {1}", p_name, new_name);
-     Add(new_name, p_shader);
-   }
-   else
-     m_shaders[p_name] = p_shader;
+    KAREN_CORE_ASSERT_MSG(m_shaders.find(p_name) != m_shaders.end(), std::string("Shader with Name: {0} already exist it won't be added"));
+    m_shaders[p_name] = p_shader;
   }
 
   void ShaderManager::Add(const std::string& p_vert_path, const std::string& p_frag_path, const std::string& p_name) 
   {
     std::string new_name = p_name;
     if(p_vert_path == "" || p_frag_path == "")
-      KAREN_CORE_ERROR("No Path specified Shader Won't be Added");
-    if(p_name == "")
+    {
+      KAREN_CORE_ASSERT_MSG(false,"No Path specified Shader Won't be Added");
+    }
+    else if(p_name == "")
     {
       new_name = getNameFromPath(p_vert_path);
       KAREN_CORE_WARN("No Name specified for Shader VertPath: {0} FragPath: {1} it will be assigned the name: {2}", p_vert_path, p_frag_path, new_name); 
     }
     ARef<Shader> shader = Shader::create(p_vert_path, p_frag_path);
-    if(m_shaders.find(new_name) != m_shaders.end())
-    {
-      auto new_new_name = new_name + "_" + new_name;
-      KAREN_CORE_WARN("Shader with name: {0} already exist Shader will be added as {1}", p_name, new_name);
-      Add(new_name, shader);
-    }
-    else
-       m_shaders[new_name] = shader;
+    KAREN_CORE_ASSERT_MSG(m_shaders.find(new_name) != m_shaders.end(), std::string("Shader with Name: {0} already exist it wont be added" + new_name))
+    m_shaders[new_name] = shader;
   }
 
   ARef<Shader> ShaderManager::get(const std::string& p_name)
@@ -131,8 +120,6 @@ namespace Karen
   {
     return m_shaders;
   }
-
-
 
   static std::string getNameFromPath(const std::string& path)
   {

@@ -17,11 +17,11 @@ void SandboxLayer::onAttach()
   KAREN_INFO("Layer: {0} Attached", this->getName());
   m_tri_varr = (Karen::VertexArray::create());
   m_tri_varr->bind();
-  m_tri_vbuf = (Karen::VertexBuffer::create(sizeof(float) * 15, m_tri_verts, 5));
+  m_tri_vbuf = (Karen::VertexBuffer::create(sizeof(float) * 15, m_tri_verts));
   m_tri_ibuf = (Karen::IndexBuffer::create(3, m_tri_inds, 5));
    
   m_rect_varr = (Karen::VertexArray::create());
-  m_rect_vbuf = (Karen::VertexBuffer::create(sizeof(float) * 20, m_rect_verts, 5));
+  m_rect_vbuf = (Karen::VertexBuffer::create(sizeof(float) * 20, m_rect_verts));
   m_rect_ibuf = (Karen::IndexBuffer::create(6, m_rect_inds, 5));
 #ifdef KAREN_EMSCRIPTEN
   m_color_sh->loadFromFile("res/shaders/color_vs_gles.glsl", "res/shaders/color_fs_gles.glsl");

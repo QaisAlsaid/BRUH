@@ -77,6 +77,16 @@ namespace Karen
         }
       }
 
+      for(auto it = m_layers.end(); it != m_layers.begin();)
+      {
+        --it;
+        if((*it)->isActive() && (*it)->isVisible())
+        {
+          (*it)->onRender();
+          KAREN_CORE_INFO("called onRender for Layer: {0}, isActive: {1}, isGuiActive: {2}",(*it)->getName(), (*it)->isActive(), (*it)->isVisible());
+        }
+      }
+
       m_gui_layer->begin();
       for(auto it = m_layers.end(); it != m_layers.begin();)
       {
@@ -89,15 +99,7 @@ namespace Karen
       }
       m_gui_layer->end();
 
-      for(auto it = m_layers.end(); it != m_layers.begin();)
-      {
-        --it;
-        if((*it)->isActive() && (*it)->isVisible())
-        {
-          (*it)->onRender();
-          KAREN_CORE_INFO("called onRender for Layer: {0}, isActive: {1}, isGuiActive: {2}",(*it)->getName(), (*it)->isActive(), (*it)->isVisible());
-        }
-      }
+
       m_window->onUpdate();
 #ifndef KAREN_EMSCRIPTEN
     }

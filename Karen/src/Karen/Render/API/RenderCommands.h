@@ -24,9 +24,9 @@ namespace Karen
     {
       s_API->clear(p_clear_color);
     }
-    inline static void drawIndexed(const ARef<VertexArray>& p_varr)
+    inline static void drawIndexed(const ARef<VertexArray>& p_varr, uint32_t index_count = 0)
     {
-      s_API->drawIndexed(p_varr);
+      s_API->drawIndexed(p_varr, index_count);
     }
   private:
     static RendererAPI* s_API;

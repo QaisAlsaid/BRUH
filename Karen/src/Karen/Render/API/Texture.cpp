@@ -32,4 +32,9 @@ namespace Karen
     return nullptr;
 
   }
+
+  bool isEqual(const ARef<Texture>& lhs, const ARef<Texture>& rhs)
+  {
+    return *lhs.get() == *rhs.get();
+  }
 }
