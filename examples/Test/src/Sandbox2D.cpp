@@ -1,3 +1,4 @@
+#include "Karen/Render/API/RendererCapabilities.h"
 #include "pch.h"
 #include <Karen/Karen.h>
 #include "Sandbox2D.h"
@@ -17,8 +18,30 @@ void Sandbox2DLayer::onAttach()
   KAREN_INFO("Layer: {0} Attached", name);
   m_quad_pos = Karen::Vec2(50.0f);
   m_ortho.setSpeed({100.0f, 100.0f});
-  m_ortho.getCamera().setZoomLimits(0.01, 20.0f);
+  m_ortho.getCamera().setZoomLimits(0.01, 50.0f);
   KAREN_CORE_SET_LOGLEVEL(Karen::Log::LogLevel::Error);
+  auto caps = Karen::RendererCapabilities::create();
+  auto ts = caps->getMaxTextureSize();
+  auto tu = caps->getMaxTextureUints();
+  auto tc = caps->getMaxTextureCoords();
+  auto vf = caps->getMaxVaryingFloats();
+  auto va = caps->getMaxVertexAttribs();
+  auto vu = caps->getMaxVertexUniforms();
+  auto ei = caps->getMaxElementIndices();
+  auto ev = caps->getMaxElementVertices();
+  auto ca = caps->getMaxColorAttachments();
+  auto fu = caps->getMaxFragmentUniforms();
+  auto rbs = caps->getMaxRenderBufferSize();
+  auto ubs = caps->getMaxUniformBlockSize();
+  auto tbs = caps->getMaxTextureBufferSize();
+  auto tiu = caps->getMaxTextureImageUnits();
+  auto vc = caps->getMaxVaryingComponents();
+  auto cts = caps->getMaxColorTextureSamples();
+  auto dts = caps->getMaxDepthTextureSamples();
+  auto vub = caps->getMaxVertexUniformBlocks();
+  auto vac = caps->getMaxVertexOutputComponents();
+  auto fic = caps->getMaxFragmentInputComponents();
+  KAREN_INFO("Tux size {0}, Tux Uints {1}, Tux coord {2}, Var floats {3}, Vert atrribs {4}, Vert unis {5}, Element inds {6}, Element verts {7}, Color attachs {8}, Frag unis {9}, Render buf size {10}, Uniform block size {11}, Tux buff size {12}, Tux Image Units {13}, Var comps {14}, color Tux samples {15}, Depth Tux samples {16}, Vert Uniform blocks {17}, Vert out {18}, Frag in {19}", ts, tu, tc, vf, va, vu, ei, ev, ca, fu, rbs, ubs, tbs, tiu, vc, cts, dts, vub, vac, fic);
 }
 
 int i=100;
@@ -41,9 +64,9 @@ void Sandbox2DLayer::onUpdate(Karen::Timestep ts)
   if(Karen::Input::isKeyPressed(Karen::Keyboard::Left))
     m_quad_pos.x -= 50.0f * ts;
   if(Karen::Input::isKeyPressed(Karen::Keyboard::I))
-    m_ortho.zoom(0.5f * ts);
+    m_ortho.zoom(2.0f * ts);
   if(Karen::Input::isKeyPressed(Karen::Keyboard::K))
-    m_ortho.zoom(-0.5f * ts);
+    m_ortho.zoom(-2.0f * ts);
   if(Karen::Input::isKeyPressed(Karen::Keyboard::V))
     this->visible = this->visible == true ? false : true;
 }
@@ -58,8 +81,8 @@ void Sandbox2DLayer::onRender()
   //Karen::Renderer2D::drawQuad(Karen::Vec3(m_quad_pos, 0.0f), {25.0f, 25.0f}, 0.0f, m_tux);
   //Karen::Renderer2D::drawQuad(Karen::Vec3(75.0f, 0.0f, 0.0f), {25.0f, 25.0f}, 45.0f, Karen::Vec4(0.3f, 0.6f, 0.5f, 1.0f));
   //Karen::Renderer2D::drawQuad(Karen::Vec2(70.0f, 50.0f), {25.0f, 25.0f}, 0.0f, m_tux);
-  for(int i = 0; i < 20; ++i)
-    for(int j = 0; j < 20; ++j)
+  for(int i = 0; i < 100; ++i)
+    for(int j = 0; j < 100; ++j)
     {
       Karen::Renderer2D::drawQuad(Karen::Vec2(11.0f * i, 11.0f * j), {10.0f, 10.0f}, Karen::Vec4(0.3f, 1.0f/float(i * j) / t_s, 1.0f * (float)j/2.0f * (float)i * t_s, 1.0f));
     }
