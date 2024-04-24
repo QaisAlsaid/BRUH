@@ -1,4 +1,3 @@
-#include "Karen/Render/API/RendererCapabilities.h"
 #include "pch.h"
 #include <Karen/Karen.h>
 #include "Sandbox2D.h"
@@ -19,6 +18,11 @@ void Sandbox2DLayer::onAttach()
   m_quad_pos = Karen::Vec2(50.0f);
   m_ortho.setSpeed({100.0f, 100.0f});
   m_ortho.getCamera().setZoomLimits(0.01, 50.0f);
+  Karen::FrameBuffer::Specs s;
+  s.width = 1280;
+  s.height = 720;
+  s.is_swap_chain_target = true;
+  m_frame_buff = Karen::FrameBuffer::create(s);
   KAREN_CORE_SET_LOGLEVEL(Karen::Log::LogLevel::Error);
   auto caps = Karen::RendererCapabilities::create();
   auto ts = caps->getMaxTextureSize();
@@ -75,6 +79,7 @@ void Sandbox2DLayer::onRender()
 {
   KAREN_PROFILE_FUNCTION();
   KAREN_PROFILE_SCOPE("Render");
+  m_frame_buff->bind();
   Karen::Renderer2D::resetStats();
   Karen::Renderer2D::clear(Karen::Vec4(0.24f, 0.24f, 0.24f, 1.0f));
   Karen::Renderer2D::beginScene(m_ortho.getCamera());
@@ -88,6 +93,7 @@ void Sandbox2DLayer::onRender()
     }
 
   Karen::Renderer2D::endScene();
+  m_frame_buff->unbind();
 }
 
 void Sandbox2DLayer::onGuiUpdate()
@@ -99,6 +105,7 @@ void Sandbox2DLayer::onGuiUpdate()
   ImGui::Text("Renderer2D::Stats: Quad Count: %d", stats.quad_count);
   ImGui::Text("Renderer2D::Stats: Index Count: %d", stats.getIndexCount());
   ImGui::Text("Renderer2D::Stats: Vertex Count: %d", stats.getVertexCount());
+  ImGui::Image((void*)m_frame_buff->getColorAttachmentId(), ImVec2(1280, 720));
   ImGui::End();
 }
 
