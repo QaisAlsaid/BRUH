@@ -18,5 +18,5 @@
 
 #include "Karen/Core/Log.h"
 #include "Karen/Core/Instrumentor.h"
-
+#include "Karen/Core/Core.h"
 #endif //PCH_H

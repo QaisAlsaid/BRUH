@@ -29,7 +29,7 @@ endif()
 set(KAREN_SRC src/Karen/Core/App.cpp src/Karen/Core/Log.cpp
     src/Platforms/Linux/LinuxWindow.cpp src/Karen/Core/Layers/Layer.cpp
     src/Karen/Core/Layers/LayerStack.cpp src/Karen/Core/Layers/GuiLayer.cpp
-    src/Platforms/Linux/LinuxInput.cpp src/Karen/Core/Input.cpp
+    src/Platforms/Linux/LinuxInput.cpp
     src/Platforms/OpenGl/OpenGlContext.cpp src/Platforms/OpenGl/OpenGlVertexBuffer.cpp
     src/Platforms/OpenGl/OpenGlIndexBuffer.cpp src/Karen/Render/API/VertexBuffer.cpp
     src/Karen/Render/API/IndexBuffer.cpp

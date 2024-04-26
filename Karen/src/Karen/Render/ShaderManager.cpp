@@ -31,53 +31,32 @@ namespace Karen
     {
       ++index;
       bool is_path = true;
-      auto path = shader.child("Path");
+      std::string path = shader.child_value("Path");
       std::string name = shader.child("Name").child_value();
-      std::string vert_path = path.child_value("VertPath");
-      std::string frag_path = path.child_value("FragPath");
 
-      if(!path )
+      if(path == "")
       {
         is_path = false;
         KAREN_CORE_ERROR("No Path for Shader number: {0} name: {1} it Won't be loaded", index, name);
-      }
-      else
-      {
-        if(vert_path == "")
-        {
-          KAREN_CORE_ERROR("No VertPath specified for Shader number: {0} name: {1}", index, name);
-          is_path = false;
-        }
-        if(frag_path == "")
-        {
-          KAREN_CORE_ERROR("No FragPath specified for Shader number: {0} name: {1}", index, name);
-          is_path = false;
-        }
       }
       if(name == "" || (!shader.child("Name")))
       {
         if(is_path)
         {
-          std::string path_name = getNameFromPath(vert_path);
-          KAREN_CORE_WARN("No name specified for Shader number: {0} VertPath : {1}, fragPath: {2} , will be assigned the name : {1}", index, vert_path, frag_path);
+          std::string path_name = getNameFromPath(path);
+          KAREN_CORE_WARN("No name specified for Shader Number: {0} Path: {1} , will be assigned the name : {2}", index, path, path_name);
           name = path_name;
         }
       }
-      KAREN_CORE_INFO("Shader number: {0} Name: {1} VertPath: {2} FragPath: {3}", index, name, vert_path, frag_path);
+      KAREN_CORE_INFO("Shader number: {0} Name: {1} Path: {2}", index, name, path);
       if(is_path)
       {
-        ARef<Shader> sh = Shader::create(vert_path, frag_path);
+        ARef<Shader> sh = Shader::create(path);
         m_shaders[name] = sh; 
       }
       else
       {
-        ARef<Shader> sh = Shader::create();
-        if(name == "")
-        {
-          name = "Shader" + std::to_string(index);
-        }
-        KAREN_CORE_WARN("No path specified for Shader number: {0} it will be assigned the name: {1}", index, name);
-        m_shaders[name] = sh;
+        KAREN_CORE_WARN("No path specified for Shader number: {0} it won't be added", index);
       }
       KAREN_CORE_INFO("NAME : {0}", name);
     }
@@ -89,19 +68,19 @@ namespace Karen
     m_shaders[p_name] = p_shader;
   }
 
-  void ShaderManager::Add(const std::string& p_vert_path, const std::string& p_frag_path, const std::string& p_name) 
+  void ShaderManager::Add(const std::string& p_path, const std::string& p_name) 
   {
     std::string new_name = p_name;
-    if(p_vert_path == "" || p_frag_path == "")
+    if(p_path == "")
     {
       KAREN_CORE_ASSERT_MSG(false,"No Path specified Shader Won't be Added");
     }
     else if(p_name == "")
     {
-      new_name = getNameFromPath(p_vert_path);
-      KAREN_CORE_WARN("No Name specified for Shader VertPath: {0} FragPath: {1} it will be assigned the name: {2}", p_vert_path, p_frag_path, new_name); 
+      new_name = getNameFromPath(p_path);
+      KAREN_CORE_WARN("No Name specified for Shader Path: {0} it will be assigned the name: {1}", p_path, new_name); 
     }
-    ARef<Shader> shader = Shader::create(p_vert_path, p_frag_path);
+    ARef<Shader> shader = Shader::create(p_path);
     KAREN_CORE_ASSERT_MSG(m_shaders.find(new_name) != m_shaders.end(), std::string("Shader with Name: {0} already exist it wont be added" + new_name))
     m_shaders[new_name] = shader;
   }

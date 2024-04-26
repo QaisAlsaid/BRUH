@@ -1,3 +1,4 @@
+#include "Karen/Render/API/RendererCapabilities.h"
 #include "pch.h"
 #include <Karen/Karen.h>
 #include "Sandbox2D.h"
@@ -13,7 +14,6 @@ void Sandbox2DLayer::onAttach()
 {
   activate();
   Karen::Renderer2D::init("../res/shaders/Shaders2D/config.xml");
-  m_tux = Karen::Texture2D::create("../res/textuers/img1.png");
   KAREN_INFO("Layer: {0} Attached", name);
   m_quad_pos = Karen::Vec2(50.0f);
   m_ortho.setSpeed({100.0f, 100.0f});
@@ -23,29 +23,7 @@ void Sandbox2DLayer::onAttach()
   s.height = 720;
   s.is_swap_chain_target = true;
   m_frame_buff = Karen::FrameBuffer::create(s);
-  KAREN_CORE_SET_LOGLEVEL(Karen::Log::LogLevel::Error);
-  auto caps = Karen::RendererCapabilities::create();
-  auto ts = caps->getMaxTextureSize();
-  auto tu = caps->getMaxTextureUints();
-  auto tc = caps->getMaxTextureCoords();
-  auto vf = caps->getMaxVaryingFloats();
-  auto va = caps->getMaxVertexAttribs();
-  auto vu = caps->getMaxVertexUniforms();
-  auto ei = caps->getMaxElementIndices();
-  auto ev = caps->getMaxElementVertices();
-  auto ca = caps->getMaxColorAttachments();
-  auto fu = caps->getMaxFragmentUniforms();
-  auto rbs = caps->getMaxRenderBufferSize();
-  auto ubs = caps->getMaxUniformBlockSize();
-  auto tbs = caps->getMaxTextureBufferSize();
-  auto tiu = caps->getMaxTextureImageUnits();
-  auto vc = caps->getMaxVaryingComponents();
-  auto cts = caps->getMaxColorTextureSamples();
-  auto dts = caps->getMaxDepthTextureSamples();
-  auto vub = caps->getMaxVertexUniformBlocks();
-  auto vac = caps->getMaxVertexOutputComponents();
-  auto fic = caps->getMaxFragmentInputComponents();
-  KAREN_INFO("Tux size {0}, Tux Uints {1}, Tux coord {2}, Var floats {3}, Vert atrribs {4}, Vert unis {5}, Element inds {6}, Element verts {7}, Color attachs {8}, Frag unis {9}, Render buf size {10}, Uniform block size {11}, Tux buff size {12}, Tux Image Units {13}, Var comps {14}, color Tux samples {15}, Depth Tux samples {16}, Vert Uniform blocks {17}, Vert out {18}, Frag in {19}", ts, tu, tc, vf, va, vu, ei, ev, ca, fu, rbs, ubs, tbs, tiu, vc, cts, dts, vub, vac, fic);
+  KAREN_CORE_SET_LOGLEVEL(Karen::Log::LogLevel::Warn);
 }
 
 int i=100;
@@ -79,7 +57,7 @@ void Sandbox2DLayer::onRender()
 {
   KAREN_PROFILE_FUNCTION();
   KAREN_PROFILE_SCOPE("Render");
-  m_frame_buff->bind();
+  //m_frame_buff->bind();
   Karen::Renderer2D::resetStats();
   Karen::Renderer2D::clear(Karen::Vec4(0.24f, 0.24f, 0.24f, 1.0f));
   Karen::Renderer2D::beginScene(m_ortho.getCamera());
@@ -93,7 +71,7 @@ void Sandbox2DLayer::onRender()
     }
 
   Karen::Renderer2D::endScene();
-  m_frame_buff->unbind();
+  //m_frame_buff->unbind();
 }
 
 void Sandbox2DLayer::onGuiUpdate()
@@ -105,7 +83,7 @@ void Sandbox2DLayer::onGuiUpdate()
   ImGui::Text("Renderer2D::Stats: Quad Count: %d", stats.quad_count);
   ImGui::Text("Renderer2D::Stats: Index Count: %d", stats.getIndexCount());
   ImGui::Text("Renderer2D::Stats: Vertex Count: %d", stats.getVertexCount());
-  ImGui::Image((void*)m_frame_buff->getColorAttachmentId(), ImVec2(1280, 720));
+  //ImGui::Image((void*)m_frame_buff->getColorAttachmentId(), ImVec2(1280, 720), ImVec2(0, 1), ImVec2(1, 0));
   ImGui::End();
 }
 

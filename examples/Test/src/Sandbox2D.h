@@ -19,7 +19,7 @@ public:
   void onGuiUpdate() override;
  private:
   bool onResize(Karen::WindowResizeEvent& e);
-  Karen::ARef<Karen::Texture2D> m_tux;
+  //Karen::ARef<Karen::Texture2D> m_tuxes[8];
   Karen::OrthographicCameraController m_ortho;
   Karen::Vec2 m_quad_pos = {0.0f, 0.0f};
   Karen::ARef<Karen::FrameBuffer> m_frame_buff;

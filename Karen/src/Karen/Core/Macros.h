@@ -18,6 +18,20 @@
   #pragma warning Unknown Function Seg Macro KAREN_PROFILE_FUNCTION() will not work you can use KAREN_PROFILE_SCOPE(name) with the Function Seg as the name 
 #endif //defined(__GNUC__) || defined(__ghs__)
 
+#if defined(__linux)
+  #if defined(__ANDROID__) 
+    #define KAREN_PLATFORM_ANDROID
+    #error Android is not supported at the moment
+  #else 
+    #define KAREN_PLATFORM_LINUX
+  #endif//defined(__ANDROID__)
+#elif defined(_Win32)
+  #define KAREN_PLATFORM_WINDOWS
+  #if defined(_WIN64) 
+    #define KAREN_PLATFORM_WINDOWS_64
+  #endif //defined(_WIN64)
+#endif //__LINUX
+
 
 #define BITSHL(x) (1 << x)
 #define BIND_EVENT_FUNCTION(x) std::bind(&x, this, std::placeholders::_1)

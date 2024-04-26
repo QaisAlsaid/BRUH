@@ -1,8 +1,11 @@
 #include "pch.h"
+
+#ifdef KAREN_PLATFORM_LINUX
+
 #include "LinuxWindow.h"
-#include "Platforms/Linux/LinuxInput.h"
 #include "Platforms/OpenGl/OpenGlContext.h"
 #include "Karen/Core/Window.h"
+#include "Karen/Core/Core.h"
 #include <GLFW/glfw3.h>
 
 
@@ -31,7 +34,6 @@ namespace Karen
   void LinuxWindow::init(const WindowSpecs& specs)
   {
     KAREN_PROFILE_FUNCTION();
-    Input::create(new LinuxInput);
     m_data.title  = specs.title;
     m_data.width  = specs.width;
     m_data.height = specs.height;
@@ -146,5 +148,6 @@ namespace Karen
     m_data.vsync = vsync;
   }
 
-
 }
+
+#endif //KAREN_PLATFORM_LINUX

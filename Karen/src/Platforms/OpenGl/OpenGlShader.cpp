@@ -1,10 +1,108 @@
 #include "pch.h"
-#include "Karen/Core/Log.h"
 #include "Platforms/OpenGl/OpenGlShader.h"
-#include "Karen/Core/Utils/FileLoader.h"
 #include "Karen/Core/Core.h"
 #include "Platforms/OpenGl/OpenGlCore.h"
+#include "Karen/Render/API/RendererCapabilities.h"
 
+//TODO: all this code is MVP and you should 
+//replace it ASAP, once you start "ksl"
+enum ToksEnum
+{
+  KAREN_MAX_TEXTUERS,
+  KAREN_CURRENT_SWITCH_CASE,
+  KAREN_VERTEX,
+  KAREN_FRAGMENT,
+  KAREN_SHADER_TYPE,
+  KAREN_SAMPLE_TEMPLATE,
+  KAREN_MAX_TEXTUER_SWITCH,
+  KAREN_NONE_TOK
+};
+//toks that can be replaced with ${}
+static std::unordered_map<std::string, ToksEnum> var_toks;
+//toks that have # before 
+static std::unordered_map<std::string, ToksEnum> hash_toks;
+//toks that used as macro to do stuff
+static std::unordered_map<std::string, ToksEnum> macro_toks;
+//all toks for ease of use
+static std::unordered_map<std::string, ToksEnum> stand_alone_toks;
+
+static void initToks()
+{
+  //TODO : remove stand_alone_toks and make ordere for eval
+  //like: first check for hash_toks if found handel then countinue the loop and if not check for macro_toks and last check for var_toks
+  stand_alone_toks["#KAREN_SHADER_TYPE"]         = ToksEnum::KAREN_SHADER_TYPE;
+  stand_alone_toks["#KAREN_SAMPLE_TEMPLATE"]     = ToksEnum::KAREN_SAMPLE_TEMPLATE;
+  stand_alone_toks["#KAREN_MAX_TEXTUER_SWITCH"]  = ToksEnum::KAREN_MAX_TEXTUER_SWITCH;
+ 
+  var_toks["KAREN_MAX_TEXTUERS"]        = ToksEnum::KAREN_MAX_TEXTUERS;
+  var_toks["KAREN_CURRENT_SWITCH_CASE"] = ToksEnum::KAREN_CURRENT_SWITCH_CASE;
+  var_toks["KAREN_VERTEX"]              = ToksEnum::KAREN_VERTEX;
+  var_toks["KAREN_FRAGMENT"]            = ToksEnum::KAREN_FRAGMENT;
+ 
+  hash_toks["#KAREN_SHADER_TYPE"]        = ToksEnum::KAREN_SHADER_TYPE;
+  hash_toks["#KAREN_SAMPLE_TEMPLATE"]    = ToksEnum::KAREN_SAMPLE_TEMPLATE;
+ 
+  macro_toks["#KAREN_MAX_TEXTUER_SWITCH"]            = ToksEnum::KAREN_MAX_TEXTUER_SWITCH;
+}
+
+//TODO: move to a string class or something
+static std::string replaceVar(std::string target, int var_val)
+{
+  if(target.find('$') == std::string::npos)
+  {
+    KAREN_CORE_ASSERT_MSG(false, "No '$' found in target: " + target);
+    return "";
+  }
+  auto pos = target.find('$');
+  auto end_pos = target.find('}');
+  target.replace(pos, end_pos - pos + 1, std::to_string(var_val));
+  return target;
+}
+
+void writeMaxTextuerSwitch(std::string& line, const std::string& sample_template, int max_tux)
+{
+  KAREN_CORE_ASSERT_MSG(sample_template != "", "#KAREN_MAX_TEXTUER_SWITCH can't be used without given KAREN_SAMPLE_TEMPLATE first");
+  std::stringstream ss;
+  auto pos = line.find("KAREN_MAX_TEXTUER_SWITCH");
+  const auto on = line.substr(pos + 24, line.size() - 2);
+  ss << "switch("<< on <<")\n";
+  ss << "{\n";
+  for(uint8_t i = 0; i < max_tux; ++i)
+  {
+    ss << "case "<< std::to_string(i) <<":\n";
+    auto rst = replaceVar(sample_template, i);
+    ss << rst << '\n';
+    ss << "break;\n";
+  }
+  ss << "}\n";
+  line = ss.str();
+}
+
+static std::pair<std::string, ToksEnum> findStandAloneTok(const std::string& line)
+{
+  for(auto iter = stand_alone_toks.begin(); iter != stand_alone_toks.end(); ++iter)
+  {
+    const auto pos = line.find(iter->first);
+    if(pos != std::string::npos)
+    {
+      return *iter;
+    }
+  }
+  return std::make_pair(std::string(""), ToksEnum::KAREN_NONE_TOK);
+}
+
+static std::pair<std::string, ToksEnum> findVarToks(const std::string& line)
+{
+  for(auto iter = var_toks.begin(); iter != var_toks.end();  ++iter)
+  {
+    const auto pos = line.find(iter->first);
+    if(pos != std::string::npos)
+    {
+      return *iter;
+    }
+  }
+  return std::make_pair(std::string(""), ToksEnum::KAREN_NONE_TOK);
+}
 
 namespace Karen
 {
@@ -18,11 +116,14 @@ namespace Karen
 
   OpenGlShader::OpenGlShader()
   {
+    //FIXME: initToks(); should be called one time on Renderer init;
+    initToks();
   }
 
-  OpenGlShader::OpenGlShader(const std::string& vp, const std::string& fp)
+  OpenGlShader::OpenGlShader(const std::string& p)
   {
-    loadFromFile(vp, fp);
+    initToks();
+    loadFromFile(p);
   }
 
   OpenGlShader::~OpenGlShader()
@@ -43,14 +144,10 @@ namespace Karen
     glCall(glUseProgram(0));
   }
 
-  void OpenGlShader::loadFromFile(const std::string& vp, const std::string& fp)
+  void OpenGlShader::loadFromFile(const std::string& fp)
   {
     std::string vs, fs;
-    {
-      KAREN_PROFILE_SCOPE("FileLoader::LoadFromFile(VERTEX_SHADER, FRAGMENT_SHADER)");
-      vs = FileLoader::LoadFromFile(vp);
-      fs = FileLoader::LoadFromFile(fp);
-    }
+    preprocessShader(fp, vs, fs);
     if(compileShaders(vs, fs))
       if(createProgram())
         cacheUniforms(vs, fs);
@@ -58,7 +155,68 @@ namespace Karen
     else {KAREN_CORE_WARN("Error Compiling Shader No Uniforms Will Be Cached");}
   }
 
-  bool OpenGlShader::compileShaders(std::string& vs, std::string& fs)
+  bool OpenGlShader::preprocessShader(const std::string& fp, std::string& vs, std::string& fs)
+  {
+    ShaderType sh_ty = ShaderType::Vertex;
+    int max_tux = RendererCapabilities::getMaxTextureUints();
+    std::string src, line, sample_template;
+    std::stringstream src_ss[2];
+    std::ifstream fstream(fp);
+    if(!fstream) 
+    {
+      KAREN_CORE_ERROR("Cant open file {0}", fp);
+      return false;
+    }
+    while(std::getline(fstream, line))
+    {
+      auto sa_pair = findStandAloneTok(line);
+      auto var_pair = findVarToks(line);
+      if(sa_pair.first != "")
+      {
+        switch(sa_pair.second)
+        {
+          case ToksEnum::KAREN_SHADER_TYPE:
+            if(line.find("KAREN_VERTEX") != std::string::npos) sh_ty = ShaderType::Vertex;
+            else if(line.find("KAREN_FRAGMENT") != std::string::npos) sh_ty = ShaderType::Fragment;
+            break;
+          case ToksEnum::KAREN_SAMPLE_TEMPLATE:
+            sample_template = line.substr(22);
+            KAREN_CORE_TRACE("sample_template: {0}", sample_template);
+            break;
+          case ToksEnum::KAREN_MAX_TEXTUER_SWITCH:
+            KAREN_TRACE("CALLING replace from MAX tux switch line {0}", line);
+            writeMaxTextuerSwitch(line, sample_template, max_tux);
+            KAREN_TRACE("Line: {0} added after tok", line);
+            src_ss[(int)sh_ty] << line << '\n';
+            break;
+          default:
+            KAREN_CORE_WARN("Tok: {0} have no such use like: {1}, it will be ignored", sa_pair.first, line);
+        }
+      }
+      else if(var_pair.first != "")
+      {
+        switch(var_pair.second)
+        {
+          case ToksEnum::KAREN_MAX_TEXTUERS:
+            line = replaceVar(line, max_tux);
+            src_ss[(int)sh_ty] << line << '\n';
+            break;
+          default:
+            KAREN_WARN("Tok: {0} Don't have a value", var_pair.first);
+            break;
+        }
+      }
+      else
+      {
+        src_ss[(int)sh_ty] << line << '\n';
+      }
+    }
+    vs = src_ss[(int)ShaderType::Vertex].str();
+    fs = src_ss[(int)ShaderType::Fragment].str();
+    KAREN_CORE_TRACE("Vertex : {0},   Fragment : {1}", vs, fs);
+    return true;
+  }
+  bool OpenGlShader::compileShaders(const std::string& vs, const std::string& fs)
   {
     KAREN_PROFILE_FUNCTION();
     bool _status = true;
@@ -128,7 +286,7 @@ namespace Karen
     return _status;
   }
 
-  void OpenGlShader::cacheUniforms(std::string& vs, std::string& fs)
+  void OpenGlShader::cacheUniforms(std::string vs, std::string fs)
   {
     KAREN_PROFILE_FUNCTION();
     std::vector<std::string> vs_toks, fs_toks;
@@ -164,10 +322,20 @@ namespace Karen
         {
           name = t.at(i + 3);
           type_location = 2;
+          if(name.find('[') != std::string::npos)
+          {
+            auto pos = name.find('[');
+            name = name.substr(0, pos);
+          }
         }
         else
         {
           name = t.at(i + 2);
+          if(name.find('[') != std::string::npos)
+          {
+            auto pos = name.find('[');
+            name = name.substr(0, pos);
+          }
           type_location = 1;
         }
         data.type = getTypeFromString(t.at(i + type_location));

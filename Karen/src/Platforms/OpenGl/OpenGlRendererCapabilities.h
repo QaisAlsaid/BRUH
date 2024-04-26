@@ -11,26 +11,26 @@ namespace Karen
   class OpenGlRendererCapabilities : public RendererCapabilities
   {
   public:
-    int getMaxTextureSize()             override;
-    int getMaxTextureUints()            override;
-    int getMaxVertexAttribs()           override;
-    int getMaxTextureCoords()           override;
-    int getMaxVertexUniforms()          override;
-    int getMaxFragmentUniforms()        override;
-    int getMaxVaryingFloats()           override;
-    int getMaxElementIndices()          override;
-    int getMaxColorAttachments()        override;
-    int getMaxElementVertices()         override;
-    int getMaxRenderBufferSize()        override;
-    int getMaxUniformBlockSize()        override;
-    int getMaxVaryingComponents()       override;
-    int getMaxTextureBufferSize()       override;
-    int getMaxTextureImageUnits()       override;
-    int getMaxColorTextureSamples()     override;
-    int getMaxDepthTextureSamples()     override;
-    int getMaxVertexUniformBlocks()     override;
-    int getMaxVertexOutputComponents()  override;
-    int getMaxFragmentInputComponents() override;
+    static int getMaxTextureSize();
+    static int getMaxTextureUints();
+    static int getMaxVertexAttribs();
+    static int getMaxTextureCoords();
+    static int getMaxVertexUniforms();
+    static int getMaxFragmentUniforms();
+    static int getMaxVaryingFloats();
+    static int getMaxElementIndices();
+    static int getMaxColorAttachments();
+    static int getMaxElementVertices();
+    static int getMaxRenderBufferSize();
+    static int getMaxUniformBlockSize();
+    static int getMaxVaryingComponents();
+    static int getMaxTextureBufferSize();
+    static int getMaxTextureImageUnits();
+    static int getMaxColorTextureSamples();
+    static int getMaxDepthTextureSamples();
+    static int getMaxVertexUniformBlocks();
+    static int getMaxVertexOutputComponents();
+    static int getMaxFragmentInputComponents();
   };
 }
 

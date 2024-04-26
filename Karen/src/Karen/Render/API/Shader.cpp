@@ -7,7 +7,7 @@
 
 namespace Karen
 {
-  ARef<Shader> Shader::create(const std::string& vp, const std::string& fp)
+  ARef<Shader> Shader::create(const std::string& p)
   {
     switch(RendererAPI::getAPI())
     {
@@ -15,7 +15,7 @@ namespace Karen
         KAREN_CORE_ASSERT_MSG(false, "Renderer API: 'NONE' Not suported at the moment");
         return nullptr;
       case RendererAPI::API::OpenGl:
-        return Karen::createARef<OpenGlShader>(vp, fp);
+        return Karen::createARef<OpenGlShader>(p);
     }
     KAREN_CORE_ASSERT_MSG(false, "Unknown Renderer API");
     return nullptr;

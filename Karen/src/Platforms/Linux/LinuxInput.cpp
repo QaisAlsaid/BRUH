@@ -1,18 +1,18 @@
 #include "pch.h"
-#include "LinuxInput.h"
 #include "Karen/Core/App.h"
+#include "Karen/Core/Input.h"
 #include <GLFW/glfw3.h>
 
 namespace Karen
 {
-  bool LinuxInput::isKeyPressedImpl(Keyboard key)
+  bool Input::isKeyPressed(Keyboard key)
   {
     auto* window = (GLFWwindow*)App::get()->getWindow().getNativeWindow();
     auto  status = glfwGetKey(window, (int)key);
     return (status == GLFW_PRESS || status == GLFW_REPEAT);
   }
 
-  Vec2 LinuxInput::getMousePosImpl()
+  Vec2 Input::getMousePos()
   {
     auto* window = (GLFWwindow*)App::get()->getWindow().getNativeWindow();
     double x, y;
@@ -20,21 +20,21 @@ namespace Karen
     return Vec2((float)x, (float)y);
   }
 
-  bool LinuxInput::isMouseButtonPressedImpl(Mouse button)
+  bool Input::isMouseButtonPressed(Mouse button)
   {
     auto* window = (GLFWwindow*)App::get()->getWindow().getNativeWindow();
     auto status = glfwGetMouseButton(window, (int)button);
     return (status == GLFW_PRESS);
   }
 
-  bool LinuxInput::isKeyReleasedImpl(Keyboard key)
+  bool Input::isKeyReleased(Keyboard key)
   {
     auto* window = (GLFWwindow*)App::get()->getWindow().getNativeWindow();
     auto status = glfwGetKey(window, (int)key);
     return status == GLFW_RELEASE;
   }
 
-  bool LinuxInput::isMouseButtonReleasedImpl(Mouse button)
+  bool Input::isMouseButtonReleased(Mouse button)
   {
     auto* window = (GLFWwindow*)App::get()->getWindow().getNativeWindow();
     auto status = glfwGetMouseButton(window, (int)button);

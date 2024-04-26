@@ -9,23 +9,24 @@ namespace Karen
   {
   public:
     OpenGlShader();
-    OpenGlShader(const std::string& vp, const std::string& fp);
+    OpenGlShader(const std::string& p);
     ~OpenGlShader();
 
     void bind()   const override;
     void unbind() const override;
     //TODO: make it bool
-    void loadFromFile(const std::string& vp, const std::string& fp) override;
+    void loadFromFile(const std::string& path) override;
     void setUniform(const std::string& name, const Mat4& value) override;
     void setUniform(const std::string& name, int value) override;
     void setUniform(const std::string& name, const Vec4& value) override;
     void setUniform(const std::string& name, const Vec2& value) override;
     void setUniform(const std::string& name, const int* value, uint32_t count) override;
   private:
-    bool compileShaders(std::string& vs, std::string& fs);
+    bool compileShaders(const std::string& vs, const std::string& fs);
     bool createProgram();
-    void cacheUniforms(std::string& vs, std::string& fs);
+    void cacheUniforms(std::string vs, std::string fs);
     void findUniformsAndData(const std::vector<std::string>& tokens);
+    bool preprocessShader(const std::string& file_path, std::string& vs, std::string& fs);
   private:
     std::string vertex_src;
     std::string fragment_src;

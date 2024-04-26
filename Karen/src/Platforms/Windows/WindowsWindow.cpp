@@ -1,9 +1,10 @@
-#ifdef _WIN32
-
 #include "pch.h"
-#include "Platforms/Windows/WindowsWindow.h"
-#include "Platforms/Windows/WindowsInput.h"
+
+#ifdef KAREN_PLATFORM_WINDOWS
+
+#include "WindowsWindow.h"
 #include "Platforms/OpenGl/OpenGlContext.h"
+#include "Karen/Core/Input.h"
 
 #include <GLFW/glfw3.h>
 
@@ -32,8 +33,7 @@ namespace Karen
     
   void WindowsWindow::init(const WindowSpecs& specs)
   {
-    KAREN_PRKAREN_PROFILE_FUNCTION();
-    Input::create(new WindowsInput);
+    KAREN_PROFILE_FUNCTION();
     m_data.title  = specs.title;
     m_data.width  = specs.width;
     m_data.height = specs.height;
@@ -146,4 +146,4 @@ namespace Karen
   }
 }
 
-#endif //_WIN32
+#endif //KAREN_PLATFORM_WINDOWS

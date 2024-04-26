@@ -17,7 +17,6 @@ namespace Karen
   void Renderer2D::init(const std::string& shaders_2d_config_path)
   {
     s_data->shaders.LoadConfig(shaders_2d_config_path);
-    
     uint32_t wh_data = 0xffffffff;
     s_data->wh_tux = Texture2D::create(1, 1, sizeof(wh_data), &wh_data);
 
@@ -101,7 +100,7 @@ namespace Karen
   void Renderer2D::drawQuad(const Vec3& pos, const Vec2& size, float rotation, const Vec4& color)
   {
     //clock wise starting from bottom left 
-    //the position is defined from the middle of the quad
+    //the position is defined from the bottom left of quad
     if(s_data->quad_index_count >= s_data->MAX_INDES)
     {
       flush();
@@ -109,7 +108,7 @@ namespace Karen
     }
 
     Mat4 trans = glm::translate(Mat4(1.0f), pos);
-    trans = glm::rotate(trans, glm::radians(rotation), {0.0f, 0.0f, 1.0f});
+    trans = glm::rotate(trans, rotation, {0.0f, 0.0f, 1.0f});
     trans = glm::scale(trans, {size.x, size.y, 1.0f});
     
     const Vec2 tux_coords[4] = 
@@ -139,7 +138,7 @@ namespace Karen
 
   void Renderer2D::drawQuad(const Vec3& pos, const Vec2& size, float rotation, const ARef<Texture2D>& tux, const Vec4& color)
   {
-    if(s_data->quad_index_count >= s_data->MAX_INDES)
+    if(s_data->quad_index_count >= s_data->MAX_INDES || s_data->texture_slot_index >= s_data->MAX_TEXTURE_SLOTS)
     {
       flush();
       reset();
@@ -164,10 +163,10 @@ namespace Karen
 
 
     Mat4 trans = glm::translate(Mat4(1.0f), pos);
-    trans = glm::rotate(trans, glm::radians(rotation), {0.0f, 0.0f, 1.0f});
+    trans = glm::rotate(trans, rotation, {0.0f, 0.0f, 1.0f});
     trans = glm::scale(trans, {size.x, size.y, 1.0f});
     
-    const Vec2 tux_coords[4] = 
+    const Vec2 tux_coords[4] =
     {
       {0.0f, 0.0f},
       {1.0f, 0.0f},
@@ -195,33 +194,33 @@ namespace Karen
 
   void Renderer2D::drawQuad(const Vec3& pos, const Vec2& size, const Vec4& color)
   {
-    if(s_data->quad_index_count >= s_data->MAX_INDES)
+    if(s_data->quad_index_count >= s_data->MAX_INDES || s_data->texture_slot_index >= s_data->MAX_TEXTURE_SLOTS)
     {
       flush();
       reset();
     }
 
-    s_data->quad_vertex_ptr->position = pos + Vec3(-size.x/2.0f, -size.y/2.0f, 0.0f);
+    s_data->quad_vertex_ptr->position = pos;//Vec3(-size.x/2.0f, -size.y/2.0f, 0.0f);
     s_data->quad_vertex_ptr->color = color;
     s_data->quad_vertex_ptr->tux_coord = {0.0f, 0.0f};
     s_data->quad_vertex_ptr->tux_idx = 0.0f;
     s_data->quad_vertex_ptr++;
 
-    s_data->quad_vertex_ptr->position = pos + Vec3(size.x/2.0f, -size.y/2.0f, 0.0f);
+    s_data->quad_vertex_ptr->position = pos + Vec3(size.x, 0.0f, 0.0f);//Vec3(size.x/2.0f, -size.y/2.0f, 0.0f);
     s_data->quad_vertex_ptr->color = color;
-    s_data->quad_vertex_ptr->tux_coord = {0.0f, 1.0f};
+    s_data->quad_vertex_ptr->tux_coord = {1.0f, 0.0f};
     s_data->quad_vertex_ptr->tux_idx = 0.0f;
     s_data->quad_vertex_ptr++;
 
-    s_data->quad_vertex_ptr->position = pos + Vec3(size.x/2.0f, size.y/2.0f, 0.0f);
+    s_data->quad_vertex_ptr->position = pos + Vec3(size.x, size.y, 0.0f);//Vec3(size.x/2.0f, size.y/2.0f, 0.0f);
     s_data->quad_vertex_ptr->color = color;
     s_data->quad_vertex_ptr->tux_coord = {1.0f, 1.0f};
     s_data->quad_vertex_ptr->tux_idx = 0.0f;
     s_data->quad_vertex_ptr++;
 
-    s_data->quad_vertex_ptr->position = pos + Vec3(-size.x/2.0f, size.y/2.0f, 0.0f);
+    s_data->quad_vertex_ptr->position = pos + Vec3(0.0f, size.y, 0.0f);//Vec3(-size.x/2.0f, size.y/2.0f, 0.0f);
     s_data->quad_vertex_ptr->color = color;
-    s_data->quad_vertex_ptr->tux_coord = {1.0f, 0.0f};
+    s_data->quad_vertex_ptr->tux_coord = {0.0f, 1.0f};
     s_data->quad_vertex_ptr->tux_idx = 0.0f;
     s_data->quad_vertex_ptr++;
 
@@ -237,7 +236,7 @@ namespace Karen
 
   void Renderer2D::drawQuad(const Vec3& pos, const Vec2& size, const ARef<Texture>& tux, const Vec4& color)
   {
-    if(s_data->quad_index_count >= s_data->MAX_INDES)
+    if(s_data->quad_index_count >= s_data->MAX_INDES || s_data->texture_slot_index >= s_data->MAX_TEXTURE_SLOTS)
     {
       flush();
       reset();
@@ -260,27 +259,27 @@ namespace Karen
       s_data->texture_slot_index++;
     }
 
-    s_data->quad_vertex_ptr->position = pos + Vec3(-size.x/2.0f, -size.y/2.0f, 0.0f);
+    s_data->quad_vertex_ptr->position = pos;//+ Vec3(-size.x/2.0f, -size.y/2.0f, 0.0f);
     s_data->quad_vertex_ptr->color = color;
     s_data->quad_vertex_ptr->tux_coord = {0.0f, 0.0f};
     s_data->quad_vertex_ptr->tux_idx = c_tux_slot;
     s_data->quad_vertex_ptr++;
 
-    s_data->quad_vertex_ptr->position = pos + Vec3(size.x/2.0f, -size.y/2.0f, 0.0f);
+    s_data->quad_vertex_ptr->position = pos + Vec3(size.x, 0.0f, 0.0f);//Vec3(size.x/2.0f, -size.y/2.0f, 0.0f);
     s_data->quad_vertex_ptr->color = color;
-    s_data->quad_vertex_ptr->tux_coord = {0.0f, 1.0f};
+    s_data->quad_vertex_ptr->tux_coord = {1.0f, 0.0f};
     s_data->quad_vertex_ptr->tux_idx = c_tux_slot;
     s_data->quad_vertex_ptr++;
 
-    s_data->quad_vertex_ptr->position = pos + Vec3(size.x/2.0f, size.y/2.0f, 0.0f);
+    s_data->quad_vertex_ptr->position = pos + Vec3(size.x, size.y, 0.0f);//Vec3(size.x/2.0f, size.y/2.0f, 0.0f);
     s_data->quad_vertex_ptr->color = color;
     s_data->quad_vertex_ptr->tux_coord = {1.0f, 1.0f};
     s_data->quad_vertex_ptr->tux_idx = c_tux_slot;
     s_data->quad_vertex_ptr++;
 
-    s_data->quad_vertex_ptr->position = pos + Vec3(-size.x/2.0f, size.y/2.0f, 0.0f);
+    s_data->quad_vertex_ptr->position = pos + Vec3(0.0f, size.y, 0.0f);//Vec3(-size.x/2.0f, size.y/2.0f, 0.0f);
     s_data->quad_vertex_ptr->color = color;
-    s_data->quad_vertex_ptr->tux_coord = {1.0f, 0.0f};
+    s_data->quad_vertex_ptr->tux_coord = {0.0f, 1.0f};
     s_data->quad_vertex_ptr->tux_idx = c_tux_slot;
     s_data->quad_vertex_ptr++;
 

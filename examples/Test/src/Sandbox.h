@@ -16,7 +16,7 @@ public:
   void onEvent(Karen::Event& e) override;
 
  private:
-  Karen::ShaderManager m_shaders = Karen::ShaderManager("../res/shaders/config.xml");
+  Karen::ShaderManager m_shaders ; //Karen::ShaderManager("../res/shaders/config.xml");
   Karen::ARef<Karen::Renderer> m_r;
   Karen::ARef<Karen::VertexArray> m_tri_varr;
   Karen::ARef<Karen::VertexBuffer> m_tri_vbuf;
