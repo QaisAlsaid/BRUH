@@ -13,3 +13,6 @@
 [submodule "Karen/vendor/pugixml"]
 	path = Karen/vendor/pugixml
 	url = https://github.com/zeux/pugixml.git
+[submodule "Karen/vendor/entt"]
+	path = Karen/vendor/entt
+	url = https://github.com/skypjack/entt.git
