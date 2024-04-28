@@ -6,3 +6,5 @@ Karen/build/
 Karen/.cache/
 examples/.cache/
 examples/Test/.cache/
+Editor/.cache/
+Editor/build/
