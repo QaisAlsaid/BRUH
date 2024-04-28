@@ -11,9 +11,10 @@ namespace Karen
     OpenGlFrameBuffer(const Specs& specs);
     ~OpenGlFrameBuffer();
 
-    void         reCreate()                   override;
-    void         bind()                 const override;
-    void         unbind()               const override;
+    void reCreate()                                   override;
+    void reSize(uint32_t width, uint32_t height)      override;     
+    void bind()                                 const override;
+    void unbind()                               const override;
     
     uint32_t getColorAttachmentId() const override
     {
@@ -29,9 +30,9 @@ namespace Karen
     }
 
   private:
-    uint32_t m_renderer_id;
-    uint32_t m_color_attachment;
-    uint32_t m_depth_attachment;
+    uint32_t m_renderer_id      = 0;
+    uint32_t m_color_attachment = 0;
+    uint32_t m_depth_attachment = 0;
     Specs    m_specs;
   };
 }

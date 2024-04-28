@@ -64,6 +64,7 @@ namespace Karen
     }
     void onUpdate(Timestep ts);
     void onEvent(Event& e);
+    void onViewportResize(uint32_t width, uint32_t height);
     void setInitial(Vec4 p_initial)
     {
       m_initial = p_initial;

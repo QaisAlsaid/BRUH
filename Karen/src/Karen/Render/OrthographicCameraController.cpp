@@ -49,6 +49,13 @@ namespace Karen
       rotate(-m_rotation_speed * ts);
     m_camera.onUpdate(ts);
   }
+
+  void OrthographicCameraController::onViewportResize(uint32_t width, uint32_t height)
+  {
+    auto e = WindowResizeEvent(width, height);
+    onEvent(e);
+  }
+
   void OrthographicCameraController::onEvent(Event& e)
   {
     EventDispatcher dp(e); 

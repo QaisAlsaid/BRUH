@@ -18,12 +18,13 @@ namespace Karen
     virtual ~FrameBuffer() = default;
     static ARef<FrameBuffer> create(const Specs& specs);
     
-    virtual void         reCreate()                   = 0;
+    virtual void         reCreate()                              = 0;
+    virtual void         reSize(uint32_t width, uint32_t height) = 0;
     virtual void         setSpecs(const Specs& specs) = 0;
-    virtual const Specs& getSpecs()             const = 0;
-    virtual void         bind()                 const = 0;
-    virtual void         unbind()               const = 0;
-    virtual uint32_t     getColorAttachmentId() const = 0;
+    virtual const Specs& getSpecs()                        const = 0;
+    virtual void         bind()                            const = 0;
+    virtual void         unbind()                          const = 0;
+    virtual uint32_t     getColorAttachmentId()            const = 0;
   };
 }
 

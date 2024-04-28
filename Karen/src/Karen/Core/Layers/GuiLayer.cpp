@@ -31,8 +31,6 @@ namespace Karen
   }
   void GuiLayer::onGuiUpdate()
   {
-    static bool showd = true;
-    ImGui::ShowDemoWindow(&showd);
   }
   
   void GuiLayer::begin()

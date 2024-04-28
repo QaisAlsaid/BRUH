@@ -1,0 +1,10 @@
+<ShadersList>
+  <Shader>
+    <Name>color_shader</Name>
+      <Path>../res/shaders/color.glsl</Path>
+  </Shader>
+  <Shader>
+    <Name>tux_shader</Name>
+      <Path>../res/shaders/tux.glsl</Path>
+  </Shader>
+</ShadersList>

@@ -29,6 +29,7 @@ namespace Karen
     m_window = std::unique_ptr<Window>(Window::create());
     m_window->setEventCallbackFunction(BIND_EVENT_FUNCTION(App::onEvent));
     m_gui_layer = new GuiLayer("Base GuiLayer");
+    m_gui_layer->activate();
     pushOverlay(m_gui_layer);
    }
 
@@ -50,7 +51,6 @@ namespace Karen
         if(event.isHandled())
           break;
         (*it)->onEvent(event);
-        KAREN_CORE_INFO("Layer: {0}, isActive: {1} Recived an Event",(*it)->getName(), (*it)->isActive());
       }
     }
   }
@@ -83,7 +83,6 @@ namespace Karen
         if((*it)->isActive() && (*it)->isVisible())
         {
           (*it)->onRender();
-          KAREN_CORE_INFO("called onRender for Layer: {0}, isActive: {1}, isGuiActive: {2}",(*it)->getName(), (*it)->isActive(), (*it)->isVisible());
         }
       }
 

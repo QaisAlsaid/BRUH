@@ -80,7 +80,7 @@ namespace Karen
       ss << "Stride: " << m_stride;
       for(auto& e : m_elements)
       {
-      ss << "name: "<<e.name<<" type: "<<(int)e.type<<" offset: "<< e.offset<<" count: "<<e.count<<" normalized: "<<e.normalized;
+        ss << "name: "<<e.name<<" type: "<<(int)e.type<<" offset: "<< e.offset<<" count: "<<e.count<<" normalized: "<<e.normalized;
       }
       return ss.str();
     }
