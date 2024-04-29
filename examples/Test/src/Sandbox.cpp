@@ -73,10 +73,6 @@ void SandboxLayer::onUpdate(Karen::Timestep ts)
   if(Karen::Input::isKeyPressed(Karen::Keyboard::A))
     m_rect_pos.x -= m_tri_speed * ts;
  
-
-  if(Karen::Input::isKeyPressed(Karen::Keyboard::V))
-    this->visible = this->visible == true ? false : true;
-   
   m_ortho.onUpdate(ts);
   
   Karen::Mat4 tri_trans = glm::translate(Karen::Mat4(1.0f), m_tri_pos);
@@ -101,10 +97,6 @@ void SandboxLayer::onUpdate(Karen::Timestep ts)
   m_r->endScene();
 }
 
-void SandboxLayer::onRender()
-{
-  
-}
   void SandboxLayer::onEvent(Karen::Event& e)
   {
     if(e.getEventType() == Karen::EventType::WindowResized)

@@ -1,8 +1,8 @@
-#include "Karen/Render/API/RendererCapabilities.h"
+#include "Karen/Scene/Components.h"
 #include "pch.h"
 #include <Karen/Karen.h>
 #include "Sandbox2D.h"
-#include "../../../Karen/vendor/imgui/imgui.h"
+#include <imgui.h>
 Sandbox2DLayer::Sandbox2DLayer()
   :Karen::Layer("Sandbox2D"),/* m_ortho(0.0f, 100.0f, 0.0f, 100.0f)//*/m_ortho(Karen::Vec3(50.0f, 50.0f, 0.0f), Karen::Vec2(100.0f, 100.0f))//m_ortho(Karen::OrthographicCameraController(1280.0f/720.0f, Karen::Vec4(0.0f, 100.0f, 0.0f, 100.0f)))
 {
@@ -24,6 +24,12 @@ void Sandbox2DLayer::onAttach()
   s.is_swap_chain_target = true;
   m_frame_buff = Karen::FrameBuffer::create(s);
   KAREN_CORE_SET_LOGLEVEL(Karen::Log::LogLevel::Warn);
+  auto e = m_scene.addEntity("colored quad");
+  e.addComponent<Karen::SpriteComponent>(Karen::Vec4(0.8f, 0.25f, 0.8f, 1.0f));
+  e.getComponent<Karen::TransformComponent>().position = {10.0f, 10.0f, 1.0f};
+  auto ec = m_scene.addEntity("camera");
+  ec.addComponent<Karen::CameraComponent>(glm::ortho(0.0f, 100.0f, 0.0f, 100.0f));
+  ec.getComponent<Karen::CameraComponent>().is_primary = true;
 }
 
 int i=100;
@@ -38,40 +44,27 @@ void Sandbox2DLayer::onUpdate(Karen::Timestep ts)
     m_ortho.onUpdate(ts); 
   }
   if(Karen::Input::isKeyPressed(Karen::Keyboard::Up))
-    m_quad_pos.y += 50.0f * ts;
+    m_quad_pos.y += 5.0f * ts;
   if(Karen::Input::isKeyPressed(Karen::Keyboard::Down))
-    m_quad_pos.y -= 50.0f * ts;
+    m_quad_pos.y -= 5.0f * ts;
   if(Karen::Input::isKeyPressed(Karen::Keyboard::Right))
-    m_quad_pos.x += 50.0f * ts;
+    m_quad_pos.x += 5.0f * ts;
   if(Karen::Input::isKeyPressed(Karen::Keyboard::Left))
-    m_quad_pos.x -= 50.0f * ts;
+    m_quad_pos.x -= 5.0f * ts;
   if(Karen::Input::isKeyPressed(Karen::Keyboard::I))
     m_ortho.zoom(2.0f * ts);
   if(Karen::Input::isKeyPressed(Karen::Keyboard::K))
     m_ortho.zoom(-2.0f * ts);
-  if(Karen::Input::isKeyPressed(Karen::Keyboard::V))
-    this->visible = this->visible == true ? false : true;
-}
-
-void Sandbox2DLayer::onRender()
-{
-  KAREN_PROFILE_FUNCTION();
-  KAREN_PROFILE_SCOPE("Render");
-  //m_frame_buff->bind();
-  Karen::Renderer2D::resetStats();
-  Karen::Renderer2D::clear(Karen::Vec4(0.24f, 0.24f, 0.24f, 1.0f));
-  Karen::Renderer2D::beginScene(m_ortho.getCamera());
-  //Karen::Renderer2D::drawQuad(Karen::Vec3(m_quad_pos, 0.0f), {25.0f, 25.0f}, 0.0f, m_tux);
-  //Karen::Renderer2D::drawQuad(Karen::Vec3(75.0f, 0.0f, 0.0f), {25.0f, 25.0f}, 45.0f, Karen::Vec4(0.3f, 0.6f, 0.5f, 1.0f));
-  //Karen::Renderer2D::drawQuad(Karen::Vec2(70.0f, 50.0f), {25.0f, 25.0f}, 0.0f, m_tux);
-  for(int i = 0; i < 100; ++i)
-    for(int j = 0; j < 100; ++j)
-    {
-      Karen::Renderer2D::drawQuad(Karen::Vec2(11.0f * i, 11.0f * j), {10.0f, 10.0f}, Karen::Vec4(0.3f, 1.0f/float(i * j) / t_s, 1.0f * (float)j/2.0f * (float)i * t_s, 1.0f));
-    }
-
-  Karen::Renderer2D::endScene();
-  //m_frame_buff->unbind();
+  
+  //Render 
+  {
+    KAREN_PROFILE_SCOPE("Render");
+    Karen::Renderer2D::resetStats();
+    Karen::Renderer2D::clear(Karen::Vec4(0.24f, 0.24f, 0.24f, 1.0f));
+    //Karen::Renderer2D::beginScene(m_ortho.getCamera());
+    m_scene.onUpdate(ts);
+    //Karen::Renderer2D::endScene();
+  }
 }
 
 void Sandbox2DLayer::onGuiUpdate()

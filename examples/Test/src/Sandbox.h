@@ -10,8 +10,6 @@ public:
   void onDetach() override;
 
   void onUpdate(Karen::Timestep ts) override;
-
-  void onRender() override;
   
   void onEvent(Karen::Event& e) override;
 

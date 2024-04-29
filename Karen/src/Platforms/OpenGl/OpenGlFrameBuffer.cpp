@@ -1,15 +1,17 @@
 #include "pch.h"
 #include "OpenGlFrameBuffer.h"
 #include "OpenGlCore.h"
+#include "Karen/Render/API/RendererCapabilities.h"
 
-static const uint32_t MAX_FRAMEBUFFER_SIZE = 10024;//temp
 
 namespace Karen
 {
   OpenGlFrameBuffer::OpenGlFrameBuffer(const Specs& specs)
-    : m_specs(specs)
+    : m_specs(specs), MAX_FRAMEBUFFER_SIZE(sqrt(Karen::RendererCapabilities::getMaxTextureBufferSize())), 
+    MIN_FRAMEBUFFER_SIZE(1)
   {
-    reCreate();
+    KAREN_CORE_WARN("{0}, {1}",MIN_FRAMEBUFFER_SIZE, MAX_FRAMEBUFFER_SIZE);
+    reCreate(); 
   }
 
   OpenGlFrameBuffer::~OpenGlFrameBuffer()
@@ -53,14 +55,24 @@ namespace Karen
 
   void OpenGlFrameBuffer::reSize(uint32_t w, uint32_t h)
   {
-    if(w == 0 || h == 0 || w > MAX_FRAMEBUFFER_SIZE || h > MAX_FRAMEBUFFER_SIZE)
+    if(w > MAX_FRAMEBUFFER_SIZE || h > MAX_FRAMEBUFFER_SIZE)
     {
-      KAREN_CORE_ERROR("Attempting to resize FrameBuffer to ({0}, {1}), which is greater than MAX_FRAMEBUFFER_SIZE which is ({2}) falling back to the previous FrameBuffer size which is ({3}, {4})", w, h, MAX_FRAMEBUFFER_SIZE, m_specs.width, m_specs.height);
+      KAREN_CORE_WARN("Attempting to resize FrameBuffer to ({0}, {1}), which is greater than MAX_FRAMEBUFFER_SIZE which is ({2}) falling back to the previous FrameBuffer size which is ({3}, {4})", w, h, MAX_FRAMEBUFFER_SIZE, m_specs.width, m_specs.height);
       return;
     }
-    m_specs.width  = w;
-    m_specs.height = h;
-    reCreate();
+    else if(w == 0 || h == 0)
+    {
+      KAREN_CORE_WARN("Attempting to resize FrameBuffer to ({0}, {1}), which is less than MIN_FRAMEBUFFER_SIZE which is ({2}) clamping the value to MIN_FRAMEBUFFER_SIZE", w, h, MIN_FRAMEBUFFER_SIZE);
+      m_specs.width  = (w == 0 ? MIN_FRAMEBUFFER_SIZE : w);
+      m_specs.height = (h == 0 ? MIN_FRAMEBUFFER_SIZE : h);
+      reCreate();
+    }
+    else [[likely]]
+    {
+      m_specs.width  = w;
+      m_specs.height = h;
+      reCreate();
+    }
   }
 
   void OpenGlFrameBuffer::bind() const

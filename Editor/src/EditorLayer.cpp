@@ -2,40 +2,40 @@
 #include "pch.h"
 #include <Karen/Karen.h>
 #include "EditorLayer.h"
-#include "../../../Karen/vendor/imgui/imgui.h"
+#include <imgui.h>
 
 
 namespace Karen
 {
 
   EditorLayer::EditorLayer()
-    :Karen::Layer(),/* m_ortho(0.0f, 100.0f, 0.0f, 100.0f)//*/m_ortho(Karen::Vec3(50.0f, 50.0f, 0.0f), Karen::Vec2(100.0f, 100.0f))//m_ortho(Karen::OrthographicCameraController(1280.0f/720.0f, Karen::Vec4(0.0f, 100.0f, 0.0f, 100.0f)))
+    :Layer(),/* m_ortho(0.0f, 100.0f, 0.0f, 100.0f)//*/m_ortho(Karen::Vec3(50.0f, 50.0f, 0.0f), Karen::Vec2(100.0f, 100.0f))//m_ortho(Karen::OrthographicCameraController(1280.0f/720.0f, Karen::Vec4(0.0f, 100.0f, 0.0f, 100.0f)))
   {
     KAREN_START_INSTRUMENTOR();
-    Karen::RenderCommands::init();
+    RenderCommands::init();
   }
 
   void EditorLayer::onAttach()
   {
     activate();
-    Karen::Renderer2D::init("../res/shaders/Shaders2D/config.xml");
+    Renderer2D::init("../res/shaders/Shaders2D/config.xml");
     KAREN_INFO("Layer: {0} Attached", name);
-    m_quad_pos = Karen::Vec2(50.0f);
+    m_quad_pos = Vec2(50.0f);
     m_ortho.setSpeed({100.0f, 100.0f});
     m_ortho.getCamera().setZoomLimits(0.01, 50.0f);
-    Karen::FrameBuffer::Specs s;
+    FrameBuffer::Specs s;
     s.width = 1280;
     s.height = 720;
     s.is_swap_chain_target = true;
-    m_frame_buff = Karen::FrameBuffer::create(s);
-    KAREN_CORE_SET_LOGLEVEL(Karen::Log::LogLevel::Warn);
+    m_frame_buff = FrameBuffer::create(s);
+    KAREN_CORE_SET_LOGLEVEL(Log::LogLevel::Warn);
   
     m_ortho.getCamera().setZoom(m_ortho.getCamera().getZoom() + 20.0f);
   }
 
   int i=100;
   float t_s = 0.0f;
-  void EditorLayer::onUpdate(Karen::Timestep ts)
+  void EditorLayer::onUpdate(Timestep ts)
   {
     t_s = ts;
     if(i-- < 0) KAREN_STOP_INSTRUMENTOR();
@@ -44,43 +44,32 @@ namespace Karen
       KAREN_PROFILE_SCOPE("Camera_Update");
       m_ortho.onUpdate(ts); 
     }
-    if(Karen::Input::isKeyPressed(Karen::Keyboard::Up))
+    if(Input::isKeyPressed(Karen::Keyboard::Up))
       m_quad_pos.y += 50.0f * ts;
-    if(Karen::Input::isKeyPressed(Karen::Keyboard::Down))
+    if(Input::isKeyPressed(Karen::Keyboard::Down))
       m_quad_pos.y -= 50.0f * ts;
-    if(Karen::Input::isKeyPressed(Karen::Keyboard::Right))
+    if(Input::isKeyPressed(Karen::Keyboard::Right))
       m_quad_pos.x += 50.0f * ts;
-    if(Karen::Input::isKeyPressed(Karen::Keyboard::Left))
+    if(Input::isKeyPressed(Karen::Keyboard::Left))
       m_quad_pos.x -= 50.0f * ts;
-    if(Karen::Input::isKeyPressed(Karen::Keyboard::I))
+    if(Input::isKeyPressed(Karen::Keyboard::I))
       m_ortho.zoom(2.0f * ts);
-    if(Karen::Input::isKeyPressed(Karen::Keyboard::K))
+    if(Input::isKeyPressed(Karen::Keyboard::K))
       m_ortho.zoom(-2.0f * ts);
-    if(Karen::Input::isKeyPressed(Karen::Keyboard::V))
-      this->visible = this->visible == true ? false : true;
-  }
-
-  void EditorLayer::onRender()
-  {
-    KAREN_PROFILE_FUNCTION();
-    KAREN_PROFILE_SCOPE("Render");
   
-    m_frame_buff->bind();
+    //Render   
+    {
+      
+      KAREN_PROFILE_SCOPE("Render");
   
-    Karen::Renderer2D::resetStats();
-    Karen::Renderer2D::clear(Karen::Vec4(0.24f, 0.24f, 0.24f, 1.0f));
-    Karen::Renderer2D::beginScene(m_ortho.getCamera());
-    //Karen::Renderer2D::drawQuad(Karen::Vec3(m_quad_pos, 0.0f), {25.0f, 25.0f}, 0.0f, m_tux);
-    //Karen::Renderer2D::drawQuad(Karen::Vec3(75.0f, 0.0f, 0.0f), {25.0f, 25.0f}, 45.0f, Karen::Vec4(0.3f, 0.6f, 0.5f, 1.0f));
-    //Karen::Renderer2D::drawQuad(Karen::Vec2(70.0f, 50.0f), {25.0f, 25.0f}, 0.0f, m_tux);
-    for(int i = 0; i < 100; ++i)
-      for(int j = 0; j < 100; ++j)
-      {
-        Karen::Renderer2D::drawQuad(Karen::Vec2(11.0f * i, 11.0f * j), {10.0f, 10.0f}, Karen::Vec4(0.3f, 1.0f/float(i * j) / t_s, 1.0f * (float)j/2.0f * (float)i * t_s, 1.0f));
-      }
-
-    Karen::Renderer2D::endScene();
-    m_frame_buff->unbind();
+      m_frame_buff->bind();
+  
+      Renderer2D::resetStats();
+      Renderer2D::clear(Karen::Vec4(0.24f, 0.24f, 0.24f, 1.0f));
+      Renderer2D::beginScene(m_ortho.getCamera());
+      Renderer2D::endScene();
+      m_frame_buff->unbind();
+    }
   }
 
   void EditorLayer::onGuiUpdate()
@@ -157,7 +146,7 @@ namespace Karen
     // End the parent window that contains the Dockspace:
     ImGui::End();
 
-    const auto stats = Karen::Renderer2D::getStats();
+    const auto stats = Renderer2D::getStats();
 
     ImGui::Begin("Stats");
     ImGui::Text("App::Stats Timestep: %f", t_s);
@@ -182,7 +171,7 @@ namespace Karen
   }
 
 
-  void EditorLayer::onEvent(Karen::Event& e)
+  void EditorLayer::onEvent(Event& e)
   {
     //m_ortho.onEvent(e);
   }

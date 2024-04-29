@@ -77,15 +77,6 @@ namespace Karen
         }
       }
 
-      for(auto it = m_layers.end(); it != m_layers.begin();)
-      {
-        --it;
-        if((*it)->isActive() && (*it)->isVisible())
-        {
-          (*it)->onRender();
-        }
-      }
-
       m_gui_layer->begin();
       for(auto it = m_layers.end(); it != m_layers.begin();)
       {

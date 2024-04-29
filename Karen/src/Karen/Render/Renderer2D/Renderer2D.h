@@ -1,5 +1,5 @@
-#ifndef RENDERER2D_H
-#define RENDERER2D_H
+#ifndef KR_RENDERER2D_H
+#define KR_RENDERER2D_H
 
 
 #include "Karen/Render/API/RenderCommands.h"
@@ -9,7 +9,7 @@
 #include "Karen/Render/API/VertexBuffer.h"
 #include "Karen/Render/OrthographicCamera.h"
 #include "Karen/Render/ShaderManager.h"
-
+#include "Karen/Camera.h"
 
 namespace Karen
 {
@@ -24,6 +24,10 @@ namespace Karen
     }
 
     static void beginScene(const OrthographicCamera& camera);
+    static void beginScene(const Camera& camera, const Mat4& transform);
+
+    static void drawQuad(const Mat4& transform, const Vec4& color = Vec4(1.0f));
+    static void drawQuad(const Mat4& transform, const ARef<Texture2D>& tux, const Vec4& color = Vec4(1.0f));
 
     static void drawQuad(const Vec3& pos = Vec3(0.0f), const Vec2& size = Vec2(1.0f), float rotation = 0.0f, const Vec4& color = Vec4(1.0f)); 
     static void drawQuad(const Vec2& pos = Vec2(0.0f), const Vec2& size = Vec2(1.0f), float rotation = 0.0f, const Vec4& color = Vec4(1.0f));
@@ -107,4 +111,4 @@ namespace Karen
   };
 }
 
-#endif //RENDERER2D_H
+#endif //KR_RENDERER2D_H

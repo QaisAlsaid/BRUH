@@ -21,4 +21,8 @@
 #include "Karen/Render/Renderer2D/Renderer2D.h"
 #include "Karen/Render/API/RendererCapabilities.h"
 #include "Karen/Render/API/FrameBuffer.h"
+#include "Karen/Scene/Scene.h"
+#include "Karen/Scene/Entity.h"
+#include "Karen/Scene/Components.h"
+
 #endif //KAREN_H

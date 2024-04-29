@@ -1,5 +1,3 @@
-#include "Karen/Render/API/Shader.h"
-#include "Karen/Render/API/Texture.h"
 #include "pch.h"
 #include "Renderer2D.h"
 #include "Karen/Core/Log.h"
@@ -90,6 +88,15 @@ namespace Karen
     reset();
   }
 
+  void Renderer2D::beginScene(const Camera& camera, const Mat4& transform)
+  {
+    const auto proj_view = camera.getProjection() * glm::inverse(transform);
+    s_data->shaders.get("tux_shader")->bind();
+    s_data->shaders.get("tux_shader")->setUniform("u_proj_view", proj_view);
+    reset();
+  }
+
+
   void Renderer2D::reset()
   {
     s_data->quad_vertex_ptr = s_data->quad_vertex_base;
@@ -97,20 +104,14 @@ namespace Karen
     s_data->texture_slot_index = 1;
   }
     
-  void Renderer2D::drawQuad(const Vec3& pos, const Vec2& size, float rotation, const Vec4& color)
+  void Renderer2D::drawQuad(const Mat4& trans, const Vec4& color)
   {
-    //clock wise starting from bottom left 
-    //the position is defined from the bottom left of quad
-    if(s_data->quad_index_count >= s_data->MAX_INDES)
+   if(s_data->quad_index_count >= s_data->MAX_INDES)
     {
       flush();
       reset();
     }
 
-    Mat4 trans = glm::translate(Mat4(1.0f), pos);
-    trans = glm::rotate(trans, rotation, {0.0f, 0.0f, 1.0f});
-    trans = glm::scale(trans, {size.x, size.y, 1.0f});
-    
     const Vec2 tux_coords[4] = 
     {
       {0.0f, 0.0f},
@@ -129,14 +130,10 @@ namespace Karen
     s_data->quad_index_count += 6;
 
     s_data->stats.quad_count++;
- }
-  
-  void Renderer2D::drawQuad(const Vec2& pos, const Vec2& size, float rotation, const Vec4& color)
-  {
-    drawQuad(Vec3(pos.x, pos.y, 0.0f), size, rotation, color);
+
   }
 
-  void Renderer2D::drawQuad(const Vec3& pos, const Vec2& size, float rotation, const ARef<Texture2D>& tux, const Vec4& color)
+  void Renderer2D::drawQuad(const Mat4& trans, const ARef<Texture2D>& tux, const Vec4& color)
   {
     if(s_data->quad_index_count >= s_data->MAX_INDES || s_data->texture_slot_index >= s_data->MAX_TEXTURE_SLOTS)
     {
@@ -160,12 +157,7 @@ namespace Karen
       s_data->texture_slots[s_data->texture_slot_index] = tux;
       s_data->texture_slot_index++;
     }
-
-
-    Mat4 trans = glm::translate(Mat4(1.0f), pos);
-    trans = glm::rotate(trans, rotation, {0.0f, 0.0f, 1.0f});
-    trans = glm::scale(trans, {size.x, size.y, 1.0f});
-    
+   
     const Vec2 tux_coords[4] =
     {
       {0.0f, 0.0f},
@@ -185,6 +177,32 @@ namespace Karen
     s_data->quad_index_count += 6;
 
     s_data->stats.quad_count++;
+
+  }
+
+  void Renderer2D::drawQuad(const Vec3& pos, const Vec2& size, float rotation, const Vec4& color)
+  {
+    //clock wise starting from bottom left 
+    //the position is defined from the bottom left of quad
+    Mat4 trans = glm::translate(Mat4(1.0f), pos);
+    trans = glm::rotate(trans, rotation, {0.0f, 0.0f, 1.0f});
+    trans = glm::scale(trans, {size.x, size.y, 1.0f});
+  
+    drawQuad(trans, color);
+  }
+  
+  void Renderer2D::drawQuad(const Vec2& pos, const Vec2& size, float rotation, const Vec4& color)
+  {
+    drawQuad(Vec3(pos.x, pos.y, 0.0f), size, rotation, color);
+  }
+
+  void Renderer2D::drawQuad(const Vec3& pos, const Vec2& size, float rotation, const ARef<Texture2D>& tux, const Vec4& color)
+  {
+    Mat4 trans = glm::translate(Mat4(1.0f), pos);
+    trans = glm::rotate(trans, rotation, {0.0f, 0.0f, 1.0f});
+    trans = glm::scale(trans, {size.x, size.y, 1.0f});
+
+    drawQuad(trans, tux, color);
   }
   
   void Renderer2D::drawQuad(const Vec2& pos, const Vec2& size, float rotation, const ARef<Texture2D>& tux, const Vec4& color)

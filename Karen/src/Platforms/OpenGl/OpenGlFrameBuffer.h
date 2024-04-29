@@ -34,6 +34,8 @@ namespace Karen
     uint32_t m_color_attachment = 0;
     uint32_t m_depth_attachment = 0;
     Specs    m_specs;
+    const uint32_t MAX_FRAMEBUFFER_SIZE;
+    const uint32_t MIN_FRAMEBUFFER_SIZE;
   };
 }
 

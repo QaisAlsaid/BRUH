@@ -45,6 +45,7 @@ set(KAREN_SRC src/Karen/Core/App.cpp src/Karen/Core/Log.cpp
     src/Karen/Render/Renderer2D/Renderer2D.cpp src/Platforms/OpenGl/OpenGlRendererCapabilities.cpp
     src/Karen/Core/Instrumentor.cpp src/Karen/Render/API/RendererCapabilities.cpp
     src/Karen/Render/API/FrameBuffer.cpp src/Platforms/OpenGl/OpenGlFrameBuffer.cpp
+    src/Karen/Scene/Scene.cpp src/Karen/Scene/Entity.cpp
     include/Karen/Karen.h
   )
 #set(KAREN_SRC_H src/Karen/App.h src/Karen/Log.h src/Platforms/Windows/WindowsWindow.h src/Karen/Layers/Layer.h
@@ -62,12 +63,13 @@ set(KAREN_PUBLIC_INCLUDE_DIRS
   ${CMAKE_CURRENT_SOURCE_DIR}/include/
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include/ 
   ${CMAKE_CURRENT_SOURCE_DIR}/src/
+  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui
+  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/entt/single_include/
   )
  set(KAREN_INCLUDE_DIRS ${KAREN_PUBLIC_INCLUDE_DIRS} PARENT_SCOPE)
  
  set(KAREN_PRIVATE_INCLUDE_DIRS
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glfw/include
-  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui/backends
   ${OPENGL_INCLUDE_DIRS}
   ${CMAKE_CURRENT_SOURCE_DIR}/src
@@ -85,7 +87,7 @@ add_subdirectory(vendor/stb_image)
 add_subdirectory(vendor/imgui)
 add_subdirectory(vendor/glm)
 add_subdirectory(vendor/pugixml)
-
+add_subdirectory(vendor/entt)
 if(NOT KAREN_EMSCRIPTEN)
 set(KAREN_LIBS glm glfw imgui glad stb pugixml)
 else()

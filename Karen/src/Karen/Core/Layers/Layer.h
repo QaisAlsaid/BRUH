@@ -19,22 +19,18 @@ namespace Karen
     virtual void onAttach()                {}
     virtual void onDetach()                {}
     virtual void onUpdate(Timestep t)      {}
-    virtual void onRender()                {}
     virtual void onEvent(Event&)           {}
     virtual void onGuiUpdate()             {}
   
     inline void setName(const std::string& name) {this->name = name;}
     inline const std::string& getName() const {return this->name;}
-    inline void setVisible(bool visible) {this->visible = visible;}
-    inline bool isVisible() const {return visible;}
     inline void setActive(bool active) {this->active = active;}
     inline bool isActive() const {return active;}
     inline void setGuiActive(bool active) {gui_active = active;}
     inline bool isGuiActive() const {return gui_active;}
-    inline void activate() {visible = true; active = true; gui_active = true;}
+    inline void activate() {active = true; gui_active = true;}
   protected:
     std::string name;
-    bool visible = false;
     bool active  = false;
     bool gui_active = false;
   };
