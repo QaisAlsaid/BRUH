@@ -12,10 +12,10 @@ namespace Karen
     Camera() = default;
     Camera(const Mat4& proj)
       : m_projection(proj) {}
-    
+    virtual ~Camera() = default;
     const Mat4& getProjection() const { return m_projection; }
-  private:
-    Mat4 m_projection;
+  protected:
+    Mat4 m_projection = Mat4(1.0f);
   };
 }
 

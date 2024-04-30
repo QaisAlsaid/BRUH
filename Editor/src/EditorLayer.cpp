@@ -1,15 +1,37 @@
-#include "Karen/Render/API/RendererCapabilities.h"
 #include "pch.h"
 #include <Karen/Karen.h>
 #include "EditorLayer.h"
 #include <imgui.h>
-
+class Script : public Karen::ScriptEntity
+{
+public:
+  void onCreate() override {KAREN_WARN("created Script");}
+  void onUpdate(Karen::Timestep ts) override {
+    tt += ts;
+    tc += ts;
+    if(tc > 1.0f) tc = 0.0001f;
+    if(t)
+    {
+      KAREN_WARN("{0}", ts.getTime());
+      t=false;
+    }
+    auto& trans = m_entity.getComponent<Karen::TransformComponent>();
+    trans.scale = Karen::Vec2(sin(tt) * 10.0f);
+    trans.position = Karen::Vec3(std::abs(cos(tt)) * 100.0f, std::abs(sin(tt)) * 100.0f, 0.0f);
+    auto& sprite = m_entity.getComponent<Karen::SpriteComponent>();
+    sprite.color = Karen::Vec4(cos(tc), 1/tc, sin(tc), 1.0f);
+  }
+  void onDestroy() override {KAREN_WARN("destroy entity");}
+private: 
+  bool t = true;
+  double tt = 0.0f, tc = 0.0001f;
+};
 
 namespace Karen
 {
 
   EditorLayer::EditorLayer()
-    :Layer(),/* m_ortho(0.0f, 100.0f, 0.0f, 100.0f)//*/m_ortho(Karen::Vec3(50.0f, 50.0f, 0.0f), Karen::Vec2(100.0f, 100.0f))//m_ortho(Karen::OrthographicCameraController(1280.0f/720.0f, Karen::Vec4(0.0f, 100.0f, 0.0f, 100.0f)))
+    : Layer("EditorLayer")
   {
     KAREN_START_INSTRUMENTOR();
     RenderCommands::init();
@@ -19,18 +41,24 @@ namespace Karen
   {
     activate();
     Renderer2D::init("../res/shaders/Shaders2D/config.xml");
-    KAREN_INFO("Layer: {0} Attached", name);
-    m_quad_pos = Vec2(50.0f);
-    m_ortho.setSpeed({100.0f, 100.0f});
-    m_ortho.getCamera().setZoomLimits(0.01, 50.0f);
     FrameBuffer::Specs s;
     s.width = 1280;
     s.height = 720;
     s.is_swap_chain_target = true;
     m_frame_buff = FrameBuffer::create(s);
     KAREN_CORE_SET_LOGLEVEL(Log::LogLevel::Warn);
-  
-    m_ortho.getCamera().setZoom(m_ortho.getCamera().getZoom() + 20.0f);
+    auto e = m_scene.addEntity("Quad"); 
+    e.addComponent<SpriteComponent>().color = Vec4(0.7f, 0.25f, 0.7f, 1.0f);
+    auto& ct = e.getComponent<TransformComponent>();
+    ct.position = Vec3(99.0f, 99.0f, 0.0f);
+    ct.scale = Vec2(1.0f, 1.0f);
+    auto ce = m_scene.addEntity("Camera");
+    auto& cc = ce.addComponent<CameraComponent>();
+    cc.camera.setOrtho({100.0f, 100.0f});
+    cc.is_primary = true;
+    auto& nsc = e.addComponent<NativeScriptComponent>();
+    nsc.bind<Script>();
+    m_scene.onStart();
   }
 
   int i=100;
@@ -38,38 +66,11 @@ namespace Karen
   void EditorLayer::onUpdate(Timestep ts)
   {
     t_s = ts;
-    if(i-- < 0) KAREN_STOP_INSTRUMENTOR();
-    KAREN_PROFILE_FUNCTION();
-    {
-      KAREN_PROFILE_SCOPE("Camera_Update");
-      m_ortho.onUpdate(ts); 
-    }
-    if(Input::isKeyPressed(Karen::Keyboard::Up))
-      m_quad_pos.y += 50.0f * ts;
-    if(Input::isKeyPressed(Karen::Keyboard::Down))
-      m_quad_pos.y -= 50.0f * ts;
-    if(Input::isKeyPressed(Karen::Keyboard::Right))
-      m_quad_pos.x += 50.0f * ts;
-    if(Input::isKeyPressed(Karen::Keyboard::Left))
-      m_quad_pos.x -= 50.0f * ts;
-    if(Input::isKeyPressed(Karen::Keyboard::I))
-      m_ortho.zoom(2.0f * ts);
-    if(Input::isKeyPressed(Karen::Keyboard::K))
-      m_ortho.zoom(-2.0f * ts);
-  
-    //Render   
-    {
-      
-      KAREN_PROFILE_SCOPE("Render");
-  
-      m_frame_buff->bind();
-  
-      Renderer2D::resetStats();
-      Renderer2D::clear(Karen::Vec4(0.24f, 0.24f, 0.24f, 1.0f));
-      Renderer2D::beginScene(m_ortho.getCamera());
-      Renderer2D::endScene();
-      m_frame_buff->unbind();
-    }
+    Renderer2D::resetStats();
+    m_frame_buff->bind();
+    Renderer2D::clear(Vec4(0.25f, 0.25f, 0.25f, 1.0f));
+    m_scene.onUpdate(ts);
+    m_frame_buff->unbind();
   }
 
   void EditorLayer::onGuiUpdate()
@@ -163,7 +164,7 @@ namespace Karen
     {
       m_frame_buff->reSize(k_panel_size.x, k_panel_size.y);
       m_viewport_size = k_panel_size;
-      m_ortho.onViewportResize(k_panel_size.x, k_panel_size.y);
+      m_scene.onViewportResize(m_viewport_size.x, m_viewport_size.y);
     }
     ImGui::Image((void*)(uintptr_t)m_frame_buff->getColorAttachmentId(), panel_size, ImVec2(0, 1), ImVec2(1, 0));
     ImGui::End();
@@ -178,7 +179,7 @@ namespace Karen
 
   void EditorLayer::onDetach()
   {
-
+    m_scene.onEnd();
   }
 
 }

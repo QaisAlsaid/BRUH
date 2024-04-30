@@ -16,16 +16,31 @@ namespace Karen
       e.addComponent<TagComponent>(tag);
     return e;
   }
+  
+  void Scene::onStart()
+  {
+    m_registry.view<NativeScriptComponent>().each([&](auto e, auto& native_script)
+    {
+      native_script.instance = native_script.instantiateScript();
+      native_script.instance->m_entity = Entity(e, this);
+      native_script.instance->onCreate();
+    });
+  }
 
   void Scene::onUpdate(Timestep ts)
   {
-    Camera* camera;
+    m_registry.view<NativeScriptComponent>().each([&](auto e, auto& native_script)
+    {
+      native_script.instance->onUpdate(ts);
+    });
+
+    SceneCamera* camera = nullptr;
     Mat4 camera_trans;
     {
-      auto group = m_registry.group<TransformComponent>(entt::get<CameraComponent>);
-      for(auto e : group)
+      auto view = m_registry.view<TransformComponent, CameraComponent>();
+      for(auto e : view)
       {
-        const auto& [trans, cam] = group.get<TransformComponent, CameraComponent>(e);
+        auto [trans, cam] = view.get<TransformComponent, CameraComponent>(e);
         if(cam.is_primary)
         {
           camera_trans = trans.getTransformationMatrix();
@@ -40,11 +55,35 @@ namespace Karen
       auto group = m_registry.group<TransformComponent>(entt::get<SpriteComponent>);
       for(auto e : group)
       {
-        const auto& [trans, sprite] = group.get<TransformComponent, SpriteComponent>(e);
+        auto [trans, sprite] = group.get<TransformComponent, SpriteComponent>(e);
         Renderer2D::drawQuad(trans.getTransformationMatrix(), sprite.color);
       }
       Renderer2D::endScene();
     }
-    else KAREN_CORE_WARN("No default Camera found in Scene");
+    else KAREN_CORE_WARN("No main Camera found in Scene");
+  }
+
+  void Scene::onViewportResize(uint32_t w, uint32_t h)
+  {
+    m_viewport_width = w;
+    m_viewport_height = h;
+    KAREN_WARN("WIDTH {0} HEIGHT {1}", w, h);
+    auto view = m_registry.view<CameraComponent>();
+    for(auto e : view)
+    {
+      auto& cam = view.get<CameraComponent>(e);
+      if(!cam.is_fixed_aspect_ratio)
+        cam.camera.setViewport(m_viewport_width, m_viewport_height);
+    }
+  }
+
+  void Scene::onEnd()
+  {
+    m_registry.view<NativeScriptComponent>().each([&](auto e, auto& native_script)
+    {
+      native_script.instance->onDestroy();
+    });
+
+
   }
 }

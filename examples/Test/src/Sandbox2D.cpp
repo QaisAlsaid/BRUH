@@ -24,13 +24,7 @@ void Sandbox2DLayer::onAttach()
   s.is_swap_chain_target = true;
   m_frame_buff = Karen::FrameBuffer::create(s);
   KAREN_CORE_SET_LOGLEVEL(Karen::Log::LogLevel::Warn);
-  auto e = m_scene.addEntity("colored quad");
-  e.addComponent<Karen::SpriteComponent>(Karen::Vec4(0.8f, 0.25f, 0.8f, 1.0f));
-  e.getComponent<Karen::TransformComponent>().position = {10.0f, 10.0f, 1.0f};
-  auto ec = m_scene.addEntity("camera");
-  ec.addComponent<Karen::CameraComponent>(glm::ortho(0.0f, 100.0f, 0.0f, 100.0f));
-  ec.getComponent<Karen::CameraComponent>().is_primary = true;
-}
+  }
 
 int i=100;
 float t_s = 0.0f;

@@ -1,7 +1,8 @@
 #ifndef KR_COMPONENTS_H
 #define KR_COMPONENTS_H
 
-#include "Karen/Camera.h"
+#include "SceneCamera.h"
+#include "ScriptEntity.h"
 #include "Karen/Core/Math/math.h"
 
 
@@ -41,13 +42,30 @@ namespace Karen
 
   struct CameraComponent
   {
-    Camera camera;
+    SceneCamera camera;
     bool is_primary = false;
+    bool is_fixed_aspect_ratio = false;
     CameraComponent() = default;
-    CameraComponent(const Camera& camera)
-      : camera(camera) {}
-    CameraComponent(const Mat4& projection)
-      : camera(projection) {}
+  };
+
+  struct NativeScriptComponent
+  {
+    ScriptEntity* instance = nullptr;
+     
+    template<typename T>
+    void bind()
+    {
+      instantiateScript = [](){return static_cast<ScriptEntity*>(new T());};
+      DestroyScript = [](NativeScriptComponent* native_script)
+      {
+        delete native_script->instance;
+        native_script->instance = nullptr;
+      };
+    }
+    private:
+      ScriptEntity* (*instantiateScript)();
+      void (*DestroyScript)(NativeScriptComponent*);
+    friend class Scene;
   };
 }
 
