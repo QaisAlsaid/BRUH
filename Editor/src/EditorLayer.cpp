@@ -1,7 +1,10 @@
+#include "Karen/Core/Assertion.h"
 #include "pch.h"
 #include <Karen/Karen.h>
 #include "EditorLayer.h"
 #include <imgui.h>
+#include "EditorSerializer.h"
+
 class Script : public Karen::ScriptEntity
 {
 public:
@@ -16,7 +19,7 @@ public:
       t=false;
     }
     auto& trans = m_entity.getComponent<Karen::TransformComponent>();
-    trans.scale = Karen::Vec2(sin(tt) * 10.0f);
+    trans.scale = Karen::Vec3(sin(tt) * 10.0f);
     trans.position = Karen::Vec3(std::abs(cos(tt)) * 100.0f, std::abs(sin(tt)) * 100.0f, 0.0f);
     auto& sprite = m_entity.getComponent<Karen::SpriteComponent>();
     sprite.color = Karen::Vec4(cos(tc), 1/tc, sin(tc), 1.0f);
@@ -39,6 +42,145 @@ namespace Karen
 
   void EditorLayer::onAttach()
   {
+    m_helper_windows["Stats"] = createScoped<StatsWindow>();
+  
+      m_colors["WindowBg"] = Vec4(0.1f, 0.1f, 0.1f, 1.0f);
+      m_colors["HeaderHovered"] = Vec4(0.2f, 0.2f, 0.2f, 1.0f);
+      m_colors["HeaderActive"] = Vec4(0.17f, 0.17f, 0.17f, 1.0f);
+      
+//new
+      m_colors["ChildBg"] = Vec4(0.1f, 0.1f, 0.12f, 1.0f); 
+      m_colors["PopupBg"] = Vec4(0.32f, 0.2f, 0.2f, 1.0f);
+      m_colors["Border"] = Vec4(0.45f, 0.45f, 0.54f, 1.0f);
+      m_colors["BorderShadow"] = Vec4(0.1f, 0.1f, 0.1f, 0.7f);
+
+      m_colors["MenuBarBg"] = Vec4(0.1f, 0.1f, 0.1f, 1.0f);
+      m_colors["ScrollbarBg"] = Vec4(0.3f, 0.3f ,0.32f, 1.0f);
+      m_colors["ScrollbarGrab"] = Vec4(0.4f, 0.4f, 0.43f, 1.0f);
+      m_colors["ScrollbarGrabHovered"] = Vec4(0.5f, 0.5f, 0.5f, 1.0f);
+      m_colors["ScrollbarGrabActive"] = Vec4(0.4f, 0.4f, 0.6f, 1.0f);
+      m_colors["CheckMark"] = Vec4(0.4f, 0.47f, 0.4f, 1.0f);
+      m_colors["SliderGrab"] = Vec4(0.3f, 0.3f, 0.3f, 1.0f);
+      m_colors["SliderGrabActive"] = Vec4(0.3f, 0.3f, 0.4f, 1.0f);
+      m_colors["Header"] = Vec4(0.32f, 0.32f, 0.39f, 1.0f);
+      m_colors["Separator"] = Vec4(0.6f, 0.6f, 0.6f, 0.8f);
+      m_colors["SeparatorHovered"] = Vec4(0.3f, 0.3f, 0.3f, 0.9f);
+      m_colors["SeparatorActive"] = Vec4(0.3f, 0.43f, 0.3f ,1.0f);
+      m_colors["ResizeGrip"] = Vec4(0.3f, 0.3f, 0.5f, 0.6f);
+      m_colors["ResizeGripHovered"] = Vec4(0.3f, 0.3f, 0.6f, 0.7f);
+      m_colors["ResizeGripActive"] = Vec4(0.3f, 0.3f, 0.7f, 0.8f);
+      m_colors["DockingPreview"] = Vec4(0.32f, 0.32f, 0.32f, 1.0f);
+      m_colors["DockingEmptyBg"] = Vec4(0.32f, 0.32f, 0.32f, 1.0f);
+      m_colors["PlotLines"] = Vec4(1.0f, 1.0f, 1.0f, 1.0f);
+      m_colors["PlotLinesHovered"] = Vec4(1.0f);
+      m_colors["PlotHistogram"] = Vec4(1.0f);
+      m_colors["PlotHistogramHovered"] = Vec4(1.0f);
+      m_colors["TableHeaderBg"] = Vec4(1.0f);
+      m_colors["TableBorderStrong"] = Vec4(1.0f);
+      m_colors["TableBorderLight"] = Vec4(1.0f);
+      m_colors["TableRowBg"] = Vec4(1.0f);
+      m_colors["TableRowBgAlt"] = Vec4(1.0f);
+      m_colors["TextSelectedBg"] = Vec4(1.0f);
+      m_colors["DragDropTarget"] = Vec4(1.0f);
+      m_colors["NavHighlight"] = Vec4(1.0f);
+      m_colors["NavWindowingHighlight"] = Vec4(1.0f);
+      m_colors["NavWindowingDimBg"] = Vec4(1.0f);
+      m_colors["ModalWindowDimBg"] = Vec4(1.0f);
+//
+      m_colors["Button"] = Vec4(0.2f, 0.2f, 0.2f, 1.0f);
+      m_colors["ButtonHovered"] = Vec4(0.3f, 0.3f, 0.3f, 1.0f);
+      m_colors["ButtonActive"] = Vec4(0.15f, 0.15f, 0.15f, 1.0f);
+      
+      m_colors["FrameBg"] = Vec4(0.2f, 0.2f, 0.2f, 1.0f);
+      m_colors["FrameBgHovered"] = Vec4(0.3f, 0.3f, 0.3f, 1.0f);
+      m_colors["FrameBgActive"] = Vec4(0.17f, 0.1f, 0.19f, 1.0f);
+
+      m_colors["Tab"] = Vec4(0.14f, 0.17f, 0.13f, 1.0f);
+      m_colors["TabHovered"] = Vec4(0.3f, 0.34f, 0.35f, 1.0f);
+      m_colors["TabActive"] = Vec4(0.23f, 0.25f, 0.18f, 1.0f);
+      m_colors["TabUnfocused"] = Vec4(0.07f, 0.2f, 0.13f, 1.0f);
+      m_colors["TabUnfocusedActive"] = Vec4(0.21f, 0.23f, 0.22f, 1.0f);
+
+      m_colors["TitleBg"] = Vec4(0.15f, 0.154f, 0.145f, 1.0f);
+      m_colors["TitleBgActive"] = Vec4(0.23f, 0.26f, 0.32f, 1.0f);
+      m_colors["TitleBgCollapsed"] = Vec4(0.75f, 0.32f, 0.98f, 1.0f);
+    
+      m_default_font_size = 18;
+      m_default_font = "../res/fonts/Roboto/Roboto-Regular.ttf";
+      m_imgui_ini_path = ".";
+    
+    deSerializeEditor("../res/config/test.xml");
+    KAREN_WARN("Font Path: {0}, Font Size: {1}, Ini Path {2}, WindowBG: {3}, State:", m_default_font, m_default_font_size, m_imgui_ini_path, m_colors["WindowBg"]);//, m_helper_windows["Stats"]->is_active);
+        
+    ImGui::LoadIniSettingsFromDisk(m_imgui_ini_path.c_str());
+    
+    auto& io = ImGui::GetIO();
+    io.FontDefault = io.Fonts->AddFontFromFileTTF(m_default_font.c_str(), m_default_font_size);
+    
+    auto& colors = ImGui::GetStyle().Colors;
+    
+    colors[ImGuiCol_WindowBg] = *(ImVec4*)&m_colors.at("WindowBg");
+    colors[ImGuiCol_HeaderHovered] = *(ImVec4*)&m_colors.at("HeaderHovered");
+    colors[ImGuiCol_HeaderActive] = *(ImVec4*)&m_colors.at("HeaderActive");
+
+    colors[ImGuiCol_Button] = *(ImVec4*)&m_colors.at("Button");
+    colors[ImGuiCol_ButtonHovered] = *(ImVec4*)&m_colors.at("ButtonHovered");
+    colors[ImGuiCol_ButtonActive] = *(ImVec4*)&m_colors.at("ButtonActive");
+
+    colors[ImGuiCol_FrameBg] = *(ImVec4*)&m_colors.at("FrameBg");
+    colors[ImGuiCol_FrameBgHovered] = *(ImVec4*)&m_colors.at("FrameBgHovered");
+    colors[ImGuiCol_FrameBgActive] = *(ImVec4*)&m_colors.at("FrameBgActive");
+
+    colors[ImGuiCol_Tab] = *(ImVec4*)&m_colors.at("Tab");
+    colors[ImGuiCol_TabHovered] = *(ImVec4*)&m_colors.at("TabHovered");
+    colors[ImGuiCol_TabActive] = *(ImVec4*)&m_colors.at("TabActive");
+    colors[ImGuiCol_TabUnfocused] = *(ImVec4*)&m_colors.at("TabUnfocused");
+    colors[ImGuiCol_TabUnfocusedActive] = *(ImVec4*)&m_colors.at("TabUnfocusedActive");
+
+    colors[ImGuiCol_TitleBg] = *(ImVec4*)&m_colors.at("TitleBg");
+    colors[ImGuiCol_TitleBgActive] = *(ImVec4*)&m_colors.at("TitleBgActive");
+    colors[ImGuiCol_TitleBgCollapsed] = *(ImVec4*)&m_colors.at("TitleBgCollapsed");
+
+
+    colors[ImGuiCol_ChildBg] = *(ImVec4*)&m_colors.at("ChildBg"); 
+    colors[ImGuiCol_PopupBg] = *(ImVec4*)&m_colors.at("PopupBg");
+    colors[ImGuiCol_Border] = *(ImVec4*)&m_colors.at("Border");
+    colors[ImGuiCol_BorderShadow] = *(ImVec4*)&m_colors.at("BorderShadow");
+
+    colors[ImGuiCol_MenuBarBg] = *(ImVec4*)&m_colors.at("MenuBarBg");
+    colors[ImGuiCol_ScrollbarBg] = *(ImVec4*)&m_colors.at("ScrollbarBg");
+    colors[ImGuiCol_ScrollbarBg] = *(ImVec4*)&m_colors.at("ScrollbarGrab");
+    colors[ImGuiCol_ScrollbarBg] = *(ImVec4*)&m_colors.at("ScrollbarGrabHovered");
+    colors[ImGuiCol_ScrollbarGrabActive] =  *(ImVec4*)&m_colors.at("ScrollbarGrabActive");
+    colors[ImGuiCol_CheckMark] =  *(ImVec4*)&m_colors.at("CheckMark");
+    colors[ImGuiCol_SliderGrab] =  *(ImVec4*)&m_colors.at("SliderGrab");
+    colors[ImGuiCol_SliderGrabActive] =  *(ImVec4*)&m_colors.at("SliderGrabActive");
+    colors[ImGuiCol_Header] =  *(ImVec4*)&m_colors["Header"];
+    colors[ImGuiCol_Separator] =  *(ImVec4*)&m_colors["Separator"];
+    colors[ImGuiCol_SeparatorHovered] =  *(ImVec4*)&m_colors.at("SeparatorHovered");
+    colors[ImGuiCol_SeparatorActive] =  *(ImVec4*)&m_colors.at("SeparatorActive");
+    colors[ImGuiCol_ResizeGrip] =  *(ImVec4*)&m_colors.at("ResizeGrip");
+    colors[ImGuiCol_ResizeGripHovered] =  *(ImVec4*)&m_colors.at("ResizeGripHovered");
+    colors[ImGuiCol_ResizeGripActive] =  *(ImVec4*)&m_colors.at("ResizeGripActive");
+    colors[ImGuiCol_DockingPreview] =  *(ImVec4*)&m_colors.at("DockingPreview");
+    colors[ImGuiCol_DockingEmptyBg] =  *(ImVec4*)&m_colors.at("DockingEmptyBg");
+    colors[ImGuiCol_PlotLines] =  *(ImVec4*)&m_colors.at("PlotLines");
+    colors[ImGuiCol_PlotLinesHovered] =  *(ImVec4*)&m_colors.at("PlotLinesHovered");
+    colors[ImGuiCol_PlotHistogram] =  *(ImVec4*)&m_colors.at("PlotHistogram");
+    colors[ImGuiCol_PlotHistogramHovered] =  *(ImVec4*)&m_colors.at("PlotHistogramHovered");
+    colors[ImGuiCol_TableHeaderBg] =  *(ImVec4*)&m_colors.at("TableHeaderBg");
+    colors[ImGuiCol_TableBorderStrong] =  *(ImVec4*)&m_colors.at("TableBorderStrong");
+    colors[ImGuiCol_TableBorderLight] =  *(ImVec4*)&m_colors.at("TableBorderLight");
+    colors[ImGuiCol_TableRowBg] =  *(ImVec4*)&m_colors.at("TableRowBg");
+    colors[ImGuiCol_TableRowBgAlt] =  *(ImVec4*)&m_colors.at("TableRowBgAlt");
+    colors[ImGuiCol_TextSelectedBg] =  *(ImVec4*)&m_colors.at("TextSelectedBg");
+    colors[ImGuiCol_DragDropTarget] =  *(ImVec4*)&m_colors.at("DragDropTarget");
+    colors[ImGuiCol_NavHighlight] =  *(ImVec4*)&m_colors.at("NavHighlight");
+    colors[ImGuiCol_NavWindowingHighlight] =  *(ImVec4*)&m_colors.at("NavWindowingHighlight");
+    colors[ImGuiCol_NavWindowingDimBg] =  *(ImVec4*)&m_colors.at("NavWindowingDimBg");
+    colors[ImGuiCol_ModalWindowDimBg] = *(ImVec4*)&m_colors.at("ModalWindowDimBg");
+
+
     activate();
     Renderer2D::init("../res/shaders/Shaders2D/config.xml");
     FrameBuffer::Specs s;
@@ -47,19 +189,13 @@ namespace Karen
     s.is_swap_chain_target = true;
     m_frame_buff = FrameBuffer::create(s);
     KAREN_CORE_SET_LOGLEVEL(Log::LogLevel::Warn);
-    auto e = m_scene.addEntity("Quad"); 
-    e.addComponent<SpriteComponent>().color = Vec4(0.7f, 0.25f, 0.7f, 1.0f);
-    auto& ct = e.getComponent<TransformComponent>();
-    ct.position = Vec3(99.0f, 99.0f, 0.0f);
-    ct.scale = Vec2(1.0f, 1.0f);
-    auto ce = m_scene.addEntity("Camera");
-    auto& cc = ce.addComponent<CameraComponent>();
-    cc.camera.setOrtho({100.0f, 100.0f});
-    cc.is_primary = true;
-    auto& nsc = e.addComponent<NativeScriptComponent>();
-    nsc.bind<Script>();
+    
+    m_scene.deSerializer("../res/config/scene.yaml");
     m_scene.onStart();
+    m_scene_hierarchy_panel.setContext(&m_scene);
+    m_menu_bar.stats_window = (StatsWindow*)m_helper_windows["Stats"].get();
   }
+
 
   int i=100;
   float t_s = 0.0f;
@@ -77,60 +213,44 @@ namespace Karen
   {
     static bool* p_open = new bool;
     *p_open = true;
-    static bool opt_fullscreen = true; // Is the Dockspace full-screen?
-    static bool opt_padding = false; // Is there padding (a blank space) between the window edge and the Dockspace?
-    static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None; // Config flags for the Dockspace
+    static bool opt_fullscreen = true;
+    static bool opt_padding = false;
+    static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 
-    ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+    ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
 
-    // Is the example in Fullscreen mode?
     if (opt_fullscreen)
     {
-        // If so, get the main viewport:
       const ImGuiViewport* viewport = ImGui::GetMainViewport();
 
-        // Set the parent window's position, size, and viewport to match that of the main viewport. This is so the parent window
-        // completely covers the main viewport, giving it a "full-screen" feel.
       ImGui::SetNextWindowPos(viewport->WorkPos);
       ImGui::SetNextWindowSize(viewport->WorkSize);
       ImGui::SetNextWindowViewport(viewport->ID);
 
-        // Set the parent window's styles to match that of the main viewport:
-      ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f); // No corner rounding on the window
-      ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f); // No border around the window
+      ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+      ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
 
-        // Manipulate the window flags to make it inaccessible to the user (no titlebar, resize/move, or navigation)
       window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
       window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
     }
     else
     {
-        // The example is not in Fullscreen mode (the parent window can be dragged around and resized), disable the
-        // ImGuiDockNodeFlags_PassthruCentralNode flag.
       dockspace_flags &= ~ImGuiDockNodeFlags_PassthruCentralNode;
     }
 
-    // When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background
-    // and handle the pass-thru hole, so the parent window should not have its own background:
     if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
       window_flags |= ImGuiWindowFlags_NoBackground;
 
-    // If the padding option is disabled, set the parent window's padding size to 0 to effectively hide said padding.
     if (!opt_padding)
       ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-
-    // Important: note that we proceed even if Begin() returns false (aka window is collapsed).
-    // This is because we want to keep our DockSpace() active. If a DockSpace() is inactive,
-    // all active windows docked into it will lose their parent and become undocked.
-    // We cannot preserve the docking relationship between an active window and an inactive docking, otherwise
-    // any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
+    ImGuiStyle& style = ImGui::GetStyle();
+    ImVec2 min_win_size = style.WindowMinSize;
+    style.WindowMinSize = ImVec2(230, 100);//TODO: make it changeable from Editor Settings
     ImGui::Begin("DockSpace", p_open, window_flags);
 
-    // Remove the padding configuration - we pushed it, now we pop it:
     if (!opt_padding)
       ImGui::PopStyleVar();
 
-    // Pop the two style rules set in Fullscreen mode - the corner rounding and the border size.
     if (opt_fullscreen)
       ImGui::PopStyleVar(2);
 
@@ -138,25 +258,18 @@ namespace Karen
     ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 
 
-    // This is to show the menu bar that will change the config settings at runtime.
-    // If you copied this demo function into your own code and removed ImGuiWindowFlags_MenuBar at the top of the function,
-
- 
-
-
-    // End the parent window that contains the Dockspace:
     ImGui::End();
-
-    const auto stats = Renderer2D::getStats();
-
-    ImGui::Begin("Stats");
-    ImGui::Text("App::Stats Timestep: %f", t_s);
-    ImGui::Text("Renderer2D::Stats: Draw Calls: %d", stats.draw_calls);
-    ImGui::Text("Renderer2D::Stats: Quad Count: %d", stats.quad_count);
-    ImGui::Text("Renderer2D::Stats: Index Count: %d", stats.getIndexCount());
-    ImGui::Text("Renderer2D::Stats: Vertex Count: %d", stats.getVertexCount());
-    ImGui::End();
-  
+    style.WindowMinSize = min_win_size;
+    const Stats stats = {Renderer2D::getStats(), m_time_step};
+    ((StatsWindow*)m_helper_windows["Stats"].get())->stats = stats;
+    m_menu_bar.onImGuiUpdate();
+    m_helper_windows["Stats"]->onImGuiUpdate();
+    m_scene_hierarchy_panel.onGuiUpdate();
+    auto e = m_scene_hierarchy_panel.getCurrentSelected();
+    m_inspector_panel.setCurrentSelected(e);
+    m_inspector_panel.onGuiUpdate();
+    bool s = true;
+    //ImGui::ShowDemoWindow(&s);
     ImGui::Begin("ViewPort");
     const ImVec2 panel_size = ImGui::GetContentRegionAvail();
     Vec2 k_panel_size = {panel_size.x, panel_size.y};
@@ -179,7 +292,23 @@ namespace Karen
 
   void EditorLayer::onDetach()
   {
+    m_scene.serializer("../res/config/scene.yaml");
     m_scene.onEnd();
+    serializeEditor("../res/config/test.xml");
+  }
+
+  void EditorLayer::serializeEditor(const char* path)
+  {
+    EditorSerializer es(this);
+    if(!es.serialize(path))
+      KAREN_ASSERT(false);
+  }
+
+  void EditorLayer::deSerializeEditor(const char* path)
+  {
+    EditorSerializer es(this);
+    if(!es.deSerialize(path))
+      m_default_editor = true;
   }
 
 }

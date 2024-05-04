@@ -11,7 +11,8 @@ namespace Karen
   public:
     EditorApp() 
     {
-      pushLayer(new EditorLayer());
+      EditorLayer* al = new EditorLayer();
+      pushLayer(al);
     }
     ~EditorApp()
     {

@@ -2,6 +2,7 @@
 #include "Entity.h"
 #include "Components.h"
 #include "Karen/Render/Renderer2D/Renderer2D.h"
+#include "Karen/Scene/SceneSerializer.h"
 
 
 namespace Karen
@@ -17,6 +18,11 @@ namespace Karen
     return e;
   }
   
+  void Scene::removeEntity(const Entity& e)
+  {
+    m_registry.destroy(e);
+  }
+
   void Scene::onStart()
   {
     m_registry.view<NativeScriptComponent>().each([&](auto e, auto& native_script)
@@ -83,7 +89,17 @@ namespace Karen
     {
       native_script.instance->onDestroy();
     });
+  }
 
+  bool Scene::serializer(const char* path)
+  {
+    SceneSerializer s(this);
+    return s.serializeText(path);
+  }
 
+  bool Scene::deSerializer(const char* path)
+  {
+    SceneSerializer s(this);
+    return s.deSerializeText(path);
   }
 }

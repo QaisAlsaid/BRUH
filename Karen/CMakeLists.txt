@@ -46,6 +46,7 @@ set(KAREN_SRC src/Karen/Core/App.cpp src/Karen/Core/Log.cpp
     src/Karen/Core/Instrumentor.cpp src/Karen/Render/API/RendererCapabilities.cpp
     src/Karen/Render/API/FrameBuffer.cpp src/Platforms/OpenGl/OpenGlFrameBuffer.cpp
     src/Karen/Scene/Scene.cpp src/Karen/Scene/Entity.cpp src/Karen/Scene/SceneCamera.cpp
+    src/Karen/Scene/SceneSerializer.cpp
     include/Karen/Karen.h
   )
 #set(KAREN_SRC_H src/Karen/App.h src/Karen/Log.h src/Platforms/Windows/WindowsWindow.h src/Karen/Layers/Layer.h
@@ -65,6 +66,8 @@ set(KAREN_PUBLIC_INCLUDE_DIRS
   ${CMAKE_CURRENT_SOURCE_DIR}/src/
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/entt/single_include/
+  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/yaml-cpp/include/
+  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/pugixml/src
   )
  set(KAREN_INCLUDE_DIRS ${KAREN_PUBLIC_INCLUDE_DIRS} PARENT_SCOPE)
  
@@ -77,7 +80,6 @@ set(KAREN_PUBLIC_INCLUDE_DIRS
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glm
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/stb_image
-  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/pugixml/src
   )
 if(NOT KAREN_EMSCRIPTEN)
 add_subdirectory(vendor/glfw)
@@ -88,11 +90,12 @@ add_subdirectory(vendor/imgui)
 add_subdirectory(vendor/glm)
 add_subdirectory(vendor/pugixml)
 add_subdirectory(vendor/entt)
+add_subdirectory(vendor/yaml-cpp)
 if(NOT KAREN_EMSCRIPTEN)
-set(KAREN_LIBS glm glfw imgui glad stb pugixml)
+set(KAREN_LIBS glm glfw imgui glad stb pugixml yaml-cpp)
 else()
 set(KAREN_ADDITIONAL_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../../emsdk/upstream/emscripten/cache/sysroot/include)
-set(KAREN_LIBS glm imgui stb pugixml)
+set(KAREN_LIBS glm imgui stb pugixml yaml-cpp)
 endif()
 
 if(KAREN_IS_SHARED)

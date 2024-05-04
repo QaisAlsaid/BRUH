@@ -9,6 +9,7 @@ namespace Karen
   class Timestep
   {
   public:
+    Timestep() = default;
     Timestep(float current_time)
     {
       m_time = current_time;

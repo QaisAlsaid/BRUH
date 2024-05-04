@@ -22,7 +22,32 @@ namespace Karen
 
   void GuiLayer::onAttach()
   {
+    auto& io = ImGui::GetIO();
+    io.FontDefault = io.Fonts->AddFontFromFileTTF("../res/fonts/Roboto/Roboto-Regular.ttf", 18);
+  
+    auto& colors = ImGui::GetStyle().Colors;
 
+    colors[ImGuiCol_WindowBg] = {0.1f, 0.1f, 0.1f, 1.0f};
+    colors[ImGuiCol_HeaderHovered] = {0.2f, 0.2f, 0.2f, 1.0f};
+    colors[ImGuiCol_HeaderActive] = {0.15, 0.15, 0.15, 1.0f};
+
+    colors[ImGuiCol_Button] = {0.2, 0.2, 0.2, 1.0f};
+    colors[ImGuiCol_ButtonHovered] = {0.3, 0.3, 0.3, 1.0f};
+    colors[ImGuiCol_ButtonActive] = {0.15, 0.15, 0.15, 1.0f};
+
+    colors[ImGuiCol_FrameBg] = {0.2, 0.2, 0.2, 1.0};
+    colors[ImGuiCol_FrameBgHovered] = {0.3, 0.3, 0.3, 1.0f};
+    colors[ImGuiCol_FrameBgActive] = {0.17, 0.1, 0.2, 1.0f};
+
+    colors[ImGuiCol_Tab] = {0.15, 0.16, 0.14, 1.0f};
+    colors[ImGuiCol_TabHovered] = {0.3, 0.34, 0.345, 1.0f};
+    colors[ImGuiCol_TabActive] = {0.23, 0.25, 0.189, 1.0f};
+    colors[ImGuiCol_TabUnfocused] = {0.07, 0.2, 0.13, 1.0f};
+    colors[ImGuiCol_TabUnfocusedActive] = {0.21, 0.23, 0.22, 1.0f};
+
+    colors[ImGuiCol_TitleBg] = {0.15, 0.154, 0.145, 1.0f};
+    colors[ImGuiCol_TitleBgActive] = {0.23, 0.26, 0.32, 1.0f};
+    colors[ImGuiCol_TitleBgCollapsed] = {0.75, 0.32, 0.98, 1.0f};
   }
 
   void GuiLayer::onDetach()
@@ -46,7 +71,7 @@ namespace Karen
     auto& window = app->getWindow();
     ImGuiIO& io = ImGui::GetIO();
 		io.DisplaySize = ImVec2(window.getWidth(), window.getHeight());
-
+ 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

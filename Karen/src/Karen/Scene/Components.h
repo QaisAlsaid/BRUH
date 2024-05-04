@@ -18,17 +18,19 @@ namespace Karen
   struct TransformComponent
   {
     Vec3 position  = {0.0f, 0.0f, 0.0f};
-    Vec2 scale     = {1.0f, 1.0f};
-    float rotation = 0.0f;
+    Vec3 scale     = {1.0f, 1.0f, 1.0f};
+    Vec3 rotation  = {0.0f, 0.0f, 0.0f};
     TransformComponent() = default;
-    TransformComponent(const Vec3& pos, const Vec2& scale, float rotation)
+    TransformComponent(const Vec3& pos, const Vec3& scale, const Vec3& rotation)
       : position(pos), scale(scale), rotation(rotation) {}
     Mat4 getTransformationMatrix()
     {
       Mat4 trans(1.0f);
       trans = glm::translate(trans, position);
-      trans = glm::rotate(trans, rotation, {0, 0, 1});
-      trans = glm::scale(trans, Vec3(scale, 1.0f));
+      trans = glm::rotate(trans, rotation.x, {1, 0, 0});
+      trans = glm::rotate(trans, rotation.y, {0, 1, 0});
+      trans = glm::rotate(trans, rotation.z, {0, 0, 1});
+      trans = glm::scale(trans, scale);
       return trans;
     }
   };

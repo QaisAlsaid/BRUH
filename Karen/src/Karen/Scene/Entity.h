@@ -1,6 +1,7 @@
 #ifndef KR_ENTITY_H
 #define KR_ENTITY_H
 
+#include <cstdint>
 #include <entt/entt.hpp>
 #include "Scene.h"
 
@@ -12,31 +13,76 @@ namespace Karen
   public:
     Entity() = default;
     Entity(entt::entity id, Scene* scene);
-    /*bool hasComponent()
-      {
-        m_scene->m_registry.orphan<T>(m_id);
-      }*/
+    
+    inline void inst(){}
+
+    inline void destroy() 
+    {
+      m_scene->removeEntity(*this);
+    }
+
+    template<typename T>
+    inline bool hasComponent()
+    {
+      return m_scene->m_registry.try_get<T>(m_id);
+    }
   
     template<typename T>
-    T& getComponent()
+    inline T& getComponent()
     {
       return m_scene->m_registry.get<T>(m_id);
     }
 
+    template<typename T>
+    inline T* tryGetComponent()
+    {
+      return m_scene->m_registry.try_get<T>(m_id);
+    }
+
     template<typename T, typename... TArgs>
-    T& addComponent(TArgs&&... args)
+    inline T& addComponent(TArgs&&... args)
     {
       return m_scene->m_registry.emplace<T>(m_id, std::forward<TArgs>(args)...);
     }
+    template<typename T, typename... TArgs>
+    inline T& insertComponent(TArgs&&... args)
+    {
+      return m_scene->m_registry.emplace_or_replace<T>(m_id, std::forward<TArgs>(args)...);
+    }
 
     template<typename T>
-    void removeComponent()
+    inline void removeComponent()
     {
       m_scene->m_registry.remove<T>(m_id);
     }
 
+    inline bool operator== (const Entity& other) const
+    {
+      return this->m_id == other.m_id;
+    }
+
+    inline bool operator!= (const Entity& other) const
+    {
+      return !(*this == other);
+    }
+    inline operator uint32_t() const
+    {
+      return (uint32_t)m_id;
+    }
+    inline operator uint64_t() const
+    {
+      return (uint64_t)m_id;
+    }
+    inline operator entt::entity() const
+    {
+      return m_id;
+    }
+    inline operator bool() const
+    {
+      return m_id != entt::null;
+    }
   private: 
-    entt::entity m_id{0};
+    entt::entity m_id{entt::null};
     Scene* m_scene;
   };
 }

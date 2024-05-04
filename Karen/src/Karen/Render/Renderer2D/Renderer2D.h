@@ -16,6 +16,26 @@ namespace Karen
   class Renderer2D
   {
   public:
+    struct Stats 
+     {
+       uint32_t draw_calls = 0;
+       uint32_t quad_count = 0;
+
+       inline uint32_t getVertexCount() const
+       {
+         return quad_count * 4;
+       }
+       inline uint32_t getIndexCount() const 
+       {
+         return quad_count * 6;
+       }
+       inline void reset()
+       {
+         draw_calls = 0;
+         quad_count = 0;
+       }
+     };
+  public:
     static void init(const std::string& shaders_2d_config_path);
 
     inline static void clear(const Vec4& clear_color = Vec4(1.0f))
@@ -57,26 +77,7 @@ namespace Karen
        float     tux_idx;
      };
      
-     struct Stats 
-     {
-       uint32_t draw_calls = 0;
-       uint32_t quad_count = 0;
-
-       inline uint32_t getVertexCount() const
-       {
-         return quad_count * 4;
-       }
-       inline uint32_t getIndexCount() const 
-       {
-         return quad_count * 6;
-       }
-       inline void reset()
-       {
-         draw_calls = 0;
-         quad_count = 0;
-       }
-     };
-    struct Data
+     struct Data
      {
        const uint32_t MAX_QUADS = 10000;
        const uint32_t MAX_VERTS = MAX_QUADS * 4;

@@ -35,6 +35,10 @@ namespace Karen
 
   App::~App()
   {
+    for(auto it = m_layers.begin(); it != m_layers.end(); ++it)
+    {
+      (*it)->onDetach();
+    }
   }
 
   void App::onEvent(Event& event)

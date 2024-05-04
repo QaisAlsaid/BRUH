@@ -16,3 +16,6 @@
 [submodule "Karen/vendor/entt"]
 	path = Karen/vendor/entt
 	url = https://github.com/skypjack/entt.git
+[submodule "Karen/vendor/yaml-cpp"]
+	path = Karen/vendor/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp.git
