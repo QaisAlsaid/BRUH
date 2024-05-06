@@ -4,12 +4,12 @@
 
 namespace Karen
 {
-  SceneHierarchy::SceneHierarchy(Scene* context)
+  SceneHierarchy::SceneHierarchy(const ARef<Scene>& context)
   {
     setContext(context);
   }
 
-  void SceneHierarchy::setContext(Scene* context)
+  void SceneHierarchy::setContext(const ARef<Scene>& context)
   {
     m_context = context;
   }
@@ -25,7 +25,7 @@ namespace Karen
     ImGui::PopItemWidth();
     m_context->m_registry.view<TagComponent>().each([&](auto e, auto& t)
     {
-      Entity en(e, m_context);
+      Entity en(e, m_context.get());
       drawEntityNode(en);
     });
     

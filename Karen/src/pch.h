@@ -15,6 +15,11 @@
 #include <map>
 #include <unordered_map>
 #include <algorithm>
+#include <cstdio>
+#include <mutex>
+#include <future>
+#include <shared_mutex>
+#include<filesystem>
 
 #include "Karen/Core/Log.h"
 #include "Karen/Core/Instrumentor.h"

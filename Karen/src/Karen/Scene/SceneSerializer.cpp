@@ -78,12 +78,12 @@ namespace Karen
 {
   using namespace YAML;
 
-  SceneSerializer::SceneSerializer(Scene* scene)
+  SceneSerializer::SceneSerializer(const ARef<Scene>& scene)
+    : m_context(scene)
   {
-    m_context = scene;
   }
 
-  void SceneSerializer::setContext(Scene* scene)
+  void SceneSerializer::setContext(const ARef<Scene>& scene)
   {
     m_context = scene;
   }
@@ -98,7 +98,7 @@ namespace Karen
     emitter << Key << "Entities" << Value << BeginSeq;
     m_context->m_registry.view<TagComponent>().each([&](auto id, auto& tc)
     {
-      Entity e(id, m_context);
+      Entity e(id, m_context.get());
       serializeEntity(e, emitter);
     });
 
@@ -115,8 +115,13 @@ namespace Karen
   {
     std::ifstream fstream(path);
     std::stringstream ss;
+    if(!fstream.good())
+    {
+      KAREN_CORE_ERROR("Can't Load File: {0}", path);
+      return false;
+    }
     ss << fstream.rdbuf();
-
+    KAREN_CORE_WARN("Scene data: {0}", ss.str());
     const auto& data = Load(ss.str().c_str());
     
     const auto& scene = data["Scene"];
@@ -127,21 +132,17 @@ namespace Karen
     }
 
     std::string scene_name = scene.as<std::string>();
-
     const auto& entities = data["Entities"];
     if(entities)
     {
       for(const auto& entity : entities)
       {
         //TODO: uint64_t uuid = entity["UUID"].as<uint64_t>();
-
         std::string tag;
         const auto& ctagn = entity["TagComponent"];
         if(ctagn)
           tag = ctagn["Tag"].as<std::string>();
-
         Entity e = m_context->addEntity(tag);
-        
         const auto& ctransform_n = entity["TransformComponent"]; 
         if(ctransform_n)
         {
@@ -150,7 +151,6 @@ namespace Karen
           ctransform.rotation = ctransform_n["Rotation"].as<Vec3>();
           ctransform.scale = ctransform_n["Scale"].as<Vec3>();
         }
-
         const auto& csprite_n = entity["SpriteComponent"];
         if(csprite_n)
         {
@@ -158,19 +158,16 @@ namespace Karen
           const auto& color = csprite_n["Color"].as<Vec4>();
           csprite.color = color / 255.0f;
         }
-
         const auto& ccamera_n = entity["CameraComponent"];
         if(ccamera_n)
         {
           auto& ccamera = e.addComponent<CameraComponent>();
           auto& cam = ccamera.camera;
-          
           const auto& pd_n = ccamera_n["PerspectiveData"];
           float p_fov = pd_n["FOV"].as<float>();
           float p_near_clip = pd_n["NearClip"].as<float>();
           float p_far_clip = pd_n["FarClip"].as<float>();
           cam.setPerspectiveData({p_fov, p_near_clip, p_far_clip});
-          
           const auto& od_n = ccamera_n["OrthographicData"];
           float o_size = od_n["Size"].as<float>();
           float o_near_clip = od_n["NearClip"].as<float>();
@@ -178,13 +175,11 @@ namespace Karen
           cam.setOrthographicData({o_size, o_near_clip, o_far_clip});
 
           cam.setType((SceneCamera::ProjectionType)ccamera_n["Type"].as<int>());
-          
           ccamera.is_primary = ccamera_n["Primary"].as<bool>();
           ccamera.is_fixed_aspect_ratio = ccamera_n["FixedAspectRatio"].as<bool>();
         }
       }
     }
-
     return true;
   }
 

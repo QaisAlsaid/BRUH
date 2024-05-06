@@ -13,19 +13,16 @@ namespace Karen
   {
   public:
     SceneSerializer();
-    //SceneSerializer(const ARef<Scene>& scene);
-    SceneSerializer(Scene* scene);
-
-    void setContext(Scene* scene);
-    //void setContext(const ARef<Scene>& scene);
+    SceneSerializer(const ARef<Scene>& scene);
+    
+    void setContext(const ARef<Scene>& scene);
 
     bool serializeText(const char* path);
     bool deSerializeText(const char* path);
   private:
     void serializeEntity(Entity& e, YAML::Emitter& em);
   private:
-    Scene* m_context;
-    //ARef<Scene> m_context;
+    ARef<Scene> m_context;
   };
 }
 

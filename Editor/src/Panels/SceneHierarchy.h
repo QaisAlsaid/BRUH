@@ -10,16 +10,17 @@ namespace Karen
   {
   public:
     SceneHierarchy() = default;
-    SceneHierarchy(Scene* context);
+    SceneHierarchy(const ARef<Scene>& context);
 
-    void setContext(Scene* context);
-    inline Scene* getContext() { return m_context; }
+    void setContext(const ARef<Scene>& context);
+    inline ARef<Scene> getContext() { return m_context; }
     void onGuiUpdate();
     Entity getCurrentSelected() { return m_current; }
+    void clearSelection() { m_current = {};}
   private:
     void drawEntityNode(Entity& entity);
   private:
-    Scene* m_context;//TODO:weakRef
+    ARef<Scene> m_context;//TODO:weakRef
     Entity m_current;
   };
 }

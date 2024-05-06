@@ -2,9 +2,36 @@ Scene: ${Name}
 Entities:
   - UUID: 5345347092
     TagComponent:
-      Tag: camera
+      Tag: abohamed
     TransformComponent:
-      Position: [0, 0, 0]
+      Position: [-2.47600007, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [7.05000019, 6.47900009, 1]
+    SpriteComponent:
+      Color: [255, 236, 0, 237]
+  - UUID: 5345347092
+    TagComponent:
+      Tag: abohamed2
+    TransformComponent:
+      Position: [-5.69299984, 0, 2.5]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteComponent:
+      Color: [2.99999976, 255, 62.294117, 255]
+  - UUID: 5345347092
+    TagComponent:
+      Tag: red
+    TransformComponent:
+      Position: [-0.25, 0, 2.5]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    SpriteComponent:
+      Color: [0, 234.324371, 255, 255]
+  - UUID: 5345347092
+    TagComponent:
+      Tag: Entity
+    TransformComponent:
+      Position: [-1.5, 1, 11.25]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     CameraComponent:
@@ -13,9 +40,9 @@ Entities:
         NearClip: 0
         FarClip: 100
       OrthographicData:
-        Size: 6
+        Size: 1
         NearClip: -1
         FarClip: 1
-      Type: 0
+      Type: 1
       Primary: true
       FixedAspectRatio: false

@@ -6,7 +6,6 @@
 #include "Panels/SceneHierarchy.h"
 #include "Panels/Inspector.h"
 #include "HelperWindows.h"
-#include "MenuBar.h"
 
 
 namespace Karen
@@ -35,7 +34,7 @@ namespace Karen
     std::string m_default_font = "../res/fonts/Roboto/Roboto-Regular.ttf";
     uint8_t m_default_font_size = 18;
     Timestep m_time_step;
-    Scene m_scene;
+    ARef<Scene> m_scene;
     std::string m_imgui_ini_path;
     Vec2 m_viewport_size = {0.0f, 0.0f};
     Vec2 m_quad_pos = {0.0f, 0.0f};
@@ -44,9 +43,9 @@ namespace Karen
     std::unordered_map<std::string, Vec4> m_colors;
     SceneHierarchy m_scene_hierarchy_panel;
     Inspector m_inspector_panel;
-    MenuBar m_menu_bar;
   private:
     friend class EditorSerializer;
+    friend class MenuBar;
   };
 }
 

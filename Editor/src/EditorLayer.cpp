@@ -1,10 +1,11 @@
 #include "Karen/Core/Assertion.h"
+#include "Karen/Core/Utils/FileDialogs.h"
+#include "Karen/Scene/SceneSerializer.h"
 #include "pch.h"
 #include <Karen/Karen.h>
 #include "EditorLayer.h"
 #include <imgui.h>
 #include "EditorSerializer.h"
-
 class Script : public Karen::ScriptEntity
 {
 public:
@@ -42,6 +43,7 @@ namespace Karen
 
   void EditorLayer::onAttach()
   {
+    m_scene = createARef<Scene>();
     m_helper_windows["Stats"] = createScoped<StatsWindow>();
   
       m_colors["WindowBg"] = Vec4(0.1f, 0.1f, 0.1f, 1.0f);
@@ -190,10 +192,8 @@ namespace Karen
     m_frame_buff = FrameBuffer::create(s);
     KAREN_CORE_SET_LOGLEVEL(Log::LogLevel::Warn);
     
-    m_scene.deSerializer("../res/config/scene.yaml");
-    m_scene.onStart();
-    m_scene_hierarchy_panel.setContext(&m_scene);
-    m_menu_bar.stats_window = (StatsWindow*)m_helper_windows["Stats"].get();
+    m_scene->onStart();
+    m_scene_hierarchy_panel.setContext(m_scene);
   }
 
 
@@ -205,7 +205,7 @@ namespace Karen
     Renderer2D::resetStats();
     m_frame_buff->bind();
     Renderer2D::clear(Vec4(0.25f, 0.25f, 0.25f, 1.0f));
-    m_scene.onUpdate(ts);
+    m_scene->onUpdate(ts);
     m_frame_buff->unbind();
   }
 
@@ -262,7 +262,60 @@ namespace Karen
     style.WindowMinSize = min_win_size;
     const Stats stats = {Renderer2D::getStats(), m_time_step};
     ((StatsWindow*)m_helper_windows["Stats"].get())->stats = stats;
-    m_menu_bar.onImGuiUpdate();
+    if(ImGui::BeginMainMenuBar())
+    {
+      if(ImGui::BeginMenu("File"))
+      {
+        if(ImGui::MenuItem("New")) 
+        {
+          m_scene_hierarchy_panel.clearSelection();
+          m_scene = createARef<Scene>();
+          m_scene_hierarchy_panel.setContext(m_scene);
+          m_inspector_panel.setCurrentSelected({});
+        }
+  
+        ImGui::Separator();
+        if(ImGui::MenuItem("Open", "Ctrl+O")) 
+        {
+          const auto& path = FileDialogs::OpenFile(nullptr, "Karen Scene (.Karen)");
+          KAREN_TRACE("path: {0}", path);
+          if(!path.empty())
+          {
+            ARef<Scene> s = createARef<Scene>();
+            SceneSerializer ss(s);
+            ss.deSerializeText(path.c_str());
+            m_scene = s;
+            m_scene_hierarchy_panel.setContext(s);
+            m_scene_hierarchy_panel.clearSelection();
+            m_inspector_panel.setCurrentSelected({});
+          }
+        }
+
+        ImGui::Separator();
+  
+        if(ImGui::MenuItem("Save As..")) 
+        {
+          const auto& path = FileDialogs::SaveFile("Karen", "Karen Scene (.Karen)");
+          KAREN_TRACE("path: {0}", path);
+          if(!path.empty())
+          {
+            SceneSerializer ss(m_scene);
+            ss.serializeText(path.c_str());
+          }
+        }
+
+        ImGui::EndMenu();
+      }
+      if(ImGui::BeginMenu("Editor"))
+      {
+        ImGui::Separator();
+        const auto& stats_window = m_helper_windows["Stats"];
+        ImGui::Checkbox("Show Stats Window", &stats_window->is_active);
+        ImGui::EndMenu();
+      }
+      ImGui::EndMainMenuBar();
+    }
+
     m_helper_windows["Stats"]->onImGuiUpdate();
     m_scene_hierarchy_panel.onGuiUpdate();
     auto e = m_scene_hierarchy_panel.getCurrentSelected();
@@ -277,23 +330,27 @@ namespace Karen
     {
       m_frame_buff->reSize(k_panel_size.x, k_panel_size.y);
       m_viewport_size = k_panel_size;
-      m_scene.onViewportResize(m_viewport_size.x, m_viewport_size.y);
+      m_scene->onViewportResize(m_viewport_size.x, m_viewport_size.y);
     }
     ImGui::Image((void*)(uintptr_t)m_frame_buff->getColorAttachmentId(), panel_size, ImVec2(0, 1), ImVec2(1, 0));
     ImGui::End();
-
+    auto& io = ImGui::GetIO();
+    if(io.WantSaveIniSettings)
+      ImGui::SaveIniSettingsToDisk(m_imgui_ini_path.c_str());
   }
 
 
   void EditorLayer::onEvent(Event& e)
   {
-    //m_ortho.onEvent(e);
   }
 
   void EditorLayer::onDetach()
   {
-    m_scene.serializer("../res/config/scene.yaml");
-    m_scene.onEnd();
+    auto& io = ImGui::GetIO();
+    if(io.WantSaveIniSettings)
+      ImGui::SaveIniSettingsToDisk(m_imgui_ini_path.c_str());
+    
+    m_scene->onEnd();
     serializeEditor("../res/config/test.xml");
   }
 

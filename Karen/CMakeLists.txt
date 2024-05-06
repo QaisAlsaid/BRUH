@@ -46,7 +46,7 @@ set(KAREN_SRC src/Karen/Core/App.cpp src/Karen/Core/Log.cpp
     src/Karen/Core/Instrumentor.cpp src/Karen/Render/API/RendererCapabilities.cpp
     src/Karen/Render/API/FrameBuffer.cpp src/Platforms/OpenGl/OpenGlFrameBuffer.cpp
     src/Karen/Scene/Scene.cpp src/Karen/Scene/Entity.cpp src/Karen/Scene/SceneCamera.cpp
-    src/Karen/Scene/SceneSerializer.cpp
+    src/Karen/Scene/SceneSerializer.cpp src/Platforms/Linux/LinuxFileDialogs.cpp
     include/Karen/Karen.h
   )
 #set(KAREN_SRC_H src/Karen/App.h src/Karen/Log.h src/Platforms/Windows/WindowsWindow.h src/Karen/Layers/Layer.h
