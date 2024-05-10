@@ -1,6 +1,6 @@
-#ifdef _WIN32
-
 #include "pch.h"
+#ifdef KAREN_PLATFORM_WINDOWS
+
 #include "Karen/Core/Input.h"
 #include "Karen/Core/App.h"
 #include <GLFW/glfw3.h>
@@ -45,4 +45,4 @@ namespace Karen
   }
 }
 
-#endif //_WIN32
+#endif //KAREN_PLATFORM_WINDOWS

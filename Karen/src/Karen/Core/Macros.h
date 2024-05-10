@@ -25,7 +25,7 @@
   #else 
     #define KAREN_PLATFORM_LINUX
   #endif//defined(__ANDROID__)
-#elif defined(_Win32)
+#elif defined(_WIN32)
   #define KAREN_PLATFORM_WINDOWS
   #if defined(_WIN64) 
     #define KAREN_PLATFORM_WINDOWS_64
