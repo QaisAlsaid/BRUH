@@ -31,6 +31,7 @@ namespace Karen
     m_gui_layer = new GuiLayer("Base GuiLayer");
     m_gui_layer->activate();
     pushOverlay(m_gui_layer);
+    m_asset_manager.loadConfig("../res/config/assets.xml");
    }
 
   App::~App()

@@ -20,6 +20,8 @@
 #include <future>
 #include <shared_mutex>
 #include<filesystem>
+#include <string_view>
+
 
 #include "Karen/Core/Log.h"
 #include "Karen/Core/Instrumentor.h"

@@ -105,7 +105,10 @@ namespace Karen
 
       drawComponent<SpriteComponent>(m_current, "Sprite", [&](auto* sprite_comp, bool removed)
       {
-        ImGui::ColorEdit4("Color", glm::value_ptr(sprite_comp->color));  
+        if(ImGui::Button("Set Texture"))
+          sprite_comp->texture_handel = "tux"; //super temp
+        ImGui::Text("TextureHandel %s", sprite_comp->texture_handel.c_str());
+        ImGui::ColorEdit4("Color", glm::value_ptr(sprite_comp->color)); 
         if(removed)
         {
           m_current.removeComponent<SpriteComponent>();

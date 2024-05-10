@@ -25,4 +25,5 @@
 #include "Karen/Scene/Entity.h"
 #include "Karen/Scene/Components.h"
 #include "Karen/Core/Utils/FileDialogs.h"
+#include "Karen/Core/AssetManager.h"
 #endif //KAREN_H

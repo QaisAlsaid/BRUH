@@ -1,11 +1,18 @@
 #include "Scene.h"
 #include "Entity.h"
 #include "Components.h"
+#include "Karen/Core/App.h"
 #include "Karen/Render/Renderer2D/Renderer2D.h"
 
 
 namespace Karen
 {
+  Scene::Scene(const std::string_view& name)
+    : m_name(name)
+  {
+
+  }
+
   Entity Scene::addEntity(const std::string& tag)
   {
     Entity e(m_registry.create(), this);
@@ -61,7 +68,13 @@ namespace Karen
       for(auto e : group)
       {
         auto [trans, sprite] = group.get<TransformComponent, SpriteComponent>(e);
-        Renderer2D::drawQuad(trans.getTransformationMatrix(), sprite.color);
+        if(!sprite.texture_handel.empty())
+        {
+          Renderer2D::drawQuad(trans.getTransformationMatrix(),
+              App::get()->assetManager().getTexture2D(sprite.texture_handel), sprite.color);
+        }
+        else
+          Renderer2D::drawQuad(trans.getTransformationMatrix(), sprite.color);
       }
       Renderer2D::endScene();
     }

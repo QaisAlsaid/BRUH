@@ -7,6 +7,7 @@
 #include "Karen/Core/Layers/LayerStack.h"
 #include "Karen/Core/Layers/GuiLayer.h"
 #include "Karen/Core/Events/Events.h"
+#include "Karen/Core/AssetManager.h"
 
 
 namespace Karen
@@ -23,6 +24,16 @@ namespace Karen
     {
       return *m_window;
     }
+
+    inline AssetManager& assetManager()
+    {
+      return m_asset_manager;
+    }
+
+    inline const AssetManager& assetManager() const
+    {
+      return m_asset_manager;
+    }
     
     inline static App* get()
     {
@@ -31,6 +42,7 @@ namespace Karen
     }
   private:
     float m_last_time = 0.0f;
+    AssetManager m_asset_manager;
     std::unique_ptr<Window> m_window;
     GuiLayer* m_gui_layer = nullptr;
     bool m_running = true;

@@ -1,6 +1,7 @@
 #ifndef KR_COMPONENTS_H
 #define KR_COMPONENTS_H
 
+#include "Karen/Render/API/Texture.h"
 #include "SceneCamera.h"
 #include "ScriptEntity.h"
 #include "Karen/Core/Math/math.h"
@@ -37,9 +38,10 @@ namespace Karen
 
   struct SpriteComponent
   {
+    std::string texture_handel;
     Vec4 color;
     SpriteComponent() = default;
-    SpriteComponent(const Vec4& color) : color(color) {}
+    SpriteComponent(const Vec4& color, const std::string& tux) : texture_handel(tux), color(color) {}
   };
 
   struct CameraComponent

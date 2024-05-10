@@ -1,0 +1,14 @@
+<Assets>
+  <Asset>
+    <Type>Texture2D</Type>
+    <Name>tux</Name>
+    <Path>../res/textuers/img1.png</Path>
+    <Flip>True</Flip>
+    <Filter>Linear</Filter>
+  </Asset>
+  <Asset>
+    <Type>Scene</Type>
+    <Name>scene</Name>
+    <Path>../res/config/scene.yaml</Path>
+  </Asset>
+</Assets>

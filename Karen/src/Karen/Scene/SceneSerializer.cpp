@@ -93,7 +93,7 @@ namespace Karen
     Emitter emitter;
     emitter << BeginMap;
     
-    emitter << Key << "Scene" << Value << "${Name}";
+    emitter << Key << "Scene" << Value << m_context->m_name;
 
     emitter << Key << "Entities" << Value << BeginSeq;
     m_context->m_registry.view<TagComponent>().each([&](auto id, auto& tc)
@@ -130,8 +130,8 @@ namespace Karen
       KAREN_CORE_ERROR("No Scene Node in Scene Serializeation File !?");
       return false;
     }
-
     std::string scene_name = scene.as<std::string>();
+    m_context = createARef<Scene>(scene_name);
     const auto& entities = data["Entities"];
     if(entities)
     {
@@ -157,6 +157,8 @@ namespace Karen
           auto& csprite = e.addComponent<SpriteComponent>();
           const auto& color = csprite_n["Color"].as<Vec4>();
           csprite.color = color / 255.0f;
+          const auto& texture_handel = csprite_n["TextureHandel"].as<std::string>();
+          csprite.texture_handel = texture_handel;
         }
         const auto& ccamera_n = entity["CameraComponent"];
         if(ccamera_n)
@@ -217,6 +219,7 @@ namespace Karen
       auto& sprite = e.getComponent<SpriteComponent>();
 
       emitter << Key << "Color" << Value << sprite.color * 255.0f;
+      emitter << Key << "TextureHandel" << Value << sprite.texture_handel;
       emitter << EndMap;
     }
 
