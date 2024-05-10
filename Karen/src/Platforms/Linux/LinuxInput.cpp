@@ -1,4 +1,6 @@
 #include "pch.h"
+#ifdef KAREN_PLATFORM_LINUX
+
 #include "Karen/Core/App.h"
 #include "Karen/Core/Input.h"
 #include <GLFW/glfw3.h>
@@ -41,3 +43,5 @@ namespace Karen
     return status == GLFW_RELEASE;
   }
 }
+
+#endif //KAREN_PLATFORM_LINUX

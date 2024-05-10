@@ -277,7 +277,7 @@ namespace Karen
         ImGui::Separator();
         if(ImGui::MenuItem("Open", "Ctrl+O")) 
         {
-          const auto& path = FileDialogs::OpenFile(nullptr, "Karen Scene (.Karen)");
+          const auto& path = FileDialogs::OpenFile("yaml", "Karen Scene (.yaml)");
           KAREN_TRACE("path: {0}", path);
           if(!path.empty())
           {
@@ -295,7 +295,7 @@ namespace Karen
   
         if(ImGui::MenuItem("Save As..")) 
         {
-          const auto& path = FileDialogs::SaveFile("Karen", "Karen Scene (.Karen)");
+          const auto& path = FileDialogs::SaveFile("yaml", "Karen Scene (.Karen)");
           KAREN_TRACE("path: {0}", path);
           if(!path.empty())
           {

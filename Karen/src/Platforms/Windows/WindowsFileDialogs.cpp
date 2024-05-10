@@ -11,7 +11,7 @@
 
 namespace Karen
 {
-  static char* processFilters(const char* kr_filters, const char* prev);
+  static const char* processFilters(const char* kr_filters, const char* prev);
   static void split(const std::string& str, std::vector<std::string>& cont, char sep) 
   {
     KAREN_PROFILE_FUNCTION();
@@ -30,14 +30,14 @@ namespace Karen
     OPENFILENAME f;
     CHAR f_s[1024] = {0};
     ZeroMemory(&f, sizeof(OPENFILENAME));
-    f.LStructSize = sizeof(OPENFILENAME);
-    f.hwndOwner = glfwGetWin32Window(App::get()->getWindow().getNativeWindow());
-    f.LpstrFile = f_s;
+    f.lStructSize = sizeof(OPENFILENAME);
+    f.hwndOwner = glfwGetWin32Window((GLFWwindow*)App::get()->getWindow().getNativeWindow());
+    f.lpstrFile = f_s;
     f.nMaxFile = sizeof(f_s);
-    f.LpstrFilter = filters;
+    f.lpstrFilter = filters;
     f.nFilterIndex = 1;
     f.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
-    if(GetOpenFileNameA(&f) TRUE)
+    if(GetOpenFileName(&f) == TRUE)
     {
       return f.lpstrFile;
     }
@@ -50,14 +50,14 @@ namespace Karen
     OPENFILENAME f;
     CHAR f_s[1024] = {0};
     ZeroMemory(&f, sizeof(OPENFILENAME));
-    f.LStructSize = sizeof(OPENFILENAME);
-    f.hwndOwner = glfwGetWin32Window(App::get()->getWindow().getNativeWindow());
-    f.LpstrFile = f_s;
+    f.lStructSize = sizeof(OPENFILENAME);
+    f.hwndOwner = glfwGetWin32Window((GLFWwindow*)App::get()->getWindow().getNativeWindow());
+    f.lpstrFile = f_s;
     f.nMaxFile = sizeof(f_s);
-    f.LpstrFilter = filters;
+    f.lpstrFilter = filters;
     f.nFilterIndex = 1;
     f.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
-    if(GetSaveFileNameA(&f) TRUE)
+    if(GetSaveFileName(&f) == TRUE)
     {
       return f.lpstrFile;
     }
@@ -65,10 +65,10 @@ namespace Karen
 
   }
 
-  char* processFilters(const char* kr_filters, const char* prev)
+  const char* processFilters(const char* kr_filters, const char* prev)
   {
     if(!kr_filters)
-      return std::string();
+      return nullptr;
 
     std::stringstream ss;
     std::vector<std::string> fils;
@@ -81,9 +81,14 @@ namespace Karen
     {
       ss << "." << fil << " ";
     }
-    return ss.str().c_str();
+    const auto& str = ss.str();
+    char* buff = (char*)alloca(sizeof(char) * str.size());
+    for(uint32_t i = 0; i < str.size(); ++i)
+    {
+      buff[i] = str.at(i);
+    }
+    return buff;
   }
 }
 
-#en
 #endif //KAREN_PLATFORM_WINDOWS
