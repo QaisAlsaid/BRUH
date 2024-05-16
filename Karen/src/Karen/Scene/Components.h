@@ -6,7 +6,8 @@
 #include "ScriptEntity.h"
 #include "Karen/Core/Math/math.h"
 
-
+class b2Body;
+class b2Fixture;
 namespace Karen
 {
   struct TagComponent
@@ -70,6 +71,29 @@ namespace Karen
       ScriptEntity* (*instantiateScript)();
       void (*DestroyScript)(NativeScriptComponent*);
     friend class Scene;
+  };
+
+  struct RigidBody2DComponent
+  {
+    enum class BodyType {Static = 0, Kinematic, Dynamic};
+    
+    BodyType type = BodyType::Dynamic;
+   
+    b2Body* body = nullptr;
+    bool fixed_rotation = false;
+  };
+
+  struct BoxColliderComponent 
+  {
+    Vec2 offset = {0.0f, 0.0f};
+    Vec2 size = {0.5f, 0.5f};
+    
+    float density = 1.0f;
+    float friction = 0.5f;
+    float restitution = 0.0f;
+    float restitution_threshold = 0.5f;
+
+    b2Fixture* fixture = nullptr;
   };
 }
 

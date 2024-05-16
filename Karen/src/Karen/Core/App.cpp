@@ -28,10 +28,10 @@ namespace Karen
     stat_instance = this;
     m_window = std::unique_ptr<Window>(Window::create());
     m_window->setEventCallbackFunction(BIND_EVENT_FUNCTION(App::onEvent));
+    m_asset_manager.loadConfig("../res/config/assets.xml");
     m_gui_layer = new GuiLayer("Base GuiLayer");
     m_gui_layer->activate();
     pushOverlay(m_gui_layer);
-    m_asset_manager.loadConfig("../res/config/assets.xml");
    }
 
   App::~App()

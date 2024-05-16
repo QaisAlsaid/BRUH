@@ -19,3 +19,6 @@
 [submodule "Karen/vendor/yaml-cpp"]
 	path = Karen/vendor/yaml-cpp
 	url = https://github.com/jbeder/yaml-cpp.git
+[submodule "Karen/vendor/Box2D"]
+	path = Karen/vendor/Box2D
+	url = https://github.com/QaisAlsaid/box2d.git

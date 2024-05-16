@@ -47,14 +47,14 @@ namespace Karen
   {
     const auto& tag = e.getComponent<TagComponent>().name;
     ImGuiTreeNodeFlags flags = (m_current == e ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
-    bool opend = ImGui::TreeNodeEx((void*)(uintptr_t)e, flags, tag.c_str());
+    bool opend = ImGui::TreeNodeEx((void*)(uintptr_t)e, flags, "%s",tag.c_str());
     if(ImGui::IsItemClicked())
     {
       m_current = e;
     }
     bool deleted = false;
     auto popup_flags = ImGuiPopupFlags_NoOpenOverExistingPopup | ImGuiPopupFlags_MouseButtonRight;
-    if(ImGui::BeginPopupContextItem("DeleteEntity", popup_flags))
+    if(ImGui::BeginPopupContextItem(std::string("Delete" + std::to_string((uint32_t)e)).c_str(), popup_flags))
     {
       if(ImGui::MenuItem("Delete Entity")) 
         deleted = true;

@@ -24,7 +24,19 @@ namespace Karen
     template<typename T>
     inline bool hasComponent()
     {
-      return m_scene->m_registry.try_get<T>(m_id);
+      return m_scene->m_registry.any_of<T>(m_id);
+    }
+
+    template<typename... Ts>
+    inline bool hasAll()
+    {
+      return m_scene->m_registry.all_of<Ts...>(m_id);
+    }
+
+    template<typename... Ts>
+    inline bool hasAny(Ts&&... ts)
+    {
+      return m_scene->m_registry.any_of<Ts...>(m_id);
     }
   
     template<typename T>
@@ -52,6 +64,12 @@ namespace Karen
 
     template<typename T>
     inline void removeComponent()
+    {
+      m_scene->m_registry.erase<T>(m_id);
+    }
+
+    template<typename T>
+    inline void tryRemoveComponent()
     {
       m_scene->m_registry.remove<T>(m_id);
     }

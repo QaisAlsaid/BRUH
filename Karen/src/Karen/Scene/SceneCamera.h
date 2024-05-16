@@ -31,25 +31,25 @@ namespace Karen
     SceneCamera(const OrthographicData& data);
     SceneCamera(const PerspectiveData& data);
 
-    void setOrthographicData(const OrthographicData& data);
-    void setPerspectiveData(const PerspectiveData& data);
-    void setOrthographicData(float size, float near_clip = -1.0f, float far_clip = 1.0f);
-    void setPerspectiveData(float fov, float near_clip = 0.0f, float far_clip = 1000.0f);
-    
+    void onUpdate();
     void setViewport(uint32_t width, uint32_t height);
+    
     inline void setType(ProjectionType t) 
     { 
       if(t != m_type)
       {
         m_type = t; 
-        reCalculate();
       }
-    }
+    }    
+
+    inline void setOrthographicData(const OrthographicData& data)                  { m_ortho = data; };
+    inline void setPerspectiveData(const PerspectiveData& data)                    { m_persp = data; }
+    inline void setOrthographicData(float size, float nc = 1.0f, float fc = 1.0f)  { m_ortho = {size, nc, fc}; }
+    inline void setPerspectiveData(float fov, float nc = 0.0f, float fc = 1000.0f) { m_persp = {fov, nc, fc}; }
+    
     inline       ProjectionType    getType() const        { return m_type; }
     inline const OrthographicData& getOrthographicData()  { return m_ortho; }
     inline const PerspectiveData&  getPerspectiveData()   { return m_persp; } 
-  private:
-    void reCalculate();
   private:
   private:
     float m_aspect_ratio   = 1280.0f/720.0f;

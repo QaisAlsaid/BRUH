@@ -13,7 +13,8 @@ namespace Karen
 
     virtual uint32_t getWidth()  const = 0;
     virtual uint32_t getHeight() const = 0;
-
+    
+    virtual uint32_t getRendererID() const = 0;
     virtual void setData(size_t data_size, const void* data) = 0;
     virtual void bind(uint8_t slot = 0) const = 0;
     virtual bool operator==(const Texture& rhs) const = 0;

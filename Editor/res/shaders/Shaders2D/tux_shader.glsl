@@ -38,4 +38,6 @@ void main()
 {
   int idx = int(v_tux_idx);
   #KAREN_MAX_TEXTUER_SWITCH(idx)
+  if(frag_color.a < 0.001)
+    discard;
 }

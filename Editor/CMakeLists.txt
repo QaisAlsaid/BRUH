@@ -8,7 +8,8 @@ set(KAREN_EMSCRIPTEN OFF CACHE BOOL "enable build for the web")
 add_subdirectory(../Karen/ ../Karen/build/)
 add_executable(${PROJECT_NAME} src/App.cpp src/EditorLayer.cpp
   src/Panels/SceneHierarchy.cpp src/Panels/Inspector.cpp
-  src/HelperWindows.cpp src/EditorSerializer.cpp)
+  src/HelperWindows.cpp src/EditorSerializer.cpp src/Panels/ContentBrowser.cpp
+  src/Panels/AssetManagerGui.cpp)
 target_include_directories(${PROJECT_NAME} PUBLIC ${KAREN_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} Karen)
 if(${KAREN_IS_EMSCRIPTEN})

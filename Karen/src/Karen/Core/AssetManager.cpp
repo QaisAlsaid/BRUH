@@ -1,4 +1,5 @@
 #include "Karen/Core/Log.h"
+#include "Karen/Scene/SceneSerializer.h"
 #include "pch.h"
 #include "AssetManager.h"
 
@@ -9,6 +10,18 @@ namespace Karen
   AssetManager::AssetManager(const char* cfg)
   {
     loadConfig(cfg);
+  }
+
+  void AssetManager::reload()
+  {
+    for(auto iter : m_textures)
+    {
+      reloadTexture(iter.first);
+    }
+    for(auto iter : m_scenes)
+    {
+      reloadScene(iter.first);
+    }
   }
 
   bool AssetManager::loadConfig(const char* cfg)
@@ -38,7 +51,7 @@ namespace Karen
         bool bool_flip = flip != "False";
         const auto& gen_tux = Karen::Texture2D::create(path, bool_flip);
         //TODO: filter
-        addTexture(name, gen_tux);
+        addTexture(name, gen_tux, path);
       }
       else if(type == "Scene")
       {
@@ -50,7 +63,7 @@ namespace Karen
         
         ARef<Scene> gen_scene;
         gen_scene.reset(new Scene(name));
-        addScene(name, gen_scene);
+        addScene(name, gen_scene, path);
       }
       else
       {
@@ -60,25 +73,54 @@ namespace Karen
     return true;
   }
 
-  void AssetManager::addScene(const std::string& name, const ARef<Scene>& scene)
+  void AssetManager::addScene(const std::string& name, const ARef<Scene>& scene, const std::string& path)
   {
     if(m_scenes.find(name) != m_scenes.end())
-      KAREN_CORE_WARN("Scenes must have unique names, name:" + std::string(name) + "is already taken");
+      KAREN_CORE_WARN("Scenes must have unique names, name: " + std::string(name) + " is already taken");
     else [[likely]]
     {
-      m_scenes[name] = scene;
+      SceneAsset a_scene;
+      a_scene.path = path;
+      a_scene.scene = scene;
+      m_scenes[name] = a_scene;
       KAREN_CORE_ERROR("Scene added name: {0}", name);
     }
   }
+
+  void AssetManager::reloadScene(const std::string& name)
+  {
+    if(m_scenes.find(name) == m_scenes.end())
+      KAREN_CORE_ERROR("Called reloadScene() with unknown scene name: {0}", name);
+    else [[likely]]
+    {
+      auto& a_scene = m_scenes.at(name);
+      SceneSerializer ss(a_scene.scene);
+      if(!ss.deSerializeText(a_scene.path.c_str()))
+        KAREN_CORE_ERROR("Failed to load Scene from Path: {0}", a_scene.path);
+    }
+  }
   
-  void AssetManager::addTexture(const std::string& name, const ARef<Texture2D>& tux)
+  void AssetManager::addTexture(const std::string& name, const ARef<Texture2D>& tux, const std::string& path)
   {
     if(m_textures.find(name) != m_textures.end())
       KAREN_CORE_WARN("Textures must have unique names, name:" + std::string(name) + "is already taken");
     else [[likely]]
     {
-      m_textures[name] = tux;
+      Texture2DAsset a_tux;
+      a_tux.path = path;
+      a_tux.texture = tux;
+      m_textures[name] = a_tux;
       KAREN_CORE_ERROR("TUX added name: {0}", name);
+    }
+  }
+
+  void AssetManager::reloadTexture(const std::string& name)
+  {
+    if(m_textures.find(name) == m_textures.end())
+      KAREN_CORE_ERROR("Called reloadTexture() with unknown texture name: {0}", name);
+    else [[likely]]
+    {
+      m_textures.at(name).texture = Texture2D::create(m_textures.at(name).path);
     }
   }
 }

@@ -16,6 +16,11 @@ namespace Karen
     void bind(uint8_t slot = 0) const override;
 
     void setData(size_t data_size, const void* data) override;
+    
+    uint32_t getRendererID() const override
+    {
+      return m_renderer_id;
+    }
 
     uint32_t getWidth()  const override 
     {

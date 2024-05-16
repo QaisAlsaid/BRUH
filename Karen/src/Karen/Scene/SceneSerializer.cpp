@@ -121,7 +121,6 @@ namespace Karen
       return false;
     }
     ss << fstream.rdbuf();
-    KAREN_CORE_WARN("Scene data: {0}", ss.str());
     const auto& data = Load(ss.str().c_str());
     
     const auto& scene = data["Scene"];
@@ -131,17 +130,18 @@ namespace Karen
       return false;
     }
     std::string scene_name = scene.as<std::string>();
-    m_context = createARef<Scene>(scene_name);
+    m_context->clear();// = createARef<Scene>(scene_name);
     const auto& entities = data["Entities"];
     if(entities)
     {
       for(const auto& entity : entities)
       {
-        //TODO: uint64_t uuid = entity["UUID"].as<uint64_t>();
+        uint64_t uuid = entity["UUID"].as<uint64_t>();
         std::string tag;
         const auto& ctagn = entity["TagComponent"];
         if(ctagn)
           tag = ctagn["Tag"].as<std::string>();
+        
         Entity e = m_context->addEntity(tag);
         const auto& ctransform_n = entity["TransformComponent"]; 
         if(ctransform_n)

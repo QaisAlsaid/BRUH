@@ -4,6 +4,8 @@ project(Karen LANGUAGES CXX)
 find_package(OpenGL REQUIRED)
 
 set(GLFW_BUILD_DOCS OFF CACHE BOOL  "GLFW lib only")
+#set(BOX2D_BUILD_UNIT_TESTS OFF CACHE BOOL "Build the Box2D unit tests")
+#set(BOX2D_BUILD_TESTBED OFF CACHE BOOL "Build the Box2D testbed")
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
@@ -82,6 +84,7 @@ set(KAREN_PUBLIC_INCLUDE_DIRS
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glm
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/stb_image
+  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/Box2D/include
   )
 if(NOT KAREN_EMSCRIPTEN)
 add_subdirectory(vendor/glfw)
@@ -93,11 +96,12 @@ add_subdirectory(vendor/glm)
 add_subdirectory(vendor/pugixml)
 add_subdirectory(vendor/entt)
 add_subdirectory(vendor/yaml-cpp)
+add_subdirectory(vendor/Box2D)
 if(NOT KAREN_EMSCRIPTEN)
-set(KAREN_LIBS glm glfw imgui glad stb pugixml yaml-cpp)
+set(KAREN_LIBS glm glfw imgui glad stb pugixml yaml-cpp box2d)
 else()
 set(KAREN_ADDITIONAL_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../../emsdk/upstream/emscripten/cache/sysroot/include)
-set(KAREN_LIBS glm imgui stb pugixml yaml-cpp)
+set(KAREN_LIBS glm imgui stb pugixml yaml-cpp box2d)
 endif()
 
 if(KAREN_IS_SHARED)
