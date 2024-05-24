@@ -5,7 +5,7 @@
 
 namespace Karen
 {
-  OpenGlTexture2D::OpenGlTexture2D(const std::string& file_path, bool flip_v)
+  OpenGlTexture2D::OpenGlTexture2D(const std::string& file_path, bool flip_v, Filters f)
   {
     KAREN_PROFILE_FUNCTION();
     glCall(glGenTextures(1, &m_renderer_id));

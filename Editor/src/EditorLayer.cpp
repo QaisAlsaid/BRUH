@@ -1,14 +1,32 @@
-#include "Karen/Core/Assertion.h"
-#include "Karen/Core/Utils/FileDialogs.h"
-#include "Karen/Scene/SceneSerializer.h"
-#include "pch.h"
-#include <Karen/Karen.h>
+#include <algorithm>
+#include <pch.h>
 #include "EditorLayer.h"
-#include <imgui.h>
 #include "EditorSerializer.h"
+#include "Karen/Core/ButtonsAndKeyCodes.h"
+#include "Karen/Core/Events/KeyEvents.h"
+#include "Karen/Core/Timestep.h"
+#include "Karen/Scene/Components.h"
+#include "Karen/Scene/SceneSerializer.h"
+#include "Karen/Scene/ScriptEntity.h"
+#include "glm/ext/quaternion_common.hpp"
+#include "glm/gtc/type_ptr.hpp"
+
+#include <Karen/Karen.h>
+#include <imgui.h>
+#include <ImGuizmo.h>
 
 namespace Karen
 {
+  class Script : public ScriptEntity
+  {
+    public:
+    float speed = 1;
+    void onUpdate(Timestep ts) override
+    {
+      m_entity.getComponent<TransformComponent>().position.x += speed * ts;
+    }
+    void onDestroy() override{}
+  };
 
   EditorLayer::EditorLayer()
     : Layer("EditorLayer"), m_content_browser("../res"), m_asset_manager_panel(&App::get()->assetManager())
@@ -20,10 +38,11 @@ namespace Karen
     RenderCommands::init();
     Renderer2D::init("../res/shaders/Shaders2D/config.xml");
   }
-
+static float* speed = new float;
   void EditorLayer::onAttach()
   {
-    m_scene = createARef<Scene>();
+    m_editor_scene = createARef<Scene>();
+    m_scene = m_editor_scene;
     m_helper_windows["Stats"] = createScoped<StatsWindow>();
   
           
@@ -39,6 +58,11 @@ namespace Karen
     initImGui();
 
     FrameBuffer::Specs s;
+    s.attachment_specs = {
+      {FrameBuffer::TextureFormat::RGBA, FrameBuffer::TextureInternalFormat::RGBA8, "render_buffer"}, 
+      {FrameBuffer::TextureFormat::RedInt, FrameBuffer::TextureInternalFormat::Int32, "id_buffer"},
+      {FrameBuffer::TextureFormat::DepthStencil, FrameBuffer::TextureInternalFormat::Depth24Stencil8, "depth_buffer"}
+    };
     s.width = 1280;
     s.height = 720;
     s.is_swap_chain_target = true;
@@ -46,14 +70,26 @@ namespace Karen
     KAREN_CORE_SET_LOGLEVEL(Log::LogLevel::Warn);
     
     m_scene_hierarchy_panel.setContext(m_scene);
+    auto e = m_scene->addEntity("Camera");
+    auto& nsc = e.addComponent<NativeScriptComponent>();
+    
+    nsc.bind<Script>();
+   //TODO: Native script instance* is templated to the type given
+    //speed = &((Script*)nsc.instance)->speed;
   }
 
 
   void EditorLayer::onUpdate(Timestep ts)
   {
+    m_camera.onUpdate(ts);
+    m_scene->setEditorCamera(m_camera.getView(), m_camera.getProjection());
+    if(Input::isKeyPressed(Keyboard::LeftControl) || Input::isKeyPressed(Keyboard::RightControl))
+      handelCMD((int)Keyboard::LeftControl);
     m_time_step = ts;
     Renderer2D::resetStats();
     m_frame_buff->bind();
+    //m_frame_buff->bindWriteFb(6);
+    //Renderer2D::clear({200, 200, 200, 200});
     Renderer2D::clear(Vec4(0.25f, 0.25f, 0.25f, 1.0f));
     switch(m_scene_state)
     {
@@ -68,8 +104,39 @@ namespace Karen
         break;
       }
     }
+      auto abs_inv_mouse = ImGui::GetMousePos();
+      Vec2 mouse(abs_inv_mouse.x, abs_inv_mouse.y);
+      mouse -= m_min_vp_bounds;
+
+      Vec2 vp_size = m_max_vp_bounds - m_min_vp_bounds;
+      mouse.y = vp_size.y - mouse.y;
+        
+
+     // mouse = m_max_vp_bounds;
+      //KAREN_CORE_WARN("MOUSE: {0}", mouse);
+      /*
+      if(mouse.x > 0 && mouse.y > 0 && mouse.x < vp_size.x && mouse.y < vp_size.y)
+      {
+        int x = m_frame_buff->readPixelI(1, mouse.x, mouse.y);
+        KAREN_CORE_ERROR("ID: {0}, MOUSE: {1}", x, mouse);
+      }
+      auto se = m_scene_hierarchy_panel.getCurrentSelected(); 
+      if(se && se.hasComponent<TransformComponent>())
+      {
+        m_scene->forEach<TransformComponent>([&](auto e, TransformComponent& tsc)
+        {
+          auto& pos = tsc.position;
+          auto& scale = tsc.scale;
+          //if(mouse.x > pos.x + scale.x/2.0f && mouse.x < pos.x - scale.x/2.0f &&
+          //   mouse.y > pos.y + scale.y/2.0f && mouse.y < pos.y - scale.y/2.0f)
+          KAREN_CORE_ERROR("True entity id: {0}", (uint32_t)e);
+        });
+        auto val = m_frame_buff->readPixelI(1, mouse.x, mouse.y);
+        KAREN_ERROR("Value: {0}, mouse: {1}", val, mouse);
+      }
+      */
       m_frame_buff->unbind();
-  }
+    }
 
   void EditorLayer::onGuiUpdate()
   {
@@ -143,6 +210,31 @@ namespace Karen
           break;
       }
     }
+      ImGui::DragFloat("Cam run speed", speed);
+    
+//Editor Camera
+    ImGui::Separator();
+    ImGui::Text("Editor Camera");
+    ImGui::DragFloat3("Position", glm::value_ptr(m_camera.position));
+    auto rot_deg = glm::degrees(m_camera.rotation);
+    ImGui::DragFloat3("Rotation", glm::value_ptr(rot_deg));
+    m_camera.rotation = glm::radians(rot_deg);
+    auto fov_deg = glm::degrees(m_camera.fov);
+    ImGui::DragFloat("Fov", &fov_deg);
+    m_camera.fov = glm::radians(fov_deg);
+    
+    auto max_fov_deg = glm::degrees(m_camera.max_fov);
+    ImGui::DragFloat("Max Fov", &max_fov_deg);
+    m_camera.max_fov = glm::radians(max_fov_deg);
+
+    auto min_fov_deg = glm::degrees(m_camera.min_fov);
+    ImGui::DragFloat("Min Fov", &min_fov_deg);
+    m_camera.min_fov = glm::radians(min_fov_deg);
+    
+    ImGui::DragFloat("Far", &m_camera.far);
+    ImGui::DragFloat("Near", &m_camera.near);
+    ImGui::DragFloat("Sensitivaty", &m_camera.mouse_sensitivaty);
+    ImGui::Checkbox("F.A.R", &m_camera.fixed_aspect_ratio);
     ImGui::End();
 
 
@@ -154,6 +246,7 @@ namespace Karen
   void EditorLayer::onScenePlay()
   {
     m_scene_state = SceneState::Play;
+    m_scene = Scene::copy(m_editor_scene);
     m_scene->onStart();
   }
 
@@ -161,10 +254,7 @@ namespace Karen
   {
     m_scene_state = SceneState::Stop;
     m_scene->onEnd();
-  }
-
-  void EditorLayer::onEvent(Event& e)
-  {
+    m_scene = m_editor_scene;
   }
 
   void EditorLayer::onDetach()
@@ -188,8 +278,9 @@ namespace Karen
     m_inspector_panel.onGuiUpdate();
 
     ImGui::ShowDemoWindow(&m_show_imgui_demo);
+    ImGui::Begin("Viewport", nullptr, ImGuiWindowFlags_NoDecoration);
+    auto vp_offset = ImGui::GetCursorPos();
 
-    ImGui::Begin("Viewport");
     const ImVec2 panel_size = ImGui::GetContentRegionAvail();
     Vec2 k_panel_size = {panel_size.x, panel_size.y};
     if(m_viewport_size != k_panel_size)
@@ -197,8 +288,38 @@ namespace Karen
       m_frame_buff->reSize(k_panel_size.x, k_panel_size.y);
       m_viewport_size = k_panel_size;
       m_scene->onViewportResize(m_viewport_size.x, m_viewport_size.y);
+      m_camera.onResize(m_viewport_size.x, m_viewport_size.y);
     }
-    ImGui::Image((void*)(uintptr_t)m_frame_buff->getColorAttachmentId(), panel_size, ImVec2(0, 1), ImVec2(1, 0));
+    m_camera.aspect_ratio = m_viewport_size.x/m_viewport_size.y;
+    ImGui::Image((void*)(uintptr_t)m_frame_buff->getColorAttachmentId("render_buffer"), panel_size, ImVec2(0, 1), ImVec2(1, 0));
+
+    auto window_size = ImGui::GetWindowSize();
+    auto min_vp_bounds = ImGui::GetWindowPos();
+
+    m_min_vp_bounds = *(Vec2*)&min_vp_bounds;
+    m_min_vp_bounds.x += vp_offset.x;
+    m_min_vp_bounds.y += vp_offset.y;
+    
+    m_max_vp_bounds = m_min_vp_bounds;
+    m_max_vp_bounds.x += window_size.x;
+    m_max_vp_bounds.y += window_size.y;
+
+
+
+    const ImVec2 win_pos = ImGui::GetWindowPos();
+
+   /* auto mp = Karen::Input::getMousePos();
+    auto t_x = mp.x - win_pos.x;
+    t_x = (t_x/window_size.x) * App::get()->getWindow().getWidth();
+
+    auto t_y = mp.y - win_pos.y;
+    t_y = App::get()->getWindow().getHeight() - (t_y / window_size.y * App::get()->getWindow().getHeight());
+
+    m_max_vp_bounds.x = t_x;
+    m_max_vp_bounds.y = t_y;
+*/
+    updateGizmos(*(Vec2*)&win_pos, *(Vec2*)&window_size);
+
     ImGui::End();
 
   }
@@ -212,7 +333,10 @@ namespace Karen
         if(ImGui::MenuItem("New")) 
         {
           m_scene_hierarchy_panel.clearSelection();
-          m_scene = createARef<Scene>();
+          m_scene->clear();
+          m_editor_scene->clear();
+          m_editor_scene = createARef<Scene>();
+          m_scene = m_editor_scene;
           m_scene_hierarchy_panel.setContext(m_scene);
           m_inspector_panel.setCurrentSelected({});
         }
@@ -260,6 +384,47 @@ namespace Karen
         ImGui::EndMenu();
       }
       ImGui::EndMainMenuBar();
+    }
+  }
+
+  void EditorLayer::updateGizmos(Vec2 pos, Vec2 size)
+  {
+    static bool tf = false;
+    ImGuizmo::SetOrthographic(tf);
+    ImGuizmo::SetDrawlist();
+    ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);
+    ImGui::Begin("__DEBUG__");
+    ImGui::Checkbox("ortho", &tf);
+    ImGui::End();
+    //SceneCamera* camera = nullptr;
+    //TransformComponent* tc = nullptr;
+    /*m_scene->forEach<CameraComponent>([&](auto e_id, CameraComponent& cc)
+    {
+      Entity e(e_id, m_scene.get());
+      camera = cc.is_primary ? &cc.camera : nullptr;
+      tc = e.tryGetComponent<TransformComponent>();
+      KAREN_CORE_ASSERT(tc);
+    });*/
+    auto current_selected = m_scene_hierarchy_panel.getCurrentSelected();
+    if(current_selected)
+    {
+      auto* current_transform_component = current_selected.tryGetComponent<TransformComponent>();
+      if(current_transform_component)
+      {
+        auto current_transformation = current_transform_component->getTransformationMatrix();
+        const auto& cam_proj = m_camera.getProjection();
+        const auto cam_view = m_camera.getView();
+        ImGuizmo::Manipulate(glm::value_ptr(cam_view), glm::value_ptr(cam_proj),
+          (ImGuizmo::OPERATION)m_op, ImGuizmo::LOCAL, glm::value_ptr(current_transformation));
+        if(ImGuizmo::IsUsing())
+        {
+          Vec3 rotate;
+          decompose(current_transformation, current_transform_component->position,
+              rotate, current_transform_component->scale);
+          auto droatate = rotate - current_transform_component->rotation;
+          current_transform_component->rotation += droatate;
+        }
+      }
     }
   }
 
@@ -402,6 +567,44 @@ namespace Karen
     colors[ImGuiCol_NavWindowingDimBg] =  *(ImVec4*)&m_colors.at("NavWindowingDimBg");
     colors[ImGuiCol_ModalWindowDimBg] = *(ImVec4*)&m_colors.at("ModalWindowDimBg");
 
+  }
+
+  void EditorLayer::onEvent(Event& e)
+  {
+    EventDispatcher dp(e);
+    dp.dispatch<MouseScrolledEvent>(BIND_EVENT_FUNCTION(EditorLayer::onMouseScrolledEvent));
+    dp.dispatch<KeyPressedEvent>(BIND_EVENT_FUNCTION(EditorLayer::onKeyPressedEvent));
+    dp.dispatch<KeyReleasedEvent>(BIND_EVENT_FUNCTION(EditorLayer::onKeyReleasedEvent));
+  }
+
+  bool EditorLayer::onKeyPressedEvent(KeyPressedEvent& e)
+  {
+    return false;
+  }
+
+  bool EditorLayer::onKeyReleasedEvent(KeyReleasedEvent& e)
+  {
+    return false;
+  }
+
+  bool EditorLayer::onMouseScrolledEvent(MouseScrolledEvent& e)
+  {
+    m_camera.onMouseScrolledEvent(e);
+    return false;
+  }
+
+  void EditorLayer::handelCMD(int cmdkey)
+  {
+    if(Input::isKeyPressed(Keyboard::Q))
+      m_op = GizmoOp::Bounds;
+    else if(Input::isKeyPressed(Keyboard::W))
+      m_op = GizmoOp::Translate;
+    else if(Input::isKeyPressed(Keyboard::R))
+      m_op = GizmoOp::Rotate;
+    else if(Input::isKeyPressed(Keyboard::S))
+      m_op = GizmoOp::Scale;
+    else if(Input::isKeyPressed(Keyboard::U))
+      m_op = GizmoOp::Universal;
   }
 }
 

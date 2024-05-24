@@ -19,9 +19,79 @@ namespace Karen
 
   }
 
+  Scene::Scene(const Scene& other)
+    : m_name(other.m_name), m_viewport_width(other.m_viewport_width), m_viewport_height(other.m_viewport_height)
+  {
+    //TODO: template
+    //old / new
+    std::unordered_map<entt::entity, entt::entity> entt_ids;
+    auto& cpyreg = other.m_registry;
+    {
+      auto view = cpyreg.view<IDComponent>();
+      for(auto& e : view)
+      {
+        auto en = this->addEntity();
+        en.insertComponent<IDComponent>(view.get<IDComponent>(e));
+        en.insertComponent<TagComponent>(cpyreg.get<TagComponent>(e));
+        entt_ids[e] = en;
+      }
+    }
+    {
+      auto view = cpyreg.view<TransformComponent>();
+      for(auto& e : view)
+      {
+        m_registry.emplace_or_replace<TransformComponent>(entt_ids.at(e), view.get<TransformComponent>(e));
+      }
+    }
+    {
+      auto view = cpyreg.view<CameraComponent>();
+      for(auto& e : view)
+      {
+        m_registry.emplace_or_replace<CameraComponent>(entt_ids.at(e), view.get<CameraComponent>(e));
+      }
+    }
+    {
+      auto view = cpyreg.view<SpriteComponent>();
+      for(auto& e : view)
+      {
+        m_registry.emplace_or_replace<SpriteComponent>(entt_ids.at(e), view.get<SpriteComponent>(e));
+      }
+    }
+    {
+      auto view = cpyreg.view<NativeScriptComponent>();
+      for(auto& e : view)
+      {
+        m_registry.emplace_or_replace<NativeScriptComponent>(entt_ids.at(e), view.get<NativeScriptComponent>(e));
+      }
+    }
+    {
+      auto view = cpyreg.view<RigidBody2DComponent>();
+      for(auto& e : view)
+      {
+        m_registry.emplace_or_replace<RigidBody2DComponent>(entt_ids.at(e), view.get<RigidBody2DComponent>(e));
+      }
+    }
+    {
+      auto view = cpyreg.view<BoxColliderComponent>();
+      for(auto& e : view)
+      {
+        m_registry.emplace_or_replace<BoxColliderComponent>(entt_ids.at(e), view.get<BoxColliderComponent>(e));
+      }
+    }
+  }
+
+  ARef<Scene> Scene::copy(const ARef<Scene>& other)
+  {
+    Scene* s = new Scene(*other.get());
+    auto scene = createARef<Scene>();
+    scene.reset(s);
+    return scene;
+  }
+
   Entity Scene::addEntity(const std::string& tag)
   {
     Entity e(m_registry.create(), this);
+    e.addComponent<IDComponent>();
     e.addComponent<TransformComponent>();
     if(tag == "")
       e.addComponent<TagComponent>("Entity");
@@ -29,7 +99,14 @@ namespace Karen
       e.addComponent<TagComponent>(tag);
     return e;
   }
-  
+ 
+  Entity Scene::addEntity(UUID uuid, const std::string& tag)
+  {
+    auto e = addEntity(tag);
+    e.getComponent<IDComponent>().ID = uuid;
+    return e;
+  }
+
   void Scene::removeEntity(const Entity& e)
   {
     m_registry.destroy(e);
@@ -140,7 +217,7 @@ namespace Karen
 
   void Scene::onEditorUpdate(Timestep ts)
   {
-    SceneCamera* camera = nullptr;
+    /*SceneCamera* camera = nullptr;
     Mat4 camera_trans;
     {
       auto view = m_registry.view<TransformComponent, CameraComponent>();
@@ -176,8 +253,22 @@ namespace Karen
       Renderer2D::endScene();
     }
     else KAREN_CORE_WARN("No main Camera found in Scene");
-
-  }
+*/
+    Renderer2D::beginScene(m_editor_camera.projection, m_editor_camera.view);
+    auto view = m_registry.view<TransformComponent, SpriteComponent>();
+    for(const auto& e : view)
+    {
+      auto &&[trans, sprite] = view.get<TransformComponent, SpriteComponent>(e);
+      if(!sprite.texture_handel.empty())
+      {
+        Renderer2D::drawQuad(trans.getTransformationMatrix(),
+        App::get()->assetManager().getTexture2D(sprite.texture_handel), sprite.color);
+      }
+      else
+        Renderer2D::drawQuad(trans.getTransformationMatrix(), sprite.color);
+    }
+    Renderer2D::endScene();
+}
 
   void Scene::onViewportResize(uint32_t w, uint32_t h)
   {

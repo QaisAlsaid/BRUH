@@ -17,7 +17,7 @@ namespace Karen
     };
     struct PerspectiveData
     {
-      float fov = 45.0f;
+      float fov = 0.785398; // 45 deg
       float near_clip = 0.0f;
       float far_clip  = 100.0f; 
     };

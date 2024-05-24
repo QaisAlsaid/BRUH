@@ -5,14 +5,14 @@
 
 namespace Karen
 {
-  ARef<Texture2D> Texture2D::create(const std::string& file_path, bool flip_v)
+  ARef<Texture2D> Texture2D::create(const std::string& file_path, bool flip_v, Filters fls)
   {
     switch(RendererAPI::getAPI())
     {
       case RendererAPI::API::NONE:
         KAREN_CORE_ASSERT_MSG(false, "Render API None not supported at the moment");
       case RendererAPI::API::OpenGl:
-        return Karen::createARef<OpenGlTexture2D>(file_path, flip_v);
+        return Karen::createARef<OpenGlTexture2D>(file_path, flip_v, fls);
     }
     KAREN_CORE_ASSERT_MSG(false, "Unknown API");
     return nullptr;

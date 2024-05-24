@@ -4,6 +4,8 @@
 #include "imgui.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_glfw.h"
+#include "ImGuizmo.h"
+
 #include "Karen/Core/App.h"
 //TODO: remove it
 #include <GLFW/glfw3.h>
@@ -63,6 +65,7 @@ namespace Karen
     ImGui_ImplGlfw_NewFrame();
     ImGui_ImplOpenGL3_NewFrame();
     ImGui::NewFrame();
+    ImGuizmo::BeginFrame();
   }
 
   void GuiLayer::end()
@@ -75,11 +78,12 @@ namespace Karen
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable){
+		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+    {
 			GLFWwindow* backup_current_context = glfwGetCurrentContext();
 			ImGui::UpdatePlatformWindows();
 			ImGui::RenderPlatformWindowsDefault();
-			glfwMakeContextCurrent(backup_current_context);
+      glfwMakeContextCurrent(backup_current_context);
 		}
   }
   

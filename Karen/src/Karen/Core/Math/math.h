@@ -15,5 +15,7 @@ namespace Karen
     typedef glm::mat2 Mat2;
     typedef glm::mat3 Mat3;
     typedef glm::mat4 Mat4;
+
+    bool decompose(const Mat4& transform, Vec3& translation, Vec3& rotation, Vec3& scale);
 }
 #endif //MATH_H

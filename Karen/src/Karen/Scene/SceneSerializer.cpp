@@ -1,5 +1,8 @@
 #include "SceneSerializer.h"
 #include "Components.h"
+#include "Karen/Core/UUID.h"
+#include "yaml-cpp/emitter.h"
+#include "yaml-cpp/emittermanip.h"
 
 
 namespace YAML
@@ -57,6 +60,35 @@ namespace YAML
     }
   };
 
+  template<>
+    struct convert<Karen::Vec2>
+    {
+      static Node encode(const Karen::Vec2& vec)
+      {
+        Node n;
+        n.push_back(vec.x);
+        n.push_back(vec.y);
+        return n;
+      }
+
+      static bool decode(const Node& node, Karen::Vec2& vec)
+      { 
+        if(!node.IsSequence())
+          return false;
+
+        vec.x = node[0].as<float>();
+        vec.y = node[1].as<float>();
+
+        return true;
+      }
+    };
+
+  Emitter& operator << (Emitter& emitter, const Karen::Vec2& vec)
+  {
+    emitter << Flow;
+    emitter << BeginSeq << vec.x << vec.y << EndSeq;
+    return emitter;
+  }
 
   Emitter& operator << (Emitter& emitter, const Karen::Vec3& vec)
   {
@@ -136,13 +168,13 @@ namespace Karen
     {
       for(const auto& entity : entities)
       {
-        uint64_t uuid = entity["UUID"].as<uint64_t>();
+        UUID uuid = entity["UUID"].as<uint64_t>();
         std::string tag;
         const auto& ctagn = entity["TagComponent"];
         if(ctagn)
           tag = ctagn["Tag"].as<std::string>();
         
-        Entity e = m_context->addEntity(tag);
+        Entity e = m_context->addEntity(uuid, tag);
         const auto& ctransform_n = entity["TransformComponent"]; 
         if(ctransform_n)
         {
@@ -180,6 +212,26 @@ namespace Karen
           ccamera.is_primary = ccamera_n["Primary"].as<bool>();
           ccamera.is_fixed_aspect_ratio = ccamera_n["FixedAspectRatio"].as<bool>();
         }
+
+        const auto& crb2d_n = entity["RigidBody2DComponent"];
+        if(crb2d_n)
+        {
+          auto& rb2dc = e.addComponent<RigidBody2DComponent>();
+          rb2dc.type = (RigidBody2DComponent::BodyType)crb2d_n["Type"].as<int>();
+          rb2dc.fixed_rotation = crb2d_n["FixedRotatiin"].as<bool>();
+        }
+
+        const auto& cbc_n = entity["BoxColliderComponent"];
+        if(cbc_n)
+        {
+          auto& bcc = e.addComponent<BoxColliderComponent>();
+          bcc.size = cbc_n["Size"].as<Vec2>();
+          bcc.offset = cbc_n["Offset"].as<Vec2>();
+          bcc.density = cbc_n["Density"].as<float>();
+          bcc.friction = cbc_n["Friction"].as<float>();
+          bcc.restitution = cbc_n["Restitution"].as<float>();
+          bcc.restitution_threshold = cbc_n["RestitutionThreshold"].as<float>();
+        }
       }
     }
     return true;
@@ -188,7 +240,7 @@ namespace Karen
   void SceneSerializer::serializeEntity(Entity& e, YAML::Emitter& emitter)
   {
     emitter << BeginMap;
-    emitter << Key << "UUID" <<Value << "5345347092";
+    emitter << Key << "UUID" <<Value << e.getComponent<IDComponent>().ID;
 
     if(e.hasComponent<TagComponent>())
     {
@@ -251,7 +303,33 @@ namespace Karen
       emitter << EndMap;
     }
 
+    if(e.hasComponent<RigidBody2DComponent>())
+    {
+      emitter << Key << "RigidBody2DComponent" << BeginMap;
+      auto& rb2dc = e.getComponent<RigidBody2DComponent>();
+      
+      emitter << Key << "Type" << (int)rb2dc.type;
+      emitter << Key << "FixedRotatiin" << rb2dc.fixed_rotation;
+
+      emitter << EndMap;
+    }
+
+    if(e.hasComponent<BoxColliderComponent>())
+    {
+      emitter << Key << "BoxColliderComponent" << BeginMap;
+      
+      auto& bcc = e.getComponent<BoxColliderComponent>();
+      emitter << Key << "Size" << bcc.size;
+      emitter << Key << "Offset" << bcc.offset;
+      emitter << Key << "Density" << bcc.density;
+      emitter << Key << "Friction" << bcc.friction;
+      emitter << Key << "Restitution" <<bcc.restitution;
+      emitter << Key << "RestitutionThreshold" << bcc.restitution_threshold;
+      emitter << EndMap;
+    }
+
     emitter << EndMap;
 
   }
+
 }

@@ -49,8 +49,9 @@ set(KAREN_SRC src/Karen/Core/App.cpp src/Karen/Core/Log.cpp
     src/Karen/Render/API/FrameBuffer.cpp src/Platforms/OpenGl/OpenGlFrameBuffer.cpp
     src/Karen/Scene/Scene.cpp src/Karen/Scene/Entity.cpp src/Karen/Scene/SceneCamera.cpp
     src/Karen/Scene/SceneSerializer.cpp src/Platforms/Linux/LinuxFileDialogs.cpp
-    src/Karen/Core/AssetManager.cpp
-    src/Platforms/Windows/WindowsFileDialogs.cpp
+    src/Karen/Core/AssetManager.cpp src/Karen/Core/Math/math.cpp src/Karen/Core/UUID.cpp
+    src/Platforms/Windows/WindowsFileDialogs.cpp src/Platforms/OpenGl/OpenGlUtils.cpp
+    
     include/Karen/Karen.h
   )
 #set(KAREN_SRC_H src/Karen/App.h src/Karen/Log.h src/Platforms/Windows/WindowsWindow.h src/Karen/Layers/Layer.h
@@ -72,6 +73,7 @@ set(KAREN_PUBLIC_INCLUDE_DIRS
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/entt/single_include/
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/yaml-cpp/include/
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/pugixml/src
+  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/Imguizmo
   )
  set(KAREN_INCLUDE_DIRS ${KAREN_PUBLIC_INCLUDE_DIRS} PARENT_SCOPE)
  
@@ -97,11 +99,12 @@ add_subdirectory(vendor/pugixml)
 add_subdirectory(vendor/entt)
 add_subdirectory(vendor/yaml-cpp)
 add_subdirectory(vendor/Box2D)
+add_subdirectory(vendor/Imguizmo)
 if(NOT KAREN_EMSCRIPTEN)
-set(KAREN_LIBS glm glfw imgui glad stb pugixml yaml-cpp box2d)
+set(KAREN_LIBS glm glfw imgui glad stb pugixml yaml-cpp box2d imguizmo)
 else()
 set(KAREN_ADDITIONAL_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../../emsdk/upstream/emscripten/cache/sysroot/include)
-set(KAREN_LIBS glm imgui stb pugixml yaml-cpp box2d)
+set(KAREN_LIBS glm imgui stb pugixml yaml-cpp box2d imguizmo)
 endif()
 
 if(KAREN_IS_SHARED)

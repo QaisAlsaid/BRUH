@@ -318,26 +318,15 @@ namespace Karen
         uint8_t type_location = 0;
         std::string name;
         UniformData data;
-        if(GLES)
+        
+        name = t.at(i + 2);
+        if(name.find('[') != std::string::npos)
         {
-          name = t.at(i + 3);
-          type_location = 2;
-          if(name.find('[') != std::string::npos)
-          {
-            auto pos = name.find('[');
-            name = name.substr(0, pos);
-          }
+          auto pos = name.find('[');
+          name = name.substr(0, pos);
         }
-        else
-        {
-          name = t.at(i + 2);
-          if(name.find('[') != std::string::npos)
-          {
-            auto pos = name.find('[');
-            name = name.substr(0, pos);
-          }
-          type_location = 1;
-        }
+        type_location = 1;
+
         data.type = getTypeFromString(t.at(i + type_location));
         glCall(auto loc = glGetUniformLocation(m_program_id, name.c_str()));
         data.location = loc;

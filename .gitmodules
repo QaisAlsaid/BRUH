@@ -22,3 +22,6 @@
 [submodule "Karen/vendor/Box2D"]
 	path = Karen/vendor/Box2D
 	url = https://github.com/QaisAlsaid/box2d.git
+[submodule "Karen/vendor/Imguizmo"]
+	path = Karen/vendor/Imguizmo
+	url = https://github.com/QaisAlsaid/ImGuizmo.git

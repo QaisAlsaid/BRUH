@@ -1,6 +1,7 @@
 #ifndef KR_COMPONENTS_H
 #define KR_COMPONENTS_H
 
+#include "Karen/Core/UUID.h"
 #include "Karen/Render/API/Texture.h"
 #include "SceneCamera.h"
 #include "ScriptEntity.h"
@@ -10,6 +11,11 @@ class b2Body;
 class b2Fixture;
 namespace Karen
 {
+  struct IDComponent
+  {
+    UUID ID;
+  };
+
   struct TagComponent
   {
     std::string name;

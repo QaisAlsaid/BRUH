@@ -85,7 +85,7 @@ namespace Karen
         }
       }
       ImGui::PopStyleColor();
-      ImGui::TextWrapped("%s", file_name.c_str());
+      ImGui::TextWrapped("%s", file_name.string().c_str());
       ImGui::NextColumn();
     }
 

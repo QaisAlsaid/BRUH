@@ -1,5 +1,6 @@
 #include "Inspector.h"
 #include "Karen/Scene/Components.h"
+#include "glm/trigonometric.hpp"
 #include "imgui.h"
 
 
@@ -49,7 +50,10 @@ namespace Karen
       {
         ImGui::DragFloat3("Position", glm::value_ptr(trans_comp->position), 0.25f/((trans_comp->scale.x + trans_comp->scale.y)/2.0f));
         ImGui::DragFloat3("Scale", glm::value_ptr(trans_comp->scale), 0.25f/((trans_comp->scale.x + trans_comp->scale.y)/2.0f));
-        ImGui::DragFloat3("Rotation", glm::value_ptr(trans_comp->rotation), 0.25f);
+        Vec3& rad_rot = trans_comp->rotation;
+        Vec3 deg_rot = glm::degrees(rad_rot);
+        ImGui::DragFloat3("Rotation", glm::value_ptr(deg_rot), 0.25f);
+        rad_rot = glm::radians(deg_rot);
         
         if(removed)
           m_current.removeComponent<TransformComponent>();
@@ -93,12 +97,16 @@ namespace Karen
           case (int)SceneCamera::ProjectionType::Perspective:
           {
             auto pd = cam.getPerspectiveData();
-            if(ImGui::DragFloat("FOV", &pd.fov)
+            float deg_fov = glm::degrees(pd.fov);
+            if(ImGui::DragFloat("FOV", &deg_fov)
             || ImGui::DragFloat("Near", &pd.near_clip)
             || ImGui::DragFloat("Far", &pd.far_clip)) any_changes = true;
             
             if(any_changes)
+            {
+              pd.fov = glm::radians(deg_fov);
               cam.setPerspectiveData(pd);
+            }
             break;
           }
         }

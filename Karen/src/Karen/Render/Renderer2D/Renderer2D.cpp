@@ -10,7 +10,7 @@
 
 namespace Karen
 {
-  Renderer2D::Data* Renderer2D::s_data = new Renderer2D::Data;
+  Renderer2D::Data* Renderer2D::s_data = new  Renderer2D::Data;
 
   void Renderer2D::init(const std::string& shaders_2d_config_path)
   {
@@ -90,7 +90,12 @@ namespace Karen
 
   void Renderer2D::beginScene(const Camera& camera, const Mat4& transform)
   {
-    const auto proj_view = camera.getProjection() * glm::inverse(transform);
+    beginScene(camera.getProjection(), glm::inverse(transform));
+  }
+
+  void Renderer2D::beginScene(const Mat4& projection, const Mat4& view)
+  {
+    const auto proj_view = projection * view;
     s_data->shaders.get("tux_shader")->bind();
     s_data->shaders.get("tux_shader")->setUniform("u_proj_view", proj_view);
     reset();
@@ -130,6 +135,11 @@ namespace Karen
     s_data->quad_index_count += 6;
 
     s_data->stats.quad_count++;
+
+  }
+
+  void Renderer2D::drawQuad(int id, const Mat4& trans, const Vec4& color)
+  {
 
   }
 

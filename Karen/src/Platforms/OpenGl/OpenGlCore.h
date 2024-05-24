@@ -14,4 +14,5 @@
 void glPrintErr(const char* fn, const char* file, int line);
 
 
+
 #endif //OPENGL_CORE_H

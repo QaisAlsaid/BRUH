@@ -6,7 +6,7 @@ namespace Karen
 {
   void OpenGLRendererAPI::init()
   {
-    //glCall(glEnable(GL_DEPTH_TEST));
+    glCall(glEnable(GL_DEPTH_TEST));
     glCall(glEnable(GL_BLEND));
     glCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
     //glCall(glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE));

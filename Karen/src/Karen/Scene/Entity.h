@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <entt/entt.hpp>
+#include "Karen/Core/UUID.h"
 #include "Scene.h"
 
 
@@ -13,7 +14,6 @@ namespace Karen
   public:
     Entity() = default;
     Entity(entt::entity id, Scene* scene);
-    
     inline void inst(){}
 
     inline void destroy() 
@@ -34,7 +34,7 @@ namespace Karen
     }
 
     template<typename... Ts>
-    inline bool hasAny(Ts&&... ts)
+    inline bool hasAny()
     {
       return m_scene->m_registry.any_of<Ts...>(m_id);
     }
@@ -102,6 +102,7 @@ namespace Karen
   private: 
     entt::entity m_id{entt::null};
     Scene* m_scene;
+    UUID m_uuid;
   };
 }
 

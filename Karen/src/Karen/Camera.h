@@ -10,7 +10,7 @@ namespace Karen
   {
   public:
     Camera() = default;
-    Camera(const Mat4& proj)
+    explicit Camera(const Mat4& proj)
       : m_projection(proj) {}
     virtual ~Camera() = default;
     const Mat4& getProjection() const { return m_projection; }
