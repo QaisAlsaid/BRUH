@@ -1,12 +1,13 @@
 #ifndef KR_SCENE_CAMERA_H
 #define KR_SCENE_CAMERA_H
 
+#include "Karen/Core/Core.h"
 #include "Karen/Camera.h"
 
 
 namespace Karen
 {
-  class SceneCamera : public Camera
+  class KAREN_API SceneCamera : public Camera
   {
   public:
     struct OrthographicData

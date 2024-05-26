@@ -1,6 +1,7 @@
 #ifndef KR_SCENE_H
 #define KR_SCENE_H
 
+#include "Karen/Core/Core.h"
 #include "Karen/Core/Math/math.h"
 #include "Karen/Core/Timestep.h"
 #include "Karen/Core/UUID.h"
@@ -14,7 +15,7 @@ namespace Karen
 { 
   class Entity;
 
-  class Scene
+  class KAREN_API Scene
   {
     struct EditorCamera { Mat4 view, projection; };
   public:
@@ -25,7 +26,7 @@ namespace Karen
 
     Entity addEntity(const std::string& tag = "");
     Entity addEntity(UUID uuid, const std::string& tag = "");
-    
+    Entity copyEntity(Entity& e);
     void removeEntity(const Entity& entity);
     void clear();
     

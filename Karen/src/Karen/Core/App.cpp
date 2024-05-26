@@ -5,6 +5,7 @@
 #include "Karen/Core/Log.h"
 #include "Karen/Render/API/RendererAPI.h"
 
+
 #ifdef KAREN_EMSCRIPTEN
 #include <emscripten.h>
 static void callMain(void* fp)
@@ -19,13 +20,13 @@ static void callMain(void* fp)
 
 namespace Karen
 {
-  App* App::stat_instance = nullptr;
+  App* App::s_instance = nullptr;
   App::App()
   {
     KAREN_CORE_INFO("App Created");
     RendererAPI::setAPI(RendererAPI::API::OpenGl);
-    KAREN_CORE_ASSERT_MSG(!stat_instance, "App Exist");
-    stat_instance = this;
+    KAREN_CORE_ASSERT_MSG(!s_instance, "App Exist");
+    s_instance = this;
     m_window = std::unique_ptr<Window>(Window::create());
     m_window->setEventCallbackFunction(BIND_EVENT_FUNCTION(App::onEvent));
     m_asset_manager.loadConfig("../res/config/assets.xml");
@@ -48,7 +49,7 @@ namespace Karen
     dp.dispatch<WindowClosedEvent>(BIND_EVENT_FUNCTION(App::onCloseCall));
     dp.dispatch<WindowResizeEvent>(BIND_EVENT_FUNCTION(App::onResizeCall));
     
-    for(auto it = m_layers.end(); it != m_layers.begin();)
+    for(auto it = m_layers.end(); it != s_instance->m_layers.begin();)
     {
       --it;
       if((*it)->isActive())

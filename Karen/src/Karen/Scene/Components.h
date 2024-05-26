@@ -1,8 +1,8 @@
 #ifndef KR_COMPONENTS_H
 #define KR_COMPONENTS_H
 
+#include "Karen/Core/Core.h"
 #include "Karen/Core/UUID.h"
-#include "Karen/Render/API/Texture.h"
 #include "SceneCamera.h"
 #include "ScriptEntity.h"
 #include "Karen/Core/Math/math.h"
@@ -11,19 +11,19 @@ class b2Body;
 class b2Fixture;
 namespace Karen
 {
-  struct IDComponent
+  struct KAREN_API IDComponent
   {
     UUID ID;
   };
 
-  struct TagComponent
+  struct KAREN_API TagComponent
   {
     std::string name;
     TagComponent() = default;
     TagComponent(const std::string& s = "") : name(s) {}
   };
 
-  struct TransformComponent
+  struct KAREN_API TransformComponent
   {
     Vec3 position  = {0.0f, 0.0f, 0.0f};
     Vec3 scale     = {1.0f, 1.0f, 1.0f};
@@ -43,7 +43,7 @@ namespace Karen
     }
   };
 
-  struct SpriteComponent
+  struct KAREN_API SpriteComponent
   {
     std::string texture_handel;
     Vec4 color;
@@ -51,7 +51,7 @@ namespace Karen
     SpriteComponent(const Vec4& color, const std::string& tux) : texture_handel(tux), color(color) {}
   };
 
-  struct CameraComponent
+  struct KAREN_API CameraComponent
   {
     SceneCamera camera;
     bool is_primary = false;
@@ -59,7 +59,7 @@ namespace Karen
     CameraComponent() = default;
   };
 
-  struct NativeScriptComponent
+  struct KAREN_API NativeScriptComponent
   {
     ScriptEntity* instance = nullptr;
      
@@ -79,7 +79,7 @@ namespace Karen
     friend class Scene;
   };
 
-  struct RigidBody2DComponent
+  struct KAREN_API RigidBody2DComponent
   {
     enum class BodyType {Static = 0, Kinematic, Dynamic};
     
@@ -89,7 +89,7 @@ namespace Karen
     bool fixed_rotation = false;
   };
 
-  struct BoxColliderComponent 
+  struct KAREN_API BoxColliderComponent 
   {
     Vec2 offset = {0.0f, 0.0f};
     Vec2 size = {0.5f, 0.5f};

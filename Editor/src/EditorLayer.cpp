@@ -1,7 +1,7 @@
-#include <algorithm>
 #include <pch.h>
 #include "EditorLayer.h"
 #include "EditorSerializer.h"
+#include "Karen/Core/App.h"
 #include "Karen/Core/ButtonsAndKeyCodes.h"
 #include "Karen/Core/Events/KeyEvents.h"
 #include "Karen/Core/Timestep.h"
@@ -14,6 +14,33 @@
 #include <Karen/Karen.h>
 #include <imgui.h>
 #include <ImGuizmo.h>
+
+
+#include <dlfcn.h>
+//#include "../res/scripts/Test.h"
+
+
+//FIXME: change the native script API 'ASAP'
+
+
+void* handle;
+Karen::ScriptEntity* (*create)();
+void (*destroy)(Karen::ScriptEntity*);
+void (*scriptInit)(Karen::App*);
+static Karen::ScriptEntity* native = nullptr;
+
+static Karen::ScriptEntity* loadNativeScript(const char* path)
+{
+  handle = dlopen(path, RTLD_NOW);
+  KAREN_CORE_ASSERT(handle);
+  create = (Karen::ScriptEntity* (*)())dlsym(handle, "createScript");
+  destroy = (void (*)(Karen::ScriptEntity*))dlsym(handle, "destroyScript");
+  scriptInit = (void (*)(Karen::App*))dlsym(handle, "scriptInit");
+
+  Karen::ScriptEntity* myClass = (Karen::ScriptEntity*)create();
+  KAREN_INFO("Loaded");
+  return myClass;
+}
 
 namespace Karen
 {
@@ -37,7 +64,14 @@ namespace Karen
     
     RenderCommands::init();
     Renderer2D::init("../res/shaders/Shaders2D/config.xml");
-  }
+  
+
+
+  native = loadNativeScript("../res/scripts/build/Script.so");
+  scriptInit(Karen::App::get());//TODO : renderer become a like the app but the interface just like the input (as-is)
+}
+
+
 static float* speed = new float;
   void EditorLayer::onAttach()
   {
@@ -74,6 +108,11 @@ static float* speed = new float;
     auto& nsc = e.addComponent<NativeScriptComponent>();
     
     nsc.bind<Script>();
+
+    auto nen = native->getEntity();
+    auto endll = m_scene->copyEntity(nen);
+    auto& nscdll = endll.insertComponent<NativeScriptComponent>();
+    nscdll.bind<ScriptEntity>();
    //TODO: Native script instance* is templated to the type given
     //speed = &((Script*)nsc.instance)->speed;
   }
@@ -91,6 +130,22 @@ static float* speed = new float;
     //m_frame_buff->bindWriteFb(6);
     //Renderer2D::clear({200, 200, 200, 200});
     Renderer2D::clear(Vec4(0.25f, 0.25f, 0.25f, 1.0f));
+    //if(Input::isKeyPressed(Keyboard::Z))
+    //{
+      if(native)
+      {
+        native->onUpdate(ts);
+        //std::cout<<"in Layer App*: "<<App::get()<<std::endl;
+      }
+    //}
+    /*if(Input::isKeyPressed(Keyboard::P))
+    {
+      if(native)
+        destroy(native);
+      if(handle)
+        dlclose(handle);
+      native = loadNativeScript("../res/scripts/build/Script.so");
+    }*/
     switch(m_scene_state)
     {
       case SceneState::Play:
@@ -263,7 +318,6 @@ static float* speed = new float;
     if(io.WantSaveIniSettings)
       ImGui::SaveIniSettingsToDisk(m_imgui_ini_path.c_str());
     
-    m_scene->onEnd();
     serializeEditor("../res/config/test.xml");
   }
 
@@ -605,6 +659,12 @@ static float* speed = new float;
       m_op = GizmoOp::Scale;
     else if(Input::isKeyPressed(Keyboard::U))
       m_op = GizmoOp::Universal;
+    else if(Input::isKeyPressed(Keyboard::D))
+    {
+      auto e = m_scene_hierarchy_panel.getCurrentSelected();
+      if(e)
+        m_scene->copyEntity(e);
+    }
   }
 }
 

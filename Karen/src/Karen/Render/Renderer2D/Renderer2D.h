@@ -1,7 +1,7 @@
 #ifndef KR_RENDERER2D_H
 #define KR_RENDERER2D_H
 
-
+#include "Karen/Core/Core.h"
 #include "Karen/Render/API/RenderCommands.h"
 #include "Karen/Render/API/Shader.h"
 #include "Karen/Render/API/Texture.h"
@@ -13,10 +13,10 @@
 
 namespace Karen
 {
-  class Renderer2D
+  class KAREN_API Renderer2D
   {
   public:
-    struct Stats 
+    struct KAREN_API Stats 
      {
        uint32_t draw_calls = 0;
        uint32_t quad_count = 0;
@@ -80,6 +80,10 @@ namespace Karen
        glm::vec3 position;
        glm::vec2 tux_coord;
        float     tux_idx;
+       /*bool operator < (const QuadVertex& other)
+       {
+         return s_data->camera_view[3][3] - this->position.z < 
+       }*/
      };
      
      struct Data
@@ -101,6 +105,7 @@ namespace Karen
        uint32_t texture_slot_index = 1;
        Vec4 quad_vertex_pos[4];
        Stats stats;
+       Mat4 camera_view = Mat4(1.0f);
      };
 
     static Data* s_data;

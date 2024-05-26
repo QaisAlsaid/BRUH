@@ -6,7 +6,7 @@
 
 namespace Karen
 {
-  class Timestep
+  class KAREN_API Timestep
   {
   public:
     Timestep() = default;

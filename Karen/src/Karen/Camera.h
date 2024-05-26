@@ -1,12 +1,13 @@
 #ifndef KR_CAMERA_H
 #define KR_CAMERA_H
 
+#include "Karen/Core/Core.h"
 #include "Karen/Core/Math/math.h"
 
 
 namespace Karen
 {
-  class Camera 
+  class KAREN_API Camera 
   {
   public:
     Camera() = default;

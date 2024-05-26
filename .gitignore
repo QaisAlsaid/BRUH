@@ -1,6 +1,7 @@
 build/
 examples/Test/build/
 examples/Karen/
+Karen/vendor/Lua/install/
 .vscode/
 Karen/build/
 Karen/.cache/

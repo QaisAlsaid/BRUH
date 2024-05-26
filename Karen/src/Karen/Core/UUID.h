@@ -1,12 +1,13 @@
 #ifndef KR_UUID_H
 #define KR_UUID_H
 
+#include "Karen/Core/Core.h"
 #include <vector> //for hash()
 
 
 namespace Karen
 {
-  class UUID 
+  class KAREN_API UUID 
   {
   public:
     UUID();

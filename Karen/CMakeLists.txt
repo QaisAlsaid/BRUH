@@ -74,6 +74,7 @@ set(KAREN_PUBLIC_INCLUDE_DIRS
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/yaml-cpp/include/
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/pugixml/src
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/Imguizmo
+  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glm
   )
  set(KAREN_INCLUDE_DIRS ${KAREN_PUBLIC_INCLUDE_DIRS} PARENT_SCOPE)
  
@@ -83,10 +84,12 @@ set(KAREN_PUBLIC_INCLUDE_DIRS
   ${OPENGL_INCLUDE_DIRS}
   ${CMAKE_CURRENT_SOURCE_DIR}/src
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glad/include
-  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glm
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/stb_image
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/Box2D/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/sol2/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/Lua/src
+
   )
 if(NOT KAREN_EMSCRIPTEN)
 add_subdirectory(vendor/glfw)
@@ -100,11 +103,13 @@ add_subdirectory(vendor/entt)
 add_subdirectory(vendor/yaml-cpp)
 add_subdirectory(vendor/Box2D)
 add_subdirectory(vendor/Imguizmo)
+add_subdirectory(vendor/sol2)
+add_subdirectory(vendor/Lua)
 if(NOT KAREN_EMSCRIPTEN)
-set(KAREN_LIBS glm glfw imgui glad stb pugixml yaml-cpp box2d imguizmo)
+  set(KAREN_LIBS glm glfw imgui glad stb pugixml yaml-cpp box2d imguizmo Lua sol2)
 else()
 set(KAREN_ADDITIONAL_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../../emsdk/upstream/emscripten/cache/sysroot/include)
-set(KAREN_LIBS glm imgui stb pugixml yaml-cpp box2d imguizmo)
+set(KAREN_LIBS glm imgui stb pugixml yaml-cpp box2d imguizmo Lua sol2)
 endif()
 
 if(KAREN_IS_SHARED)

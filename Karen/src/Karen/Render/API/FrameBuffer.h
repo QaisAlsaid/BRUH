@@ -10,7 +10,7 @@
 
 namespace Karen
 {
-  class FrameBuffer
+  class KAREN_API FrameBuffer
   {
   public:
     enum class TextureInternalFormat

@@ -1,11 +1,12 @@
 #ifndef RENDERER_CAPABILITIES_H
 #define RENDERER_CAPABILITIES_H
 
+#include "Karen/Core/Core.h"
 
 
 namespace Karen
 {
-  class RendererCapabilities
+  class KAREN_API RendererCapabilities
   {
   public:
     static int getMaxTextureSize();

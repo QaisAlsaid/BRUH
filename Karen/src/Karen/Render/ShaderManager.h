@@ -8,7 +8,7 @@
 
 namespace Karen
 {
-  class ShaderManager
+  class KAREN_API ShaderManager
   {
   public:
     ShaderManager() = default;

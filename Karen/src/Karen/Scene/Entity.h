@@ -1,18 +1,19 @@
 #ifndef KR_ENTITY_H
 #define KR_ENTITY_H
 
-#include <cstdint>
 #include <entt/entt.hpp>
+#include "Karen/Core/Core.h"
 #include "Karen/Core/UUID.h"
 #include "Scene.h"
 
 
 namespace Karen
 {
-  class Entity
+  class KAREN_API Entity
   {
   public:
     Entity() = default;
+    Entity(Entity& other, entt::entity id, Scene* scene);
     Entity(entt::entity id, Scene* scene);
     inline void inst(){}
 

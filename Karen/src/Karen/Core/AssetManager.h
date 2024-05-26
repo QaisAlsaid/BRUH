@@ -10,23 +10,25 @@
 
 namespace Karen
 {
-  struct Asset 
+  
+  class KAREN_API AssetManager
   {
-    std::string path;
-  };
+  public:
+    struct KAREN_API Asset 
+    {
+      std::string path;
+    };
 
-  struct Texture2DAsset : public Asset
-  {
-    ARef<Texture2D> texture;
-  };
+    struct KAREN_API Texture2DAsset : public Asset
+    {
+      ARef<Texture2D> texture;
+    };
 
-  struct SceneAsset : public Asset 
-  {
-    ARef<Scene> scene;
-  };
+    struct KAREN_API SceneAsset : public Asset 
+    {
+      ARef<Scene> scene;
+    };
 
-  class AssetManager
-  {
   public:
     AssetManager() = default;
     AssetManager(const char* config_path);

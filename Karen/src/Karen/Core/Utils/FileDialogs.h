@@ -4,7 +4,7 @@
 
 namespace Karen
 {
-  class FileDialogs
+  class KAREN_API FileDialogs
   {
   public:
     enum class OpType {OpenFile, SaveFile};

@@ -17,6 +17,7 @@ namespace Karen
   public:
     App();
     virtual ~App();
+    
     void run();
     void onEvent(Event&);
     
@@ -37,8 +38,8 @@ namespace Karen
     
     inline static App* get()
     {
-      KAREN_CORE_ASSERT_MSG(stat_instance, "No App Created");
-      return stat_instance;
+      KAREN_CORE_ASSERT_MSG(s_instance, "No App Created");
+      return s_instance;
     }
   private:
     float m_last_time = 0.0f;
@@ -47,7 +48,7 @@ namespace Karen
     GuiLayer* m_gui_layer = nullptr;
     bool m_running = true;
     LayerStack m_layers;
-    static App* stat_instance;
+    static App* s_instance;
   protected:
     void pushLayer(Layer* layer);
     void pushOverlay(Layer* layer);

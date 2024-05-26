@@ -2,6 +2,7 @@
 #define KR_SCENE_SERIALIZER_H
 
 
+#include "Karen/Core/Core.h"
 #include "Scene.h"
 
 #include <yaml-cpp/yaml.h>
@@ -9,7 +10,7 @@
 
 namespace Karen
 {
-  class SceneSerializer
+  class KAREN_API SceneSerializer
   {
   public:
     SceneSerializer();

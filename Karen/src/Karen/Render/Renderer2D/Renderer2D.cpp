@@ -85,6 +85,7 @@ namespace Karen
   {
     s_data->shaders.get("tux_shader")->bind();
     s_data->shaders.get("tux_shader")->setUniform("u_proj_view", camera.getProjView());
+    s_data->camera_view = camera.getView();
     reset();
   }
 
@@ -98,6 +99,7 @@ namespace Karen
     const auto proj_view = projection * view;
     s_data->shaders.get("tux_shader")->bind();
     s_data->shaders.get("tux_shader")->setUniform("u_proj_view", proj_view);
+    s_data->camera_view = view;
     reset();
   }
 
@@ -324,6 +326,12 @@ namespace Karen
   void Renderer2D::flush()
   {
     uint32_t data_size = (unsigned char*)s_data->quad_vertex_ptr - (unsigned char*)s_data->quad_vertex_base;
+    
+    //sort for Z position (for blind)
+    std::sort(s_data->quad_vertex_base, s_data->quad_vertex_ptr, [&](const QuadVertex& lhs, const QuadVertex& rhs)
+    {
+      return lhs.position.z - s_data->camera_view[3][3] < rhs.position.z - s_data->camera_view[3][3]; 
+    });
     s_data->quad_vertex_buff->setData(data_size, s_data->quad_vertex_base);
 
     for(uint8_t i = 0; i < s_data->texture_slot_index; ++i)
@@ -345,4 +353,5 @@ namespace Karen
     delete[] s_data->texture_slots;
     delete s_data;
   }
+
 }

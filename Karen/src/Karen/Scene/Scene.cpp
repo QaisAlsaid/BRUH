@@ -107,6 +107,13 @@ namespace Karen
     return e;
   }
 
+  Entity Scene::copyEntity(Entity& e)
+  {
+    auto eid = m_registry.create();
+    Entity en(e, eid, this);
+    return en;
+  }
+
   void Scene::removeEntity(const Entity& e)
   {
     m_registry.destroy(e);

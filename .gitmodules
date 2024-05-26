@@ -25,3 +25,9 @@
 [submodule "Karen/vendor/Imguizmo"]
 	path = Karen/vendor/Imguizmo
 	url = https://github.com/QaisAlsaid/ImGuizmo.git
+[submodule "Karen/vendor/LuaJit"]
+	path = Karen/vendor/LuaJit
+	url = https://github.com/QaisAlsaid/LuaJIT.git
+[submodule "Karen/vendor/sol2"]
+	path = Karen/vendor/sol2
+	url = https://github.com/ThePhD/sol2.git
