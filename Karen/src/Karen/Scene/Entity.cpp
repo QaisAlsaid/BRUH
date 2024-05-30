@@ -1,5 +1,6 @@
 #include "Entity.h"
 #include "Karen/Scene/Components.h"
+#include <sol/forward.hpp>
 
 
 namespace Karen
@@ -54,5 +55,12 @@ namespace Karen
     {
       this->insertComponent<BoxColliderComponent>(*bcc);
     }
+
+    auto* sc = e.tryGetComponent<ScriptComponent>();
+    if(sc)
+    {
+      this->insertComponent<ScriptComponent>(*sc);
+    }
   }
 }
+

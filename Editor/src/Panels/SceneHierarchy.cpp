@@ -27,6 +27,10 @@ namespace Karen
     {
       Entity en(e, m_context.get());
       drawEntityNode(en);
+      ImGui::Begin("__DEBUG__");
+      ImGui::Text("id: %u", e);
+      ImGui::End();
+
     });
     
     if(ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())

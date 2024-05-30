@@ -44,7 +44,7 @@ void TestScript::onUpdate(Karen::Timestep ts)
 
   if(Karen::Input::isKeyPressed(Karen::Keyboard::S))
     std::cout<<"S"<<std::endl;
-  auto& sc = m_entity.getComponent<Karen::SpriteComponent>().color;
+/*  auto& sc = m_entity.getComponent<Karen::SpriteComponent>().color;
   
   sc.r += tan(ts);
   sc.g += sin(ts);
@@ -65,7 +65,7 @@ void TestScript::onUpdate(Karen::Timestep ts)
     if(Karen::Input::isKeyPressed(Karen::Keyboard::A))
       pos.x -= 2 * ts;
   }
-  KAREN_INFO("Exited update");
+  KAREN_INFO("Exited update");*/
 }
 
 void TestScript::onDestroy()

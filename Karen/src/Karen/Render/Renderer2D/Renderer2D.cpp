@@ -264,7 +264,7 @@ namespace Karen
     drawQuad(Vec3(pos.x, pos.y, 0.0f), size, color);
   }
 
-  void Renderer2D::drawQuad(const Vec3& pos, const Vec2& size, const ARef<Texture>& tux, const Vec4& color)
+  void Renderer2D::drawQuad(const Vec3& pos, const Vec2& size, const ARef<Texture2D>& tux, const Vec4& color)
   {
     if(s_data->quad_index_count >= s_data->MAX_INDES || s_data->texture_slot_index >= s_data->MAX_TEXTURE_SLOTS)
     {
@@ -318,7 +318,7 @@ namespace Karen
     s_data->stats.quad_count++;
   }
 
-  void Renderer2D::drawQuad(const Vec2& pos, const Vec2& size, const ARef<Texture>& tux, const Vec4& color)
+  void Renderer2D::drawQuad(const Vec2& pos, const Vec2& size, const ARef<Texture2D>& tux, const Vec4& color)
   {
     drawQuad(Vec3(pos.x, pos.y, 0.0f), size, tux, color);
   }
@@ -328,10 +328,41 @@ namespace Karen
     uint32_t data_size = (unsigned char*)s_data->quad_vertex_ptr - (unsigned char*)s_data->quad_vertex_base;
     
     //sort for Z position (for blind)
-    std::sort(s_data->quad_vertex_base, s_data->quad_vertex_ptr, [&](const QuadVertex& lhs, const QuadVertex& rhs)
+    
+    //buble sort! slowwwwwwww (just for test)
+
+    struct Quad 
+    {
+      QuadVertex refs[4];
+      /*inline bool operator < (const Quad& other) 
+      {
+        return this->refs[0]->position.z - s_data->camera_view[3][3] < other.refs[0]->position.z - s_data->camera_view[3][3]; 
+      }*/
+    };
+
+  auto* arr = s_data->quad_vertex_base;
+  uint32_t count = data_size / sizeof(QuadVertex);
+     
+  std::sort((Quad*)s_data->quad_vertex_base, (Quad*)s_data->quad_vertex_ptr, 
+      [](const Quad& lhs, const Quad& rhs)
+      {
+        return glm::length(s_data->camera_view[3][2] - lhs.refs[0].position.z) > glm::length(s_data->camera_view[3][2] - rhs.refs[0].position.z); 
+      });
+
+
+    //std::sort(arr, arr);
+//for(size_t i = 0; i < count; ++i)
+  //  for(size_t j = 0; j < count - 1 - i; ++j)
+    //  if(arr[j] > arr[j+1])
+      //  std::swap(arr[j], arr[j+1]);
+  KAREN_CORE_WARN("vertex count: {0}, quad_count: {1}, first: << pos: {2}, color: {3}, tux_coord: {4}, tux_idx: {5} >>", count, count/4, arr[0].position, arr[0].color, arr[0].tux_coord, arr[0].tux_idx);
+    //std::sort(s_data->quad_vertex_base, s_data->quad_vertex_base + (data_size / sizeof(QuadVertex)));
+  
+    //s_data->quad_vertex_arr->getIndexBuffer();
+    /* std::sort(s_data->quad_vertex_base, s_data->quad_vertex_ptr, [&](const QuadVertex& lhs, const QuadVertex& rhs)
     {
       return lhs.position.z - s_data->camera_view[3][3] < rhs.position.z - s_data->camera_view[3][3]; 
-    });
+    });*/
     s_data->quad_vertex_buff->setData(data_size, s_data->quad_vertex_base);
 
     for(uint8_t i = 0; i < s_data->texture_slot_index; ++i)

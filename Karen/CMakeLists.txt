@@ -52,6 +52,8 @@ set(KAREN_SRC src/Karen/Core/App.cpp src/Karen/Core/Log.cpp
     src/Karen/Core/AssetManager.cpp src/Karen/Core/Math/math.cpp src/Karen/Core/UUID.cpp
     src/Platforms/Windows/WindowsFileDialogs.cpp src/Platforms/OpenGl/OpenGlUtils.cpp
     
+
+    ./src/Karen/Scripting/Lua.cpp
     include/Karen/Karen.h
   )
 #set(KAREN_SRC_H src/Karen/App.h src/Karen/Log.h src/Platforms/Windows/WindowsWindow.h src/Karen/Layers/Layer.h
@@ -75,6 +77,9 @@ set(KAREN_PUBLIC_INCLUDE_DIRS
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/pugixml/src
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/Imguizmo
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glm
+  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/sol2/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/Lua/src
+
   )
  set(KAREN_INCLUDE_DIRS ${KAREN_PUBLIC_INCLUDE_DIRS} PARENT_SCOPE)
  
@@ -87,9 +92,7 @@ set(KAREN_PUBLIC_INCLUDE_DIRS
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/stb_image
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/Box2D/include
-  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/sol2/include
-  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/Lua/src
-
+  
   )
 if(NOT KAREN_EMSCRIPTEN)
 add_subdirectory(vendor/glfw)

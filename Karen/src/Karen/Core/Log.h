@@ -37,6 +37,33 @@ namespace Karen
     {
       stat_core_logger->set_level((spdlog::level::level_enum) lvl);
     }
+    template<typename... Args>
+    static inline void trace(Args&&... arg)
+    {
+      stat_clinet_logger->trace(std::forward<Args>(arg)...);
+    }
+    template<typename... Args>
+    static inline void info(Args&&... arg)
+    {
+      stat_clinet_logger->info(std::forward<Args>(arg)...);
+    }
+    template<typename... Args>
+    static inline void warn(Args&&... arg)
+    {
+      stat_clinet_logger->warn(std::forward<Args>(arg)...);
+    }
+    template<typename... Args>
+    static inline void error(Args&&... arg)
+    {
+      stat_clinet_logger->error(std::forward<Args>(arg)...);
+    }
+
+    template<typename... Args>
+    static inline void critical(Args&&... arg)
+    {
+      stat_clinet_logger->critical(std::forward<Args>(arg)...);
+    }
+
 
   private:
     static std::shared_ptr<spdlog::logger> stat_clinet_logger;

@@ -1,3 +1,4 @@
+#include <iostream>
 #include <pch.h>
 #include "EditorLayer.h"
 #include "EditorSerializer.h"
@@ -10,7 +11,7 @@
 #include "Karen/Scene/ScriptEntity.h"
 #include "glm/ext/quaternion_common.hpp"
 #include "glm/gtc/type_ptr.hpp"
-
+#include "Karen/Scripting/Lua.h"
 #include <Karen/Karen.h>
 #include <imgui.h>
 #include <ImGuizmo.h>
@@ -44,7 +45,7 @@ static Karen::ScriptEntity* loadNativeScript(const char* path)
 
 namespace Karen
 {
-  class Script : public ScriptEntity
+  class Scriptt : public ScriptEntity
   {
     public:
     float speed = 1;
@@ -75,7 +76,9 @@ namespace Karen
 static float* speed = new float;
   void EditorLayer::onAttach()
   {
-    m_editor_scene = createARef<Scene>();
+    m_editor_scene = App::get()->assetManager().getScene("scene");
+    std::cout << "Scene* : "<< std::hex << App::get()->assetManager().getScene("scene").get()<<std::endl;
+    
     m_scene = m_editor_scene;
     m_helper_windows["Stats"] = createScoped<StatsWindow>();
   
@@ -83,7 +86,12 @@ static float* speed = new float;
     m_default_font_size = 18;
     m_default_font = "../res/fonts/Roboto/Roboto-Regular.ttf";
     m_imgui_ini_path = ".";
-    
+
+
+    Lua l;
+    l.init();
+    std::cout<<"lua";
+    std::cin.get();
 
     setColorScheme(); 
     deSerializeEditor("../res/config/test.xml");
@@ -102,19 +110,26 @@ static float* speed = new float;
     s.is_swap_chain_target = true;
     m_frame_buff = FrameBuffer::create(s);
     KAREN_CORE_SET_LOGLEVEL(Log::LogLevel::Warn);
-    
+
     m_scene_hierarchy_panel.setContext(m_scene);
     auto e = m_scene->addEntity("Camera");
     auto& nsc = e.addComponent<NativeScriptComponent>();
     
-    nsc.bind<Script>();
+    nsc.bind<Scriptt>();
 
-    auto nen = native->getEntity();
+    
+    /*auto nen = native->getEntity();
     auto endll = m_scene->copyEntity(nen);
-    auto& nscdll = endll.insertComponent<NativeScriptComponent>();
-    nscdll.bind<ScriptEntity>();
+    */
+    //auto ee = m_scene->addEntity("");
+    //auto& nscdll = ee.insertComponent<NativeScriptComponent>();
+    //nscdll.bind(native);
    //TODO: Native script instance* is templated to the type given
     //speed = &((Script*)nsc.instance)->speed;
+  
+    auto eee = m_scene->addEntity("script");
+    auto& sc = eee.addComponent<ScriptComponent>();
+    sc.path = "../res/scripts/test.lua";
   }
 
 

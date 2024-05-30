@@ -5,10 +5,14 @@
 #include "Karen/Core/App.h"
 #include "Karen/Render/Renderer2D/Renderer2D.h"
 
+#include "Karen/Scripting/Script.h"
+#include "Karen/Scripting/Lua.h"
+
 #include <box2d/box2d.h>
 #include <box2d/b2_world.h>
 #include <box2d/b2_fixture.h>
 #include <box2d/b2_polygon_shape.h>
+#include <functional>
 
 
 namespace Karen
@@ -78,6 +82,13 @@ namespace Karen
         m_registry.emplace_or_replace<BoxColliderComponent>(entt_ids.at(e), view.get<BoxColliderComponent>(e));
       }
     }
+    {
+      auto view = cpyreg.view<ScriptComponent>();
+      for(auto& e : view)
+      {
+        m_registry.emplace_or_replace<ScriptComponent>(entt_ids.at(e), view.get<ScriptComponent>(e));
+      }
+    }
   }
 
   ARef<Scene> Scene::copy(const ARef<Scene>& other)
@@ -127,6 +138,39 @@ namespace Karen
   void Scene::onStart()
   {
     m_physics_world = new b2World({0.0f, -9.8f});
+    
+    //scripts might add physics components
+    m_registry.view<NativeScriptComponent>().each([&](auto e, auto& native_script)
+    {
+      native_script.instance = native_script.instantiateScript();
+      native_script.instance->m_entity = Entity(e, this);
+      native_script.instance->onCreate();
+    });
+
+    auto& lua = Lua::get();
+    m_registry.view<ScriptComponent>().each([&](auto e, ScriptComponent& script)
+    {
+      lua.safe_script_file(script.path);
+      auto res = lua["GetObject"];
+      if(res.valid())
+      {
+        sol::function fun = res;
+        script.script = fun();
+        std::cout << "from entt::registry: id: " << uint32_t(e)<<std::endl; 
+        script.script->entity = { e, this };
+        std::cout << "inside Karen::Entity::m_id: " << (uint32_t)script.script->entity << std::endl;
+        std::cout << "calling onCreate from c++ << ";
+        script.script->onCreate();
+        std::cout << " >> " << std::endl;
+      }
+      else 
+      {
+        sol::error e = res;
+        std::cerr << e.what();
+      }
+    });
+
+
     m_registry.view<TransformComponent, RigidBody2DComponent>().each([&](auto e, TransformComponent& tc, RigidBody2DComponent& rb2dc)
     {
       Entity entity(e, this);
@@ -155,13 +199,6 @@ namespace Karen
         //bcc.fixture = fixture;
       }
     });
-
-    m_registry.view<NativeScriptComponent>().each([&](auto e, auto& native_script)
-    {
-      native_script.instance = native_script.instantiateScript();
-      native_script.instance->m_entity = Entity(e, this);
-      native_script.instance->onCreate();
-    });
   }
 
   void Scene::onUpdate(Timestep ts)
@@ -171,6 +208,12 @@ namespace Karen
       native_script.instance->onUpdate(ts);
     });
 
+    m_registry.view<ScriptComponent>().each([&](auto e, auto& script)
+    {
+      script.script->entity = { e, this };
+      script.script->timestep = ts;
+      script.script->onUpdate();
+    });
     
     int vel_iters = 6;
     int pos_iters = 2;
@@ -180,7 +223,7 @@ namespace Karen
     {
       auto* body = rb2dc.body;
       Vec2 position(body->GetPosition().x, body->GetPosition().y);
-      tc.position = { position, tc.position.z};
+      tc.position = { position, tc.position.z };
       tc.rotation.z = body->GetAngle();
     });
 
@@ -289,6 +332,13 @@ namespace Karen
     {
       native_script.instance->onDestroy();
     });
+    
+    m_registry.view<ScriptComponent>().each([&](auto e, auto& script)
+    {
+      //script.script.entity = { e, this };
+      script.script->onDestroy();
+    });
+
     delete m_physics_world;
     m_physics_world = nullptr;
   }

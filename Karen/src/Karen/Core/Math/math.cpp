@@ -5,7 +5,6 @@ namespace Karen
 {
   bool decompose(const Mat4& transform, Vec3& translation, Vec3& rotation, Vec3& scale)
   {
-    
 		using namespace glm;
 		using T = float;
 

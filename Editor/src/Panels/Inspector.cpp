@@ -45,7 +45,19 @@ namespace Karen
           tag = std::string(buffer);
         }
       }); 
-      
+
+      drawComponent<ScriptComponent>(m_current, "Script", [](auto* script_comp, bool removed)
+      {
+        auto& path = script_comp->path;
+        char buffer[256];
+        memset(buffer, 0, sizeof(buffer));
+        strcpy(buffer, path.c_str());
+        if(ImGui::InputText("ScriptPath", buffer, sizeof(buffer)))
+        {
+          path = std::string(buffer);
+        }
+      });
+
       drawComponent<TransformComponent>(m_current, "Transform", [&](auto* trans_comp, bool removed)
       {
         ImGui::DragFloat3("Position", glm::value_ptr(trans_comp->position), 0.25f/((trans_comp->scale.x + trans_comp->scale.y)/2.0f));
@@ -190,6 +202,8 @@ namespace Karen
       {
         if(ImGui::MenuItem("Transform"))
           m_current.insertComponent<TransformComponent>();
+        if(ImGui::MenuItem("Script"))
+          m_current.insertComponent<ScriptComponent>();
         //if(ImGui::MenuItem("Tag"))
         //  m_current.addComponent<TagComponent>();
         if(ImGui::MenuItem("Camera"))

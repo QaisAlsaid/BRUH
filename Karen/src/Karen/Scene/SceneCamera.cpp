@@ -40,6 +40,5 @@ namespace Karen
   void SceneCamera::setViewport(uint32_t width, uint32_t height)
   {
     m_aspect_ratio = (float)width/(float)height;
-    RenderCommands::setViewPort(0, 0, width, height);
   }
 }

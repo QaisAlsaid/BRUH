@@ -41,6 +41,10 @@ namespace Karen
       KAREN_CORE_ASSERT_MSG(s_instance, "No App Created");
       return s_instance;
     }
+    void print()
+    {
+      std::cout << "s_instance* : " << std::hex << s_instance << std::endl;
+    }
   private:
     float m_last_time = 0.0f;
     AssetManager m_asset_manager;

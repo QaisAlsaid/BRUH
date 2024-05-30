@@ -43,7 +43,17 @@ namespace Karen
       RenderCommands::clear(clear_color);
     }
 
-    static void beginScene(const OrthographicCamera& camera);
+    inline static void setClearColor(const Vec4& c)
+    {
+      s_data->clear_color = c;
+    }
+
+    inline static void clear()
+    {
+      RenderCommands::clear(s_data->clear_color);
+    }
+
+    static void beginScene(const OrthographicCamera& camera);//TODO:REOMVE AND the ortho 
 
     static void beginScene(const Camera& camera, const Mat4& transform);
     static void beginScene(const Mat4& projection, const Mat4& view);
@@ -64,8 +74,8 @@ namespace Karen
     static void drawQuad(const Vec2& pos = Vec2(0.0f), const Vec2& size = Vec2(1.0f), const Vec4& color = Vec4(1.0f));
 
 
-    static void drawQuad(const Vec3& pos = Vec3(0.0f), const Vec2& size = Vec2(1.0f), const ARef<Texture>& tux = nullptr, const Vec4& color = Vec4(1.0f));
-    static void drawQuad(const Vec2& pos = Vec2(0.0f), const Vec2& size = Vec2(1.0f), const ARef<Texture>& tux = nullptr, const Vec4& color = Vec4(1.0f));
+    static void drawQuad(const Vec3& pos = Vec3(0.0f), const Vec2& size = Vec2(1.0f), const ARef<Texture2D>& tux = nullptr, const Vec4& color = Vec4(1.0f));
+    static void drawQuad(const Vec2& pos = Vec2(0.0f), const Vec2& size = Vec2(1.0f), const ARef<Texture2D>& tux = nullptr, const Vec4& color = Vec4(1.0f));
     
     static void flush();
     static void endScene();
@@ -80,10 +90,17 @@ namespace Karen
        glm::vec3 position;
        glm::vec2 tux_coord;
        float     tux_idx;
-       /*bool operator < (const QuadVertex& other)
+       bool operator < (const QuadVertex& other)
        {
-         return s_data->camera_view[3][3] - this->position.z < 
-       }*/
+         return this->position.z - s_data->camera_view[3][3] < other.position.z - s_data->camera_view[3][3]; 
+ //        return s_data->camera_view[3][3] - this->position.z < 
+       }
+       bool operator > (const QuadVertex& other)
+       {
+         return this->position.z - s_data->camera_view[3][3] > other.position.z - s_data->camera_view[3][3]; 
+ //        return s_data->camera_view[3][3] - this->position.z < 
+       }
+
      };
      
      struct Data
@@ -106,6 +123,7 @@ namespace Karen
        Vec4 quad_vertex_pos[4];
        Stats stats;
        Mat4 camera_view = Mat4(1.0f);
+       Vec4 clear_color = Vec4(0.2, 0.2, 0.2, 1.0f);
      };
 
     static Data* s_data;

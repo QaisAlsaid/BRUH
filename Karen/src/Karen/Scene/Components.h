@@ -1,6 +1,7 @@
 #ifndef KR_COMPONENTS_H
 #define KR_COMPONENTS_H
 
+#include "Karen/Scripting/Script.h"
 #include "Karen/Core/Core.h"
 #include "Karen/Core/UUID.h"
 #include "SceneCamera.h"
@@ -11,6 +12,11 @@ class b2Body;
 class b2Fixture;
 namespace Karen
 {
+  struct ScriptComponent
+  {
+    std::string path;
+    Script* script;
+  };
   struct KAREN_API IDComponent
   {
     UUID ID;
@@ -20,7 +26,7 @@ namespace Karen
   {
     std::string name;
     TagComponent() = default;
-    TagComponent(const std::string& s = "") : name(s) {}
+    TagComponent(const std::string& s) : name(s) {}
   };
 
   struct KAREN_API TransformComponent
@@ -63,6 +69,15 @@ namespace Karen
   {
     ScriptEntity* instance = nullptr;
      
+    void bind(ScriptEntity* trans_ownership)
+    {
+      instantiateScript = [&](){ return trans_ownership; };
+      DestroyScript = [](NativeScriptComponent* native_script)
+      {
+        delete native_script->instance;
+        native_script->instance = nullptr;
+      };
+    }
     template<typename T>
     void bind()
     {
@@ -74,7 +89,8 @@ namespace Karen
       };
     }
     private:
-      ScriptEntity* (*instantiateScript)();
+    std::function<ScriptEntity*(void)> instantiateScript;  
+    //ScriptEntity* (*instantiateScript)();
       void (*DestroyScript)(NativeScriptComponent*);
     friend class Scene;
   };
@@ -102,6 +118,4 @@ namespace Karen
     b2Fixture* fixture = nullptr;
   };
 }
-
-
 #endif //KR_COMPONENTS_H
