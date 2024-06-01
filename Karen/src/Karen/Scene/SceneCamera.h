@@ -2,7 +2,7 @@
 #define KR_SCENE_CAMERA_H
 
 #include "Karen/Core/Core.h"
-#include "Karen/Camera.h"
+#include "Karen/Render/Camera.h"
 
 
 namespace Karen

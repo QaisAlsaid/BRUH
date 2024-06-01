@@ -1,3 +1,4 @@
+#include <functional>
 #include <pch.h>
 #include <sol/forward.hpp>
 #include <sol/object.hpp>
@@ -7,6 +8,7 @@
 #include <sol/types.hpp>
 
 #include "Lua.h"
+#include "Karen/Core/Input.h"
 #include "Karen/Core/Log.h"
 #include "Karen/Core/Core.h"
 #include "Karen/Core/Math/math.h"
@@ -15,11 +17,13 @@
 #include "Karen/Render/Renderer2D/Renderer2D.h"
 #include "Karen/Scene/Components.h"
 #include "Karen/Scene/Entity.h"
+#include "Karen/Scene/SceneCamera.h"
 #include "Script.h"
 #include "glm/detail/qualifier.hpp"
+#include "glm/ext/matrix_transform.hpp"
+#include "glm/ext/quaternion_common.hpp"
 #include "glm/fwd.hpp"
 
-#define STRINGIFY(x) #x
 
 #define ADD_COMPONENT_FUNCTIONS(component_prefex) \
     auto add_##component_prefex        = &::Karen::Entity::addComponent<component_prefex##Component>; \
@@ -49,12 +53,19 @@ namespace Karen
     lua.open_libraries();
     
     karen = Lua::get()["Karen"].get_or_create<sol::table>();
+    KAREN_CORE_WARN("Created Karen table");
     
+    KAREN_CORE_WARN("initCore called");
     initCore();
-    initMath();
-    initRenderer();
-    initScene();
+    KAREN_CORE_WARN("initCore exited");
 
+    KAREN_CORE_WARN("initMath exited");
+    initMath();
+    KAREN_CORE_WARN("initMath exited");
+    KAREN_CORE_WARN("initRenderer called");
+    initRenderer();
+    KAREN_CORE_WARN("initRenderer exited");
+    initScene();
 
 #if 0
     karen.new_usertype<Scene>("Scene", "addEntity", sol::resolve<Entity(const std::string&)>(&Scene::addEntity), 
@@ -85,13 +96,46 @@ namespace Karen
 
     //karen.set_function("getScene", [&](const char* name){return App::get()->assetManager().getScene(name);});
 #endif
+    KAREN_CORE_WARN("init Script started exited");
     sol::usertype<Script> script = karen.new_usertype<Script>("Script");
     script["onCreate"] = &Script::onCreate;
     script["onUpdate"] = &Script::onUpdate;
     script["onDestroy"] = &Script::onDestroy;
     script["entity"] = &Script::entity;
     script["getTimestep"] = &Script::getTimestep;
-/*
+    script["export"] = sol::overload(
+            [](Script* _this, const char* as, Vec4* v4){
+              App::get()->pushExportVariable(as, { ExportType::Type::Vec4, v4 },
+                  _this->entity.getComponent<IDComponent>().ID);
+              }, 
+            [](Script* _this, const char* as, Vec3* v3){
+              App::get()->pushExportVariable(as, { ExportType::Type::Vec3, v3 }, 
+                  _this->entity.getComponent<IDComponent>().ID);
+              }, 
+            [](Script* _this, const char* as, Vec2* v2){
+              App::get()->pushExportVariable(as, { ExportType::Type::Vec2, v2 }, 
+                  _this->entity.getComponent<IDComponent>().ID);
+              },
+              [](Script* _this, const char* as, Vec4* v4, bool dummy){ 
+              App::get()->pushExportVariable(as, { ExportType::Type::RGBA_Color, v4 },
+                  _this->entity.getComponent<IDComponent>().ID);
+              } 
+            //[](Script* _this, const char* as, float* f){
+            //  App::get()->pushExportVariable(as, { ExportType::Type::Float, f }, 
+            //      _this->entity.getComponent<IDComponent>().ID);
+            //  },
+            //[](Script* _this, const char* as, int* i){
+            //  App::get()->pushExportVariable(as, { ExportType::Type::Int, i }, 
+            //      _this->entity.getComponent<IDComponent>().ID);
+            //  },
+            //[](Script* _this, const char* as, const char* s){
+            //  App::get()->pushExportVariable(as, { ExportType::Type::String, s }, 
+            //      _this->entity.getComponent<IDComponent>().ID);  
+            //  }
+    );
+
+    KAREN_CORE_WARN("init Script done exited");
+    /*
     lua.script(R"(
     app = App.get();
     app:print();
@@ -134,11 +178,19 @@ namespace Karen
     {
       //usertype
       sol::usertype<App> app = karen.new_usertype<App>("App");
-      app["print"] = &App::print;
-      app["getWindow"] = &App::getWindow;
-      app["getAssetManager"] = sol::resolve<AssetManager&(void)>(&App::assetManager);
-      //variables
-      karen.add("app", App::get());
+      app["print"] = [](){ App::get()->print(); };
+      //app["getWindow"] = [](){ return App::get()->getWindow(); };
+      app["getAssetManager"] = [](){ return App::get()->assetManager(); }; 
+    }
+
+    //Input
+    {
+      sol::usertype<Input> input = karen.new_usertype<Input>("Input");
+      input["isKeyPressed"]          = &Input::isKeyPressed;
+      input["isKeyReleased"]         = &Input::isKeyReleased;
+      input["isMouseButtonPressed"]  = &Input::isMouseButtonPressed;
+      input["isMouseButtonReleased"] = &Input::isMouseButtonReleased;
+      input["getMousePosition"]      = &Input::getMousePos;
     }
 
     //Timestep:
@@ -170,19 +222,17 @@ namespace Karen
       wi["getWidth"]  = &Window::getWidth;
       wi["getHieght"] = &Window::getHeight;
       wi["isVsync"]   = &Window::isVsync;
-      wi["setVsync"]  = & Window::setVsync;
+      wi["setVsync"]  = &Window::setVsync;
     }
 
   }
   //stpq
   void Lua::initMath()
   {
-    sol::table math = karen["Math"].get_or_create<sol::table>();
-
     //Vec4
     {
       //usertype
-      sol::usertype<Vec4> v4 = math.new_usertype<Vec4>("Vec4", 
+      sol::usertype<Vec4> v4 = karen.new_usertype<Vec4>("Vec4", 
           sol::constructors<Vec4(), Vec4(float), Vec4(float, float, float, float)>());
 
       v4["x"] = &Vec4::x; v4["r"] = &Vec4::r; v4["s"] = &Vec4::s;
@@ -208,7 +258,7 @@ namespace Karen
     //Vec3
     {
       //usertype
-      sol::usertype<Vec3> v3 = math.new_usertype<Vec3>("Vec3", 
+      sol::usertype<Vec3> v3 = karen.new_usertype<Vec3>("Vec3", 
           sol::constructors<Vec3(), Vec3(float), Vec3(float, float, float)>());
       
       v3["x"] = &Vec3::x; v3["r"] = &Vec3::r; v3["s"] = &Vec3::s;
@@ -232,7 +282,7 @@ namespace Karen
     //Vec2
     {
       //usertype
-      sol::usertype<Vec2> v2 = math.new_usertype<Vec2>("Vec2", 
+      sol::usertype<Vec2> v2 = karen.new_usertype<Vec2>("Vec2", 
       sol::constructors<Vec2(), Vec2(float), Vec2(float, float)>());
 
       v2["x"] = &Vec2::x; v2["r"] = &Vec2::r; v2["s"] = &Vec2::s;
@@ -254,7 +304,7 @@ namespace Karen
 
     //Mat4
     {
-      sol::usertype<Mat4> m4 = math.new_usertype<Mat4>("Mat4", sol::constructors<Mat4(), Mat4(float)>());
+      sol::usertype<Mat4> m4 = karen.new_usertype<Mat4>("Mat4", sol::constructors<Mat4(), Mat4(float)>());
 
       m4["add"] = sol::resolve<Mat4(const Mat4&, const Mat4&)>(&glm::operator+);
       m4["sub"] = sol::resolve<Mat4(const Mat4&, const Mat4&)>(&glm::operator-);
@@ -267,20 +317,38 @@ namespace Karen
           sol::resolve<Vec4(const Mat4&, const Vec4&)>(&glm::operator/)
           );
     
-      m4["transpose"] = &glm::transpose<4, 4, glm::f32, glm::defaultp>;
-      m4["inverse"]   = &glm::inverse<4, 4, glm::f32, glm::defaultp>;
-      m4["translate"] = sol::resolve<Mat4(const Mat4&, const Vec3&)>
-        (&glm::translate<glm::f32, glm::defaultp>);
-      m4["rotate"]    = sol::resolve<Mat4(const Mat4&, glm::f32, const Vec3&)>
-        (&glm::rotate<glm::f32, glm::defaultp>);
-      m4["scale"]     = sol::resolve<Mat4(const Mat4&, const Vec3&)>
-        (&glm::scale<glm::f32, glm::defaultp>);
+      m4["transpose"] = [](Mat4* mat){ *mat = glm::transpose(*mat); };
+      m4["inverse"]   = [](Mat4* mat){ *mat = glm::inverse(*mat); };
+
+      m4["transposed"] = &glm::transpose<4, 4, glm::f32, glm::defaultp>;
+      m4["inversed"]   = &glm::inverse<4, 4, glm::f32, glm::defaultp>;
+      
+      m4["translate"] = [](Mat4* mat, const Vec3& vec) {
+        *mat = glm::translate(*mat, vec); 
+        return mat;
+      };
+      m4["rotate"]    = [](Mat4* mat, float angle, const Vec3& vec) {
+        *mat = glm::rotate(*mat, angle, vec); 
+        return mat;
+      };
+      m4["scale"]     = [](Mat4* mat, const Vec3& vec) { 
+        *mat = glm::translate(*mat, vec); 
+        return mat;
+      };
+      m4["transform"] = [](Mat4* mat, float angle, const Vec3& translation, 
+          const Vec3& scale, const Vec3& rotation) {
+        *mat = glm::translate(*mat, translation);
+        *mat = glm::rotate(*mat, angle, rotation);
+        *mat = glm::scale(*mat, scale);
+        return mat;
+      };
+      
       m4["decompose"] = &Karen::decompose;
     }
 
     //Mat3
     {
-      sol::usertype<Mat3> m3 = math.new_usertype<Mat3>("Mat3", sol::constructors<Mat3(), Mat3(float)>());
+      sol::usertype<Mat3> m3 = karen.new_usertype<Mat3>("Mat3", sol::constructors<Mat3(), Mat3(float)>());
 
       m3["add"] = sol::resolve<Mat3(const Mat3&, const Mat3&)>(&glm::operator+);
       m3["sub"] = sol::resolve<Mat3(const Mat3&, const Mat3&)>(&glm::operator-);
@@ -293,13 +361,16 @@ namespace Karen
           sol::resolve<Vec3(const Mat3&, const Vec3&)>(&glm::operator/)
           );
     
-      m3["transpose"] = &glm::transpose<3, 3, glm::f32, glm::defaultp>;
-      m3["inverse"]   = &glm::inverse<3, 3, glm::f32, glm::defaultp>;
+      m3["transpose"] = [](Mat3* mat){ *mat = glm::transpose(*mat); return mat; };
+      m3["inverse"]   = [](Mat3* mat){ *mat = glm::inverse(*mat); return mat ;};
+
+      m3["transposed"] = &glm::transpose<3, 3, glm::f32, glm::defaultp>;
+      m3["inversed"]   = &glm::inverse<3, 3, glm::f32, glm::defaultp>;
     }
 
     //Mat2
     {
-      sol::usertype<Mat2> m2 = math.new_usertype<Mat2>("Mat2", sol::constructors<Mat2(), Mat2(float)>());
+      sol::usertype<Mat2> m2 = karen.new_usertype<Mat2>("Mat2", sol::constructors<Mat2(), Mat2(float)>());
 
       m2["add"] = sol::resolve<Mat2(const Mat2&, const Mat2&)>(&glm::operator+);
       m2["sub"] = sol::resolve<Mat2(const Mat2&, const Mat2&)>(&glm::operator-);
@@ -311,19 +382,232 @@ namespace Karen
           sol::resolve<Mat2(const Mat2&, const Mat2&)>(&glm::operator/),
           sol::resolve<Vec2(const Mat2&, const Vec2&)>(&glm::operator/)
           );
-    
-      m2["transpose"] = &glm::transpose<2, 2, glm::f32, glm::defaultp>;
-      m2["inverse"]   = &glm::inverse<2, 2, glm::f32, glm::defaultp>;
+      
+      m2["transpose"] = [](Mat2* mat){ *mat = glm::transpose(*mat); return mat; };
+      m2["inverse"]   = [](Mat2* mat){ *mat = glm::inverse(*mat); return mat; };
+
+      m2["transposed"] = &glm::transpose<2, 2, glm::f32, glm::defaultp>;
+      m2["inversed"]   = &glm::inverse<2, 2, glm::f32, glm::defaultp>;
+    }
+
+    //glm style functions
+    {
+      //arethmatic
+      karen.set_function("add", sol::overload(
+            sol::resolve<Vec4(const Vec4&, const Vec4&)>(&glm::operator+), 
+            sol::resolve<Vec4(const Vec4&, float)>(&glm::operator+), 
+            sol::resolve<Vec4(float, const Vec4&)>(&glm::operator+), 
+            
+            sol::resolve<Vec3(const Vec3&, const Vec3&)>(&glm::operator+), 
+            sol::resolve<Vec3(const Vec3&, float)>(&glm::operator+), 
+            sol::resolve<Vec3(float, const Vec3&)>(&glm::operator+), 
+            
+            sol::resolve<Vec2(const Vec2&, const Vec2&)>(&glm::operator+), 
+            sol::resolve<Vec2(const Vec2&, float)>(&glm::operator+), 
+            sol::resolve<Vec2(float, const Vec2&)>(&glm::operator+), 
+            
+            sol::resolve<Mat4(const Mat4&, const Mat4&)>(&glm::operator+), 
+            sol::resolve<Mat4(const Mat4&, float)>(&glm::operator+), 
+            sol::resolve<Mat4(float, const Mat4&)>(&glm::operator+), 
+            
+            sol::resolve<Mat3(const Mat3&, const Mat3&)>(&glm::operator+), 
+            sol::resolve<Mat3(const Mat3&, float)>(&glm::operator+), 
+            sol::resolve<Mat3(float, const Mat3&)>(&glm::operator+), 
+            
+            sol::resolve<Mat2(const Mat2&, const Mat2&)>(&glm::operator+), 
+            sol::resolve<Mat2(const Mat2&, float)>(&glm::operator+), 
+            sol::resolve<Mat2(float, const Mat2&)>(&glm::operator+) 
+            ));
+      karen.set_function("subtract", sol::overload(
+            sol::resolve<Vec4(const Vec4&, const Vec4&)>(&glm::operator-), 
+            sol::resolve<Vec4(const Vec4&, float)>(&glm::operator-), 
+            sol::resolve<Vec4(float, const Vec4&)>(&glm::operator-), 
+            
+            sol::resolve<Vec3(const Vec3&, const Vec3&)>(&glm::operator-), 
+            sol::resolve<Vec3(const Vec3&, float)>(&glm::operator-), 
+            sol::resolve<Vec3(float, const Vec3&)>(&glm::operator-), 
+            
+            sol::resolve<Vec2(const Vec2&, const Vec2&)>(&glm::operator-), 
+            sol::resolve<Vec2(const Vec2&, float)>(&glm::operator-), 
+            sol::resolve<Vec2(float, const Vec2&)>(&glm::operator-), 
+            
+            sol::resolve<Mat4(const Mat4&, const Mat4&)>(&glm::operator-), 
+            sol::resolve<Mat4(const Mat4&, float)>(&glm::operator-), 
+            sol::resolve<Mat4(float, const Mat4&)>(&glm::operator-), 
+            
+            sol::resolve<Mat3(const Mat3&, const Mat3&)>(&glm::operator-), 
+            sol::resolve<Mat3(const Mat3&, float)>(&glm::operator-), 
+            sol::resolve<Mat3(float, const Mat3&)>(&glm::operator-), 
+            
+            sol::resolve<Mat2(const Mat2&, const Mat2&)>(&glm::operator-), 
+            sol::resolve<Mat2(const Mat2&, float)>(&glm::operator-), 
+            sol::resolve<Mat2(float, const Mat2&)>(&glm::operator-) 
+            ));
+      karen.set_function("multiply", sol::overload(
+            sol::resolve<Vec4(const Vec4&, const Vec4&)>(&glm::operator*), 
+            sol::resolve<Vec4(const Vec4&, float)>(&glm::operator*), 
+            sol::resolve<Vec4(float, const Vec4&)>(&glm::operator*), 
+            
+            sol::resolve<Vec3(const Vec3&, const Vec3&)>(&glm::operator*), 
+            sol::resolve<Vec3(const Vec3&, float)>(&glm::operator*), 
+            sol::resolve<Vec3(float, const Vec3&)>(&glm::operator*), 
+            
+            sol::resolve<Vec2(const Vec2&, const Vec2&)>(&glm::operator*), 
+            sol::resolve<Vec2(const Vec2&, float)>(&glm::operator*), 
+            sol::resolve<Vec2(float, const Vec2&)>(&glm::operator*), 
+            
+            sol::resolve<Mat4(const Mat4&, const Mat4&)>(&glm::operator*), 
+            sol::resolve<Mat4(const Mat4&, float)>(&glm::operator*), 
+            sol::resolve<Mat4(float, const Mat4&)>(&glm::operator*), 
+            
+            sol::resolve<Mat3(const Mat3&, const Mat3&)>(&glm::operator*), 
+            sol::resolve<Mat3(const Mat3&, float)>(&glm::operator*), 
+            sol::resolve<Mat3(float, const Mat3&)>(&glm::operator*), 
+            
+            sol::resolve<Mat2(const Mat2&, const Mat2&)>(&glm::operator*), 
+            sol::resolve<Mat2(const Mat2&, float)>(&glm::operator*), 
+            sol::resolve<Mat2(float, const Mat2&)>(&glm::operator*),  
+          
+            sol::resolve<Vec4(const Mat4&, const Vec4&)>(&glm::operator*), 
+            sol::resolve<Vec3(const Vec3&, const Mat3&)>(&glm::operator*), 
+            sol::resolve<Vec2(const Mat2&, const Vec2&)>(&glm::operator*)
+            ));
+      karen.set_function("devide", sol::overload(
+            sol::resolve<Vec4(const Vec4&, const Vec4&)>(&glm::operator/), 
+            sol::resolve<Vec4(const Vec4&, float)>(&glm::operator/), 
+            sol::resolve<Vec4(float, const Vec4&)>(&glm::operator/), 
+            
+            sol::resolve<Vec3(const Vec3&, const Vec3&)>(&glm::operator/), 
+            sol::resolve<Vec3(const Vec3&, float)>(&glm::operator/), 
+            sol::resolve<Vec3(float, const Vec3&)>(&glm::operator/), 
+            
+            sol::resolve<Vec2(const Vec2&, const Vec2&)>(&glm::operator/), 
+            sol::resolve<Vec2(const Vec2&, float)>(&glm::operator/), 
+            sol::resolve<Vec2(float, const Vec2&)>(&glm::operator/), 
+            
+            sol::resolve<Mat4(const Mat4&, const Mat4&)>(&glm::operator/), 
+            sol::resolve<Mat4(const Mat4&, float)>(&glm::operator/), 
+            sol::resolve<Mat4(float, const Mat4&)>(&glm::operator/), 
+            
+            sol::resolve<Mat3(const Mat3&, const Mat3&)>(&glm::operator/), 
+            sol::resolve<Mat3(const Mat3&, float)>(&glm::operator/), 
+            sol::resolve<Mat3(float, const Mat3&)>(&glm::operator/), 
+            
+            sol::resolve<Mat2(const Mat2&, const Mat2&)>(&glm::operator/), 
+            sol::resolve<Mat2(const Mat2&, float)>(&glm::operator/), 
+            sol::resolve<Mat2(float, const Mat2&)>(&glm::operator/),  
+          
+            sol::resolve<Vec4(const Mat4&, const Vec4&)>(&glm::operator/), 
+            sol::resolve<Vec3(const Vec3&, const Mat3&)>(&glm::operator/), 
+            sol::resolve<Vec2(const Mat2&, const Vec2&)>(&glm::operator/)
+            ));
+      //vector
+      karen.set_function("dot", sol::overload(
+            sol::resolve<float(const Vec4&, const Vec4&)>(&glm::dot), 
+            sol::resolve<float(const Vec3&, const Vec3&)>(&glm::dot), 
+            sol::resolve<float(const Vec2&, const Vec2&)>(&glm::dot) 
+            ));
+      karen.set_function("cross", sol::overload(
+            sol::resolve<Vec3(const Vec3&, const Vec3&)>(&glm::cross)
+            //sol::resolve<Vec2(const Vec2&, const Vec2&)>([](const Vec2& _1, const Vec2& _2) {
+            //    //cross product is defined in 2D and useful in ray casting 
+            //    //TODO: make it
+            //    return Vec2(0);
+            //  }) 
+            ));
+      karen.set_function("length", sol::overload(
+            sol::resolve<float(const Vec4&)>(&glm::length), 
+            sol::resolve<float(const Vec3&)>(&glm::length), 
+            sol::resolve<float(const Vec2&)>(&glm::length) 
+            ));
+      karen.set_function("normalize", sol::overload(
+            sol::resolve<Vec4(const Vec4&)>(&glm::normalize), 
+            sol::resolve<Vec3(const Vec3&)>(&glm::normalize), 
+            sol::resolve<Vec2(const Vec2&)>(&glm::normalize) 
+            ));
+      //matrix 
+      karen.set_function("inverse", sol::overload(
+            sol::resolve<Mat4(const Mat4&)>(&glm::inverse), 
+            sol::resolve<Mat3(const Mat3&)>(&glm::inverse), 
+            sol::resolve<Mat2(const Mat2&)>(&glm::inverse) 
+            ));
+      karen.set_function("transpose", sol::overload(
+            sol::resolve<Mat4(const Mat4&)>(&glm::transpose), 
+            sol::resolve<Mat3(const Mat3&)>(&glm::transpose), 
+            sol::resolve<Mat2(const Mat2&)>(&glm::transpose) 
+            ));
+      karen.set_function("translate", sol::resolve<Mat4(const Mat4&, const Vec3&)>(&glm::translate));
+      karen.set_function("rotate", sol::resolve<Mat4(const Mat4&, float, const Vec3&)>(&glm::rotate));
+      karen.set_function("scale", sol::resolve<Mat4(const Mat4&, const Vec3&)>(&glm::scale));
+      karen.set_function("transform", [](const Mat4& m, float a, const Vec3& t, const Vec3& s, const Vec3& r){
+          Mat4 ret = m;
+          ret = glm::translate(ret, t);
+          ret = glm::rotate(ret, a, r);
+          ret = glm::scale(ret, s);
+          return ret;
+          });
+      karen.set_function("decompose", [](const Mat4& m){
+          Vec3 t(0), r(0), s(0);
+          bool sucsses = decompose(m, t, r, s);
+          if(!sucsses) KAREN_CORE_WARN("Failed to decompose matrix: {0}, returnning empty Vectors", m);
+          return std::make_tuple(t, r, s);
+          });
+      //trig
+      karen.set_function("sin", sol::overload(
+            sol::resolve<float(float)>(&glm::sin), 
+            sol::resolve<Vec4(const Vec4&)>(&glm::sin), 
+            sol::resolve<Vec3(const Vec3&)>(&glm::sin), 
+            sol::resolve<Vec2(const Vec2&)>(&glm::sin)
+            ));
+     karen.set_function("cos", sol::overload(
+            sol::resolve<float(float)>(&glm::cos), 
+            sol::resolve<Vec4(const Vec4&)>(&glm::cos), 
+            sol::resolve<Vec3(const Vec3&)>(&glm::cos), 
+            sol::resolve<Vec2(const Vec2&)>(&glm::cos)
+            ));
+     karen.set_function("tan", sol::overload(
+            sol::resolve<float(float)>(&glm::tan), 
+            sol::resolve<Vec4(const Vec4&)>(&glm::tan), 
+            sol::resolve<Vec3(const Vec3&)>(&glm::tan), 
+            sol::resolve<Vec2(const Vec2&)>(&glm::tan) 
+            ));
+    karen.set_function("asin", sol::overload(
+           sol::resolve<float(float)>(&glm::asin), 
+           sol::resolve<Vec4(const Vec4&)>(&glm::asin), 
+           sol::resolve<Vec3(const Vec3&)>(&glm::asin), 
+           sol::resolve<Vec2(const Vec2&)>(&glm::asin) 
+           ));
+    karen.set_function("acos", sol::overload(
+           sol::resolve<float(float)>(&glm::acos), 
+           sol::resolve<Vec4(const Vec4&)>(&glm::acos), 
+           sol::resolve<Vec3(const Vec3&)>(&glm::acos), 
+           sol::resolve<Vec2(const Vec2&)>(&glm::acos) 
+           ));
+    karen.set_function("atan", sol::overload(
+           sol::resolve<float(float)>(&glm::atan), 
+           sol::resolve<Vec4(const Vec4&)>(&glm::atan), 
+           sol::resolve<Vec3(const Vec3&)>(&glm::atan), 
+           sol::resolve<Vec2(const Vec2&)>(&glm::atan) 
+           ));
+    //others
+     karen.set_function("abs", sol::overload(
+           sol::resolve<float(float)>(&glm::abs), 
+           sol::resolve<Vec4(const Vec4&)>(&glm::abs), 
+           sol::resolve<Vec3(const Vec3&)>(&glm::abs), 
+           sol::resolve<Vec2(const Vec2&)>(&glm::abs), 
+           sol::resolve<Mat4(const Mat4&)>(&glm::abs), 
+           sol::resolve<Mat3(const Mat3&)>(&glm::abs), 
+           sol::resolve<Mat2(const Mat2&)>(&glm::abs)
+           ));
     }
   }
 
   void Lua::initScene()
   {
-    sol::table scene = karen["Scene"].get_or_create<sol::table>();
-
+    KAREN_CORE_WARN("We reached initScene");
     //components
     {
-      sol::table comps = scene["Components"].get_or_create<sol::table>();
+      sol::table comps = karen["Components"].get_or_create<sol::table>();
       
       //IDComponent
       {
@@ -334,8 +618,8 @@ namespace Karen
       //TagComponent
       //TODO: make it (NameComponent)
       {
-        sol::usertype<TagComponent> name = comps.new_usertype<TagComponent>("Name"); 
- //           sol::constructors<TagComponent(TagComponent(), TagComponent(const std::string&))>());
+        sol::usertype<TagComponent> name = comps.new_usertype<TagComponent>("Name", 
+          sol::constructors<TagComponent(), TagComponent(const std::string&)>());
         name["name"] = &TagComponent::name;
       }
 
@@ -343,11 +627,12 @@ namespace Karen
       {
         sol::usertype<TransformComponent> trans = comps.new_usertype<TransformComponent>("Transform", 
             sol::constructors<TransformComponent(),
-            TransformComponent(const Vec3&, const Vec3&, const Vec3&)>());
+            TransformComponent(const Vec3&, const Vec3&, const Vec3&)>()
+            );
         trans["position"] = &TransformComponent::position;
         trans["scale"]    = &TransformComponent::scale;
         trans["rotation"] = &TransformComponent::rotation;
-        trans["asMatrix"] = &TransformComponent::getTransformationMatrix;
+        trans["asMat4"] = &TransformComponent::getTransformationMatrix;
       }
 
       //SpriteComponent
@@ -355,6 +640,7 @@ namespace Karen
         //no constructors because it will change soon (with the asset manager)
         sol::usertype<SpriteComponent> sprite = comps.new_usertype<SpriteComponent>("Sprite");
         sprite["color"] = &SpriteComponent::color;
+        sprite["texture"] = &SpriteComponent::texture_handel;
       }
 
       //ScriptComponent
@@ -376,9 +662,11 @@ namespace Karen
       //RigidBody2DComponent
       {
         sol::usertype<RigidBody2DComponent> rb2d = comps.new_usertype<RigidBody2DComponent>("RigidBody2D");
-        rb2d["type"]           = &RigidBody2DComponent::type;
-        rb2d["fixed_rotation"] = &RigidBody2DComponent::fixed_rotation;
-        
+        rb2d["type"]             = &RigidBody2DComponent::type;
+        rb2d["fixed_rotation"]   = &RigidBody2DComponent::fixed_rotation;
+        rb2d["linear_velocity"]  = &RigidBody2DComponent::linear_velocity;
+        rb2d["angular_velocity"] = &RigidBody2DComponent::angular_velocity;
+        rb2d["gravity_scale"]    = &RigidBody2DComponent::gravity_scale;
       }
 
       //BoxColliderComponent
@@ -391,15 +679,49 @@ namespace Karen
         bc["restitution"]           = &BoxColliderComponent::restitution;
         bc["restitution_threshold"] = &BoxColliderComponent::restitution_threshold;
       }
+
+      //CircleColliderComponent
+      {
+        sol::usertype<CircleColliderComponent> bc = comps.new_usertype<CircleColliderComponent>("CircleCollider");
+        bc["offset"]                = &CircleColliderComponent::offset;
+        bc["radius"]                = &CircleColliderComponent::radius;
+        bc["density"]               = &CircleColliderComponent::density;
+        bc["friction"]              = &CircleColliderComponent::friction;
+        bc["restitution"]           = &CircleColliderComponent::restitution;
+        bc["restitution_threshold"] = &CircleColliderComponent::restitution_threshold;
+      }
     }
 
-    //Scene (the object)
+    //Scene Camera
     {
-      sol::usertype<Scene> scene_obj = scene.new_usertype<Scene>("Scene");
+      sol::usertype<SceneCamera> scene_cam = karen.new_usertype<SceneCamera>("SceneCamera");
+      scene_cam["getProjection"] = &SceneCamera::getProjection;
+      
+      scene_cam["setType"] = &SceneCamera::setType;
+      scene_cam["getType"] = &SceneCamera::getType;
+      
+      scene_cam["setPerspectiveData"] = sol::overload(
+          sol::resolve<void(const SceneCamera::PerspectiveData&)>(&SceneCamera::setPerspectiveData), 
+          sol::resolve<float, float, float>(&SceneCamera::setPerspectiveData)
+          );
+      scene_cam["getPerspectiveData"] = &SceneCamera::getPerspectiveData;
+      scene_cam["setOrthographicData"] = sol::overload(
+          sol::resolve<void(const SceneCamera::OrthographicData&)>(&SceneCamera::setOrthographicData), 
+          sol::resolve<void(float, float, float)>(&SceneCamera::setOrthographicData)
+          );
+      scene_cam["getOrthographicData"] = &SceneCamera::getOrthographicData;  
+    }
+
+    //Scene
+    {
+      sol::usertype<Scene> scene_obj = karen.new_usertype<Scene>("Scene");
       scene_obj["addEntity"]    = sol::resolve<Entity(const std::string&)>(&Scene::addEntity); 
       scene_obj["copyEntity"]   = &Scene::copyEntity;
       scene_obj["removeEntity"] = &Scene::removeEntity;
       scene_obj["clear"]        = &Scene::clear;
+      scene_obj["getEntity"]    = sol::overload(
+          sol::resolve<Entity(const std::string&)>(&Scene::getEntity), 
+          sol::resolve<Entity(UUID)>(&Scene::getEntity));
     }
    
     //Entity
@@ -414,8 +736,12 @@ namespace Karen
       ADD_COMPONENT_FUNCTIONS(RigidBody2D);
       ADD_COMPONENT_FUNCTIONS(BoxCollider);
       
-      sol::usertype<Entity> entity = scene.new_usertype<Entity>("Entity");
+      sol::usertype<Entity> entity = karen.new_usertype<Entity>("Entity", 
+          sol::constructors<Entity(uint64_t, Scene*)>()
+          );
       entity["getId"]         = &Entity::operator unsigned int;//Debug
+      entity["valid"]         = &Entity::operator bool;
+      entity["same"]          = &Entity::operator==;
 
       REGESTER_COMPONENT_FUNCTIONS(ID, entity);
       REGESTER_COMPONENT_FUNCTIONS(Tag, entity);
@@ -426,11 +752,19 @@ namespace Karen
       REGESTER_COMPONENT_FUNCTIONS(RigidBody2D, entity);
       REGESTER_COMPONENT_FUNCTIONS(BoxCollider, entity);
     }
+
+    KAREN_CORE_WARN("We exited initScene");
   }
 
   void Lua::initRenderer()
   {
-    
+    //TODO: API
+
+    //Camera 
+    {
+      sol::usertype<Camera> cam = karen.new_usertype<Camera>("Camera");
+      cam["getProjection"] = &Camera::getProjection;
+    }
     //Renderer2D
     {
       sol::table r2d = karen["Renderer2D"].get_or_create<sol::table>();

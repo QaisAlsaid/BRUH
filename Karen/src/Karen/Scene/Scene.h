@@ -36,6 +36,15 @@ namespace Karen
       m_registry.view<T>().each(func);
     }
 
+    template<typename T>
+    entt::view<T> view()
+    {
+      return m_registry.view<T>();
+    }
+
+    Entity getEntity(const std::string& name);
+    Entity getEntity(UUID id);
+
     void onStart();
     void onUpdate(Timestep ts);
     void onEditorUpdate(Timestep ts);

@@ -119,7 +119,7 @@ namespace Karen
       reset();
     }
 
-    const Vec2 tux_coords[4] = 
+    constexpr const Vec2 tux_coords[4] = 
     {
       {0.0f, 0.0f},
       {1.0f, 0.0f},
@@ -170,7 +170,8 @@ namespace Karen
       s_data->texture_slot_index++;
     }
    
-    const Vec2 tux_coords[4] =
+    //TODO: in future when animations is present you should take the coords from the animation;
+    constexpr const Vec2 tux_coords[4] =
     {
       {0.0f, 0.0f},
       {1.0f, 0.0f},
@@ -194,8 +195,8 @@ namespace Karen
 
   void Renderer2D::drawQuad(const Vec3& pos, const Vec2& size, float rotation, const Vec4& color)
   {
-    //clock wise starting from bottom left 
-    //the position is defined from the bottom left of quad
+    //clock wise starting from bottom left
+    //the position is defined from the middle of the quad
     Mat4 trans = glm::translate(Mat4(1.0f), pos);
     trans = glm::rotate(trans, rotation, {0.0f, 0.0f, 1.0f});
     trans = glm::scale(trans, {size.x, size.y, 1.0f});
@@ -230,25 +231,25 @@ namespace Karen
       reset();
     }
 
-    s_data->quad_vertex_ptr->position = pos;//Vec3(-size.x/2.0f, -size.y/2.0f, 0.0f);
+    s_data->quad_vertex_ptr->position = pos + Vec3(-size.x/2.0f, -size.y/2.0f, 0.0f);
     s_data->quad_vertex_ptr->color = color;
     s_data->quad_vertex_ptr->tux_coord = {0.0f, 0.0f};
     s_data->quad_vertex_ptr->tux_idx = 0.0f;
     s_data->quad_vertex_ptr++;
 
-    s_data->quad_vertex_ptr->position = pos + Vec3(size.x, 0.0f, 0.0f);//Vec3(size.x/2.0f, -size.y/2.0f, 0.0f);
+    s_data->quad_vertex_ptr->position = pos + /*Vec3(size.x, 0.0f, 0.0f);*/Vec3(size.x/2.0f, -size.y/2.0f, 0.0f);
     s_data->quad_vertex_ptr->color = color;
     s_data->quad_vertex_ptr->tux_coord = {1.0f, 0.0f};
     s_data->quad_vertex_ptr->tux_idx = 0.0f;
     s_data->quad_vertex_ptr++;
 
-    s_data->quad_vertex_ptr->position = pos + Vec3(size.x, size.y, 0.0f);//Vec3(size.x/2.0f, size.y/2.0f, 0.0f);
+    s_data->quad_vertex_ptr->position = pos + /*Vec3(size.x, size.y, 0.0f);*/Vec3(size.x/2.0f, size.y/2.0f, 0.0f);
     s_data->quad_vertex_ptr->color = color;
     s_data->quad_vertex_ptr->tux_coord = {1.0f, 1.0f};
     s_data->quad_vertex_ptr->tux_idx = 0.0f;
     s_data->quad_vertex_ptr++;
 
-    s_data->quad_vertex_ptr->position = pos + Vec3(0.0f, size.y, 0.0f);//Vec3(-size.x/2.0f, size.y/2.0f, 0.0f);
+    s_data->quad_vertex_ptr->position = pos + /*Vec3(0.0f, size.y, 0.0f);*/Vec3(-size.x/2.0f, size.y/2.0f, 0.0f);
     s_data->quad_vertex_ptr->color = color;
     s_data->quad_vertex_ptr->tux_coord = {0.0f, 1.0f};
     s_data->quad_vertex_ptr->tux_idx = 0.0f;
@@ -289,25 +290,25 @@ namespace Karen
       s_data->texture_slot_index++;
     }
 
-    s_data->quad_vertex_ptr->position = pos;//+ Vec3(-size.x/2.0f, -size.y/2.0f, 0.0f);
+    s_data->quad_vertex_ptr->position = pos + Vec3(-size.x/2.0f, -size.y/2.0f, 0.0f);
     s_data->quad_vertex_ptr->color = color;
     s_data->quad_vertex_ptr->tux_coord = {0.0f, 0.0f};
     s_data->quad_vertex_ptr->tux_idx = c_tux_slot;
     s_data->quad_vertex_ptr++;
 
-    s_data->quad_vertex_ptr->position = pos + Vec3(size.x, 0.0f, 0.0f);//Vec3(size.x/2.0f, -size.y/2.0f, 0.0f);
+    s_data->quad_vertex_ptr->position = pos + /*Vec3(size.x, 0.0f, 0.0f);*/Vec3(size.x/2.0f, -size.y/2.0f, 0.0f);
     s_data->quad_vertex_ptr->color = color;
     s_data->quad_vertex_ptr->tux_coord = {1.0f, 0.0f};
     s_data->quad_vertex_ptr->tux_idx = c_tux_slot;
     s_data->quad_vertex_ptr++;
 
-    s_data->quad_vertex_ptr->position = pos + Vec3(size.x, size.y, 0.0f);//Vec3(size.x/2.0f, size.y/2.0f, 0.0f);
+    s_data->quad_vertex_ptr->position = pos + /*Vec3(size.x, size.y, 0.0f);*/Vec3(size.x/2.0f, size.y/2.0f, 0.0f);
     s_data->quad_vertex_ptr->color = color;
     s_data->quad_vertex_ptr->tux_coord = {1.0f, 1.0f};
     s_data->quad_vertex_ptr->tux_idx = c_tux_slot;
     s_data->quad_vertex_ptr++;
 
-    s_data->quad_vertex_ptr->position = pos + Vec3(0.0f, size.y, 0.0f);//Vec3(-size.x/2.0f, size.y/2.0f, 0.0f);
+    s_data->quad_vertex_ptr->position = pos + /*Vec3(0.0f, size.y, 0.0f);*/Vec3(-size.x/2.0f, size.y/2.0f, 0.0f);
     s_data->quad_vertex_ptr->color = color;
     s_data->quad_vertex_ptr->tux_coord = {0.0f, 1.0f};
     s_data->quad_vertex_ptr->tux_idx = c_tux_slot;
@@ -328,10 +329,7 @@ namespace Karen
     uint32_t data_size = (unsigned char*)s_data->quad_vertex_ptr - (unsigned char*)s_data->quad_vertex_base;
     
     //sort for Z position (for blind)
-    
-    //buble sort! slowwwwwwww (just for test)
-
-    struct Quad 
+    struct Quad
     {
       QuadVertex refs[4];
       /*inline bool operator < (const Quad& other) 

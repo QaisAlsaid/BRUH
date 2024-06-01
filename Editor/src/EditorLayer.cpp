@@ -12,11 +12,12 @@
 #include "glm/ext/quaternion_common.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "Karen/Scripting/Lua.h"
+#include "glm/trigonometric.hpp"
 #include <Karen/Karen.h>
 #include <imgui.h>
 #include <ImGuizmo.h>
 
-
+#ifdef KAREN_PLATFORM_LINUX
 #include <dlfcn.h>
 //#include "../res/scripts/Test.h"
 
@@ -42,7 +43,7 @@ static Karen::ScriptEntity* loadNativeScript(const char* path)
   KAREN_INFO("Loaded");
   return myClass;
 }
-
+#endif
 namespace Karen
 {
   class Scriptt : public ScriptEntity
@@ -57,7 +58,7 @@ namespace Karen
   };
 
   EditorLayer::EditorLayer()
-    : Layer("EditorLayer"), m_content_browser("../res"), m_asset_manager_panel(&App::get()->assetManager())
+    : Layer("EditorLayer"), m_content_browser("../res"), m_asset_manager_panel(App::get()->assetManager())
   {
     activate();
 
@@ -65,19 +66,19 @@ namespace Karen
     
     RenderCommands::init();
     Renderer2D::init("../res/shaders/Shaders2D/config.xml");
-  
 
-
+#ifdef KAREN_PLATFORM_LINUX
   native = loadNativeScript("../res/scripts/build/Script.so");
-  scriptInit(Karen::App::get());//TODO : renderer become a like the app but the interface just like the input (as-is)
-}
+  scriptInit(Karen::App::get());
+#endif
+  }
 
 
 static float* speed = new float;
   void EditorLayer::onAttach()
   {
-    m_editor_scene = App::get()->assetManager().getScene("scene");
-    std::cout << "Scene* : "<< std::hex << App::get()->assetManager().getScene("scene").get()<<std::endl;
+    m_editor_scene = App::get()->assetManager()->getScene("scene");
+    std::cout << "Scene* : "<< std::hex << App::get()->assetManager()->getScene("scene").get()<<std::endl;
     
     m_scene = m_editor_scene;
     m_helper_windows["Stats"] = createScoped<StatsWindow>();
@@ -88,6 +89,7 @@ static float* speed = new float;
     m_imgui_ini_path = ".";
 
 
+    //TODO: FIXME: wtf is it static or not :-()
     Lua l;
     l.init();
     std::cout<<"lua";
@@ -133,10 +135,14 @@ static float* speed = new float;
   }
 
 
+  static bool first_time = true;
+  
   void EditorLayer::onUpdate(Timestep ts)
   {
     m_camera.onUpdate(ts);
     m_scene->setEditorCamera(m_camera.getView(), m_camera.getProjection());
+    //TODO: callbacks for the context or something
+    m_scene_hierarchy_panel.setContext(m_scene);
     if(Input::isKeyPressed(Keyboard::LeftControl) || Input::isKeyPressed(Keyboard::RightControl))
       handelCMD((int)Keyboard::LeftControl);
     m_time_step = ts;
@@ -145,6 +151,7 @@ static float* speed = new float;
     //m_frame_buff->bindWriteFb(6);
     //Renderer2D::clear({200, 200, 200, 200});
     Renderer2D::clear(Vec4(0.25f, 0.25f, 0.25f, 1.0f));
+#ifdef KAREN_PLATFORM_LINUX
     //if(Input::isKeyPressed(Keyboard::Z))
     //{
       if(native)
@@ -161,6 +168,7 @@ static float* speed = new float;
         dlclose(handle);
       native = loadNativeScript("../res/scripts/build/Script.so");
     }*/
+#endif
     switch(m_scene_state)
     {
       case SceneState::Play:
@@ -286,11 +294,13 @@ static float* speed = new float;
     ImGui::Separator();
     ImGui::Text("Editor Camera");
     ImGui::DragFloat3("Position", glm::value_ptr(m_camera.position));
-    auto rot_deg = glm::degrees(m_camera.rotation);
-    ImGui::DragFloat3("Rotation", glm::value_ptr(rot_deg));
-    m_camera.rotation = glm::radians(rot_deg);
+    auto yaw_deg = glm::degrees(m_camera.yaw), pitch_deg = glm::degrees(m_camera.pitch);
+    ImGui::DragFloat("Yaw", &yaw_deg);
+    m_camera.yaw = glm::radians(yaw_deg);
+    ImGui::DragFloat("Pitch", &pitch_deg);
+    m_camera.pitch = glm::radians(pitch_deg);
     auto fov_deg = glm::degrees(m_camera.fov);
-    ImGui::DragFloat("Fov", &fov_deg);
+    ImGui::DragFloat("Fov", &fov_deg, 0.5f, glm::degrees(m_camera.min_fov), glm::degrees(m_camera.max_fov));
     m_camera.fov = glm::radians(fov_deg);
     
     auto max_fov_deg = glm::degrees(m_camera.max_fov);
@@ -317,14 +327,17 @@ static float* speed = new float;
   {
     m_scene_state = SceneState::Play;
     m_scene = Scene::copy(m_editor_scene);
+    m_inspector_panel.setCurrentSelected( { } );
+    App::get()->getExportedVariables().clear();
     m_scene->onStart();
   }
 
   void EditorLayer::onSceneStop()
   {
-    m_scene_state = SceneState::Stop;
+    m_scene_state = SceneState::Stop; 
     m_scene->onEnd();
     m_scene = m_editor_scene;
+    m_inspector_panel.setCurrentSelected( { } );
   }
 
   void EditorLayer::onDetach()
@@ -413,6 +426,7 @@ static float* speed = new float;
         ImGui::Separator();
         if(ImGui::MenuItem("Open", "Ctrl+O")) 
         {
+          //TODO : redirect to asset manager after open file
           const auto& path = FileDialogs::OpenFile("yaml", "Karen Scene (.yaml)");
           KAREN_TRACE("path: {0}", path);
           if(!path.empty())
@@ -458,22 +472,33 @@ static float* speed = new float;
 
   void EditorLayer::updateGizmos(Vec2 pos, Vec2 size)
   {
+    Mat4 scene_cam_view, scene_cam_proj;
     static bool tf = false;
+    static bool usc = false;
     ImGuizmo::SetOrthographic(tf);
     ImGuizmo::SetDrawlist();
     ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);
     ImGui::Begin("__DEBUG__");
     ImGui::Checkbox("ortho", &tf);
+    ImGui::Checkbox("use Scene Camera", &usc);
     ImGui::End();
-    //SceneCamera* camera = nullptr;
-    //TransformComponent* tc = nullptr;
-    /*m_scene->forEach<CameraComponent>([&](auto e_id, CameraComponent& cc)
+    if(usc)
     {
-      Entity e(e_id, m_scene.get());
-      camera = cc.is_primary ? &cc.camera : nullptr;
-      tc = e.tryGetComponent<TransformComponent>();
-      KAREN_CORE_ASSERT(tc);
-    });*/
+      SceneCamera* camera = nullptr;
+      TransformComponent* tc = nullptr;
+      m_scene->forEach<CameraComponent>([&](auto e_id, CameraComponent& cc)
+      {
+        Entity e(e_id, m_scene.get());
+        camera = cc.is_primary ? &cc.camera : nullptr;
+        tc = e.tryGetComponent<TransformComponent>();
+        KAREN_CORE_ASSERT(tc);
+      });
+      if(camera && tc)
+      {
+        scene_cam_proj = camera->getProjection();
+        scene_cam_view = glm::inverse(tc->getTransformationMatrix());
+      }
+    }
     auto current_selected = m_scene_hierarchy_panel.getCurrentSelected();
     if(current_selected)
     {
@@ -481,8 +506,8 @@ static float* speed = new float;
       if(current_transform_component)
       {
         auto current_transformation = current_transform_component->getTransformationMatrix();
-        const auto& cam_proj = m_camera.getProjection();
-        const auto cam_view = m_camera.getView();
+        const auto& cam_proj = usc ? scene_cam_proj : m_camera.getProjection();
+        const auto& cam_view = usc ? scene_cam_view : m_camera.getView();
         ImGuizmo::Manipulate(glm::value_ptr(cam_view), glm::value_ptr(cam_proj),
           (ImGuizmo::OPERATION)m_op, ImGuizmo::LOCAL, glm::value_ptr(current_transformation));
         if(ImGuizmo::IsUsing())
@@ -682,4 +707,3 @@ static float* speed = new float;
     }
   }
 }
-

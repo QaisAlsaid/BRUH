@@ -29,7 +29,8 @@ namespace Karen
     s_instance = this;
     m_window = std::unique_ptr<Window>(Window::create());
     m_window->setEventCallbackFunction(BIND_EVENT_FUNCTION(App::onEvent));
-    m_asset_manager.loadConfig("../res/config/assets.xml");
+    m_asset_manager = Karen::createScoped<AssetManager>();
+    m_asset_manager->loadConfig("../res/config/assets.xml");
     m_gui_layer = new GuiLayer("Base GuiLayer");
     m_gui_layer->activate();
     pushOverlay(m_gui_layer);
@@ -137,5 +138,23 @@ namespace Karen
   {
     m_layers.popOverlay(layer);
     layer->onDetach();
+  }
+
+  Layer* App::getLayer(const std::string& name)
+  {
+    for(auto* layer : m_layers)
+    {
+      if(layer->getName() == name)
+      {
+        return layer;
+      }
+    }
+    KAREN_CORE_WARN("Layer: {0} Not found in stack", name);
+    return nullptr;
+  }
+
+  void App::pushExportVariable(const char* name, const ExportType& et, UUID e_id)
+  {
+    m_export_vars[e_id].push_back({ name, et }); 
   }
 }

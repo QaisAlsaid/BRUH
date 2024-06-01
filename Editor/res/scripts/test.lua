@@ -1,14 +1,38 @@
-local script = Karen.Script.new()
+script = Karen.Script.new()
 local sprite;
 local trans;
+local asset_manager;
+local scene;
+local scene_camera_entity;
+local body;
+local karen = Karen.Vec4.new(1);
+local col = Karen.Vec4.new(255);
+--local qais = 1.0;
 
 print("made the create")
 function script:onCreate()
+  script:export("Karen", karen)
+  --script:export("Qais", qais)
+  script:export("Color", col, true)
+  --script:export("q", q)
+  --script:export("k", k)
+
+
+  asset_manager = Karen.App.getAssetManager();
+  print(asset_manager)
+  scene = asset_manager:getScene("scene")
+  print("making entity")
+  --e = Karen.Entity.new(3, scene);
+  --print("entity id: ", e:getId());
+  scene_camera_entity = scene:getEntity("Camera");
   print("onCreate Called")
   print("id", script.entity:getId());
   print("getting sprite")
   --sprite = Karen.Scene.Components.Sprite.new();
   sprite = script.entity:addSprite()
+  body = script.entity:addRigidBody2D()
+  local box = script.entity:addBoxCollider()
+
   trans = script.entity:getTransform()
   --print(script.entity:insertRigidBody2D())
   --box = script.entity:insertBoxCollider()
@@ -38,31 +62,48 @@ end
 local num = 0
 
 function script:onUpdate()
-  trans.position.x = math.sin(num) * 4
-  trans.position.y = math.cos(num) * 6
-  trans.rotation.z = math.tan(num);
+  --print("Scene*");
+  print("===================")
+  print("karen: ", karen)
+  print("===================")
+  --if(Karen.Input.isKeyPressed(87)) then
+  --body.linear_velocity = Karen.Vec4.new(0, 3) end
+  --if(Karen.Input.isKeyPressed(83)) then
+  --body.linear_velocity = Karen.Vec4.new(0, -3) end
+  --if(Karen.Input.isKeyPressed(65)) then
+ -- body.linear_velocity = Karen.Vec4.new(3, 0) end
+ -- if(Karen.Input.isKeyPressed(69)) then
+ -- body.linear_velocity = Karen.Vec4.new(-3, 0) end
 
-  local pos = Karen.Math.Vec3.new(0, 0, -0.1)
-  --local rot = Karen.Math
-  local size = Karen.Math.Vec2.new(1, 1)
-  local color = Karen.Math.Vec4.new(0.3, 0.3, 0.8, 1.0)
+  --trans.position.x = math.sin(num) * 4
+  --trans.position.y = math.cos(num) * 6
+ -- trans.rotation.z = math.tan(num);
+
+  local pos = Karen.Vec3.new(0, 0, -0.1)
+  --local rot = Karen
+  local size = Karen.Vec2.new(0, 0)
+  local color = Karen.Vec4.new(0.3, 0.3, 0.8, 1.0)
 --camera matrix 
-  local cam_transform = Karen.Math.Mat4.new(1);
-  cam_transform = cam_transform:translate(Karen.Math.Vec4.new(0))
+  local cam_transform = Karen.Mat4.new(1);
+  cam_transform = cam_transform:translate(Karen.Vec4.new(0))
   --
-  Karen.Renderer2D.beginScene(Karen.Math.Mat4.new(1), cam_transform:inverse())
-  Karen.Renderer2D.drawQuad(Karen.Math.Mat4.new(1), color)--(pos, size, color)
-  Karen.Renderer2D.endScene()
+  --local _pos = pos:sub(Karen.Vec3.new(size.x, size.y, 1):dev(2))
+--  local cam_proj = scene_camera_entity:getCamera().camera:getProjection()
+--  local cam_trans = scene_camera_entity:getTransform():asMat4()
+  --Karen.Renderer2D.beginScene(cam_proj, cam_trans)
+  --Karen.Renderer2D.drawQuad(pos, size, color)
+  --Karen.Renderer2D.endScene()
   local ts = script:getTimestep()
-  sprite.color.x = 0.7
-  sprite.color.y = 0.2
-  sprite.color.z = math.tan(num)
+  sprite.color = col;
+  --sprite.color.z = math.tan(num)
 --  if not ts == nil then
     print(sprite.color)
     print(ts)
   --else print("ts is nill")
   --end
   --trans.rotation.z = trans.rotation.z + math.sin(num)
+
+
   num = num + 0.01;
   if num > 1 then
     --num = 0
@@ -70,16 +111,18 @@ function script:onUpdate()
 end
 
 function script:onDestroy()
+  --karen = "karen"
+  --qais = "qais"
   print("onEnd")
-  local v1 = Karen.Math.Vec4.new(2)
-  local v2 = Karen.Math.Vec4.new(1)
-  local m1 = Karen.Math.Mat4.new(2)
-  local m2 = Karen.Math.Mat4.new(3)
+  local v1 = Karen.Vec4.new(2)
+  local v2 = Karen.Vec4.new(1)
+  local m1 = Karen.Mat4.new(2)
+  local m2 = Karen.Mat4.new(3)
   print(m1:mul(v2))
   print(v1:mul(v2))
-  print(((m1:mul(m2)):inverse()):transpose())
   print(m1:translate(v1))
   print(v1:add(v2))
+  print(m1:inverse())
 end
 
 print("made getobj")

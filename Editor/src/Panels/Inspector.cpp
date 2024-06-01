@@ -34,6 +34,19 @@ namespace Karen
     
     if(m_current)
     {
+
+      UUID uuid;
+      drawComponent<IDComponent>(m_current, "UUID", [&](auto* id_comp, bool removed)
+      {
+        uuid = id_comp->ID;
+        ImGui::Text("UUID: %lu", (uint64_t)uuid);
+      }); 
+
+      //export vars
+      {
+        drawExportedVars(uuid);
+      }
+
       drawComponent<TagComponent>(m_current, "Tag", [](auto* tag_comp, bool removed)
       {
         auto& tag = tag_comp->name;
@@ -189,13 +202,26 @@ namespace Karen
         ImGui::DragFloat2("Size", glm::value_ptr(bcc->size));
         ImGui::DragFloat("Density", &bcc->density);
         ImGui::DragFloat("Friction", &bcc->friction);
-        ImGui::DragFloat("Restitution", &bcc->restitution, 0.0f, 1.0f);
+        ImGui::DragFloat("Restitution", &bcc->restitution, 1.0f, 0.0f, 1.0f);
         ImGui::SameLine();
-        ImGui::DragFloat("Threshold", &bcc->restitution_threshold, 0.0f, 1.0f);
+        ImGui::DragFloat("Threshold", &bcc->restitution_threshold, 1.0f, 0.0f, 1.0f);
         if(removed)
           m_current.removeComponent<BoxColliderComponent>();
         });
       
+      drawComponent<CircleColliderComponent>(m_current, "Circle Collider", [&](auto* ccc, bool removed)
+      {
+        ImGui::DragFloat2("Offset", glm::value_ptr(ccc->offset));
+        ImGui::DragFloat("Radius", &ccc->radius);
+        ImGui::DragFloat("Density", &ccc->density);
+        ImGui::DragFloat("Friction", &ccc->friction);
+        ImGui::DragFloat("Restitution", &ccc->restitution, 1.0f, 0.0f, 1.0f);
+        ImGui::SameLine();
+        ImGui::DragFloat("Threshold", &ccc->restitution_threshold, 1.0f, 0.0f, 1.0f);
+        if(removed)
+          m_current.removeComponent<CircleColliderComponent>();
+        });
+
       if(ImGui::Button("Add Component"))
         ImGui::OpenPopup("AddComponent");
       if(ImGui::BeginPopupModal("AddComponent"))
@@ -212,13 +238,83 @@ namespace Karen
           m_current.insertComponent<SpriteComponent>();
         if(ImGui::MenuItem("Rigid Body 2D"))
           m_current.insertComponent<RigidBody2DComponent>();
-        if(ImGui::MenuItem("Box Collider 2D"))
+        if(ImGui::MenuItem("Box Collider"))
           m_current.insertComponent<BoxColliderComponent>();
+        if(ImGui::MenuItem("Circle Collider"))
+          m_current.insertComponent<CircleColliderComponent>();
+        if(ImGui::Button("Cancle"))
+          ImGui::CloseCurrentPopup();
         ImGui::EndPopup();
         ImGui::CloseCurrentPopup();
       }
     }
-    
     ImGui::End();
+  }
+
+  void Inspector::drawExportedVars(UUID uuid)
+  {
+    const auto* ev = App::get()->getExportVariablesFor(uuid); 
+    if(!ev) return;
+    for(uint32_t i = 0; i < ev->size(); ++i)
+    {
+      const auto& exp = ev->at(i);
+      KAREN_CORE_WARN("Recived var: {0}", exp.first);
+      switch(exp.second.getType())
+      {
+        case ExportType::Type::Vec4:
+        {
+          auto* data = exp.second.getAs<Vec4>();
+          ImGui::DragFloat4(exp.first, glm::value_ptr(*data));
+          KAREN_CORE_WARN("var; {0}, data: {1}", exp.first, *data);
+          break;
+        }
+        case ExportType::Type::Vec3:
+        {
+          auto* data = exp.second.getAs<Vec3>();
+          ImGui::DragFloat3(exp.first, glm::value_ptr(*data));
+          KAREN_CORE_WARN("var; {0}, data: {1}", exp.first, *data);
+          break;
+        }
+        case ExportType::Type::Vec2:
+        {
+          auto* data = exp.second.getAs<Vec2>();
+          ImGui::DragFloat2(exp.first, glm::value_ptr(*data));
+          KAREN_CORE_WARN("var; {0}, data: {1}", exp.first, *data);
+          break;
+        }
+        case ExportType::Type::Float:
+        {
+          auto* data = exp.second.getAs<float>();
+          ImGui::DragFloat(exp.first, data); 
+          KAREN_CORE_WARN("var; {0}, data: {1}", exp.first, *data);
+          break;
+        }
+        case ExportType::Type::Int:
+        {
+          auto* data = exp.second.getAs<int>();
+          ImGui::DragInt(exp.first, data);
+          KAREN_CORE_WARN("var; {0}, data: {1}", exp.first, *data);
+          break;
+        }
+        case ExportType::Type::String:
+        {
+          auto* data = exp.second.getAs<std::string>();
+          char buffer[256];
+          memset(buffer, 0, sizeof(buffer));
+          strcpy(buffer, data->c_str());
+          if(ImGui::InputText(("##Var_Name" + std::to_string(uuid)).c_str(), buffer, sizeof(buffer)))
+          {
+            *data = buffer;
+          }
+          KAREN_CORE_WARN("var; {0}, data: {1}", exp.first, *data);
+          break;
+        }
+        case ExportType::Type::RGBA_Color:
+        {
+          ImGui::ColorEdit4(exp.first, glm::value_ptr(*exp.second.getAs<Vec4>()));
+          break;
+        }
+      }
+    }
   }
 }

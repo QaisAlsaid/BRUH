@@ -83,6 +83,13 @@ namespace Karen
       }
     }
     {
+      auto view = cpyreg.view<CircleColliderComponent>();
+      for(auto& e : view)
+      {
+        m_registry.emplace_or_replace<CircleColliderComponent>(entt_ids.at(e), view.get<CircleColliderComponent>(e));
+      }
+    }
+    {
       auto view = cpyreg.view<ScriptComponent>();
       for(auto& e : view)
       {
@@ -182,21 +189,35 @@ namespace Karen
       auto* body = m_physics_world->CreateBody(&def);
       body->SetFixedRotation(rb2dc.fixed_rotation);
       rb2dc.body = body;
-      if(entity.hasComponent<BoxColliderComponent>())
+      
+      auto* bcc = entity.tryGetComponent<BoxColliderComponent>();
+      if(bcc)
       {
-        auto& bcc = entity.getComponent<BoxColliderComponent>();
-        
         b2PolygonShape poly;
-        poly.SetAsBox(bcc.size.y * tc.scale.x, bcc.size.x * tc.scale.y);
+        poly.SetAsBox(bcc->size.y * tc.scale.x, bcc->size.x * tc.scale.y);
         
         b2FixtureDef fixture_def;
         fixture_def.shape = &poly;
-        fixture_def.density = bcc.density;
-        fixture_def.friction = bcc.friction;
-        fixture_def.restitution = bcc.restitution;
-        fixture_def.restitutionThreshold = bcc.restitution_threshold;
+        fixture_def.density = bcc->density;
+        fixture_def.friction = bcc->friction;
+        fixture_def.restitution = bcc->restitution;
+        fixture_def.restitutionThreshold = bcc->restitution_threshold;
         /*auto * fixture = */body->CreateFixture(&fixture_def);
         //bcc.fixture = fixture;
+      }
+      auto* ccc = entity.tryGetComponent<CircleColliderComponent>();
+      if(ccc)
+      {
+        b2CircleShape circle;
+        circle.m_radius = ccc->radius;
+      
+        b2FixtureDef fixture_def;
+        fixture_def.shape = &circle;
+        fixture_def.density = ccc->density;
+        fixture_def.friction = ccc->friction;
+        fixture_def.restitution = ccc->restitution;
+        fixture_def.restitutionThreshold = ccc->restitution_threshold;
+        body->CreateFixture(&fixture_def);
       }
     });
   }
@@ -222,6 +243,9 @@ namespace Karen
     m_registry.view<TransformComponent, RigidBody2DComponent>().each([&](auto e, TransformComponent& tc, RigidBody2DComponent& rb2dc)
     {
       auto* body = rb2dc.body;
+      body->SetGravityScale(rb2dc.gravity_scale);
+      body->SetLinearVelocity({ rb2dc.linear_velocity.x, rb2dc.linear_velocity.y });
+      body->SetAngularVelocity(rb2dc.angular_velocity);
       Vec2 position(body->GetPosition().x, body->GetPosition().y);
       tc.position = { position, tc.position.z };
       tc.rotation.z = body->GetAngle();
@@ -255,7 +279,7 @@ namespace Karen
         if(!sprite.texture_handel.empty())
         {
           Renderer2D::drawQuad(trans.getTransformationMatrix(),
-              App::get()->assetManager().getTexture2D(sprite.texture_handel), sprite.color);
+              App::get()->assetManager()->getTexture2D(sprite.texture_handel), sprite.color);
         }
         else
           Renderer2D::drawQuad(trans.getTransformationMatrix(), sprite.color);
@@ -312,7 +336,7 @@ namespace Karen
       if(!sprite.texture_handel.empty())
       {
         Renderer2D::drawQuad(trans.getTransformationMatrix(),
-        App::get()->assetManager().getTexture2D(sprite.texture_handel), sprite.color);
+        App::get()->assetManager()->getTexture2D(sprite.texture_handel), sprite.color);
       }
       else
         Renderer2D::drawQuad(trans.getTransformationMatrix(), sprite.color);
@@ -324,6 +348,29 @@ namespace Karen
   {
     m_viewport_width = w;
     m_viewport_height = h;
+  }
+  
+  Entity Scene::getEntity(const std::string& n)
+  {
+    auto view = m_registry.view<TagComponent>();
+    for(const auto& e : view)
+    {
+      if(view.get<TagComponent>(e).name == n)
+        return Entity(e, this);
+    }
+    return {};
+  }
+  
+  Entity Scene::getEntity(UUID id)
+  {
+    auto view = m_registry.view<IDComponent>();
+    for(const auto& e : view)
+    {
+      if(view.get<IDComponent>(e).ID == id)
+        return Entity(e, this);
+    }
+    return {};
+
   }
 
   void Scene::onEnd()

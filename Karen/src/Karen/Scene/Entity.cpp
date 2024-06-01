@@ -10,6 +10,12 @@ namespace Karen
   {
   }
 
+  Entity::Entity(uint32_t e, Scene* s)
+    : m_id((entt::entity)e), m_scene(s)
+  {
+  }
+
+
   Entity::Entity(Entity& e, entt::entity id, Scene* scene)
     : Entity(id, scene)
   {

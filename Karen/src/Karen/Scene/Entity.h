@@ -15,6 +15,7 @@ namespace Karen
     Entity() = default;
     Entity(Entity& other, entt::entity id, Scene* scene);
     Entity(entt::entity id, Scene* scene);
+    Entity(uint32_t id, Scene* scene);
     inline void inst(){}
 
     inline void destroy() 

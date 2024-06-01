@@ -31,9 +31,10 @@ namespace Karen
 
   struct KAREN_API TransformComponent
   {
-    Vec3 position  = {0.0f, 0.0f, 0.0f};
-    Vec3 scale     = {1.0f, 1.0f, 1.0f};
-    Vec3 rotation  = {0.0f, 0.0f, 0.0f};
+    Vec3 position = { 0.0f, 0.0f, 0.0f };
+    Vec3 scale    = { 1.0f, 1.0f, 1.0f };
+    Vec3 rotation = { 0.0f, 0.0f, 0.0f };
+    
     TransformComponent() = default;
     TransformComponent(const Vec3& pos, const Vec3& scale, const Vec3& rotation)
       : position(pos), scale(scale), rotation(rotation) {}
@@ -100,9 +101,13 @@ namespace Karen
     enum class BodyType {Static = 0, Kinematic, Dynamic};
     
     BodyType type = BodyType::Dynamic;
-   
+    
+    Vec3  linear_velocity  = { 0.0f, 0.0f, 0.0f };
+    float gravity_scale    = 1.0f;
+    float angular_velocity = 0.0f;
+    bool  fixed_rotation   = false;
+
     b2Body* body = nullptr;
-    bool fixed_rotation = false;
   };
 
   struct KAREN_API BoxColliderComponent 
@@ -110,6 +115,19 @@ namespace Karen
     Vec2 offset = {0.0f, 0.0f};
     Vec2 size = {0.5f, 0.5f};
     
+    float density = 1.0f;
+    float friction = 0.5f;
+    float restitution = 0.0f;
+    float restitution_threshold = 0.5f;
+
+    b2Fixture* fixture = nullptr;
+  };
+
+  struct KAREN_API CircleColliderComponent
+  {
+    Vec2 offset = {0.0f, 0.0f};
+    float radius = 0.5f;
+ 
     float density = 1.0f;
     float friction = 0.5f;
     float restitution = 0.0f;

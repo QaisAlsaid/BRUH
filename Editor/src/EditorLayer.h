@@ -65,6 +65,7 @@ namespace Karen
     void updateMenuBar();
     void updatePanels();
     void updateGizmos(Vec2 panel_pos, Vec2 panel_size);
+    void exportVars();
 
     bool onMouseScrolledEvent(MouseScrolledEvent& e);
     bool onKeyPressedEvent(KeyPressedEvent& e);

@@ -33,6 +33,7 @@
 #endif //__LINUX
 
 
+#define STRINGIFY(x) #x
 #define BITSHL(x) (1 << x)
 #define BIND_EVENT_FUNCTION(x) std::bind(&x, this, std::placeholders::_1)
 

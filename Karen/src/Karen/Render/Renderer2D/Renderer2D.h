@@ -9,7 +9,7 @@
 #include "Karen/Render/API/VertexBuffer.h"
 #include "Karen/Render/OrthographicCamera.h"
 #include "Karen/Render/ShaderManager.h"
-#include "Karen/Camera.h"
+#include "Karen/Render/Camera.h"
 
 namespace Karen
 {

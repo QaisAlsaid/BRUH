@@ -12,7 +12,7 @@ namespace Karen
   //for delete the deleted stuff(from desk) from the map
   //TODO: Everything should have a timer
   ContentBrowser::ContentBrowser(const std::string& rp)
-    :m_asset_manager_modal(&App::get()->assetManager()), m_current_dir(rp), m_res_dir(rp)
+    :m_asset_manager_modal(App::get()->assetManager()), m_current_dir(rp), m_res_dir(rp)
   {
     uint32_t counter = 0;
     for(auto& entry : std::filesystem::recursive_directory_iterator(m_res_dir))

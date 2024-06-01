@@ -9,30 +9,39 @@ namespace Karen
 {
   void EditorCamera::onUpdate(Timestep ts)
   {
+    //vectors from Euler angles
+    {
+      front.x = cos(yaw) * cos(pitch);
+      front.y = sin(pitch);
+      front.z = sin(yaw) * cos(pitch);
+      front = glm::normalize(front);
+    }
+    //find camera vectors
+    {
+      right = glm::normalize(glm::cross(front, world_up));
+      up    = glm::normalize(glm::cross(right, front)); 
+    }
     m_projection = glm::perspectiveRH(fov, aspect_ratio, near, far);
     
-    auto mouse = Input::getMousePos();
-    if(Input::isKeyPressed(Keyboard::Space))
+    //Mouse Movment
     {
+      auto mouse = Input::getMousePos();
       Vec2 dmouse = m_last_mouse - mouse;
-      m_last_mouse = mouse;
-      position += Vec3(dmouse.x, -dmouse.y, 0.0f) * mouse_sensitivaty;
-    }
-    else 
-    {
+      Vec2 scaled_dmouse = dmouse * mouse_sensitivaty;
+      if(Input::isKeyPressed(Keyboard::LeftAlt) || Input::isKeyPressed(Keyboard::RightAlt))
+      {
+        yaw += scaled_dmouse.x;
+        pitch += scaled_dmouse.y;
+        if(pitch >= pi) pitch = pi - 0.001;
+        else if(pitch <= -pi) pitch = -(pi - 0.001);
+      }
       m_last_mouse = mouse;
     }
   }
 
   Mat4 EditorCamera::getView() const
   {
-    auto trans = Mat4(1.0f);
-    auto pos = position;
-    trans = glm::translate(trans, pos);
-    trans = glm::rotate(trans, rotation.x, {1, 0, 0});
-    trans = glm::rotate(trans, rotation.y, {0, 1, 0});
-    trans = glm::rotate(trans, rotation.z, {0, 0, 1});
-    return glm::inverse(trans);
+    return glm::lookAtRH(position, position + front, world_up);
   }
 
   void EditorCamera::onResize(uint32_t w, uint32_t h)
@@ -45,8 +54,6 @@ namespace Karen
   {
     auto offset = e.getYoffset();
     fov = glm::radians((glm::degrees(fov) - offset));
-    //fov = glm::radians(std::max(zoom, min_fov));
-    //fov = glm::radians(std::min(zoom, max_fov));
     if(fov > max_fov) fov = max_fov;
     else if(fov < min_fov) fov = min_fov;
   }

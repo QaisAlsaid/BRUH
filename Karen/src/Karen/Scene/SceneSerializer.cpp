@@ -61,27 +61,27 @@ namespace YAML
   };
 
   template<>
-    struct convert<Karen::Vec2>
+  struct convert<Karen::Vec2>
+  {
+    static Node encode(const Karen::Vec2& vec)
     {
-      static Node encode(const Karen::Vec2& vec)
-      {
-        Node n;
-        n.push_back(vec.x);
+      Node n;
+      n.push_back(vec.x);
         n.push_back(vec.y);
-        return n;
-      }
+      return n;
+    }
 
-      static bool decode(const Node& node, Karen::Vec2& vec)
-      { 
-        if(!node.IsSequence())
-          return false;
+    static bool decode(const Node& node, Karen::Vec2& vec)
+    { 
+      if(!node.IsSequence())
+        return false;
 
-        vec.x = node[0].as<float>();
-        vec.y = node[1].as<float>();
+      vec.x = node[0].as<float>();
+      vec.y = node[1].as<float>();
 
-        return true;
-      }
-    };
+      return true;
+    }
+  };
 
   Emitter& operator << (Emitter& emitter, const Karen::Vec2& vec)
   {
@@ -232,6 +232,18 @@ namespace Karen
           bcc.restitution = cbc_n["Restitution"].as<float>();
           bcc.restitution_threshold = cbc_n["RestitutionThreshold"].as<float>();
         }
+
+        const auto& ccc_n = entity["CircleColliderComponent"];
+        if(ccc_n)
+        {
+          auto& ccc = e.addComponent<CircleColliderComponent>();
+          ccc.radius = ccc_n["Radius"].as<float>();
+          ccc.offset = ccc_n["Offset"].as<Vec2>();
+          ccc.density = ccc_n["Density"].as<float>();
+          ccc.friction = ccc_n["Friction"].as<float>();
+          ccc.restitution = ccc_n["Restitution"].as<float>();
+          ccc.restitution_threshold = ccc_n["RestitutionThreshold"].as<float>();
+        }
       }
     }
     return true;
@@ -323,8 +335,22 @@ namespace Karen
       emitter << Key << "Offset" << bcc.offset;
       emitter << Key << "Density" << bcc.density;
       emitter << Key << "Friction" << bcc.friction;
-      emitter << Key << "Restitution" <<bcc.restitution;
+      emitter << Key << "Restitution" << bcc.restitution;
       emitter << Key << "RestitutionThreshold" << bcc.restitution_threshold;
+      emitter << EndMap;
+    }
+
+    if(e.hasComponent<BoxColliderComponent>())
+    {
+      emitter << Key << "CircleColliderComponent" << BeginMap;
+      
+      auto& ccc = e.getComponent<CircleColliderComponent>();
+      emitter << Key << "Radius" << ccc.radius;
+      emitter << Key << "Offset" << ccc.offset;
+      emitter << Key << "Density" << ccc.density;
+      emitter << Key << "Friction" << ccc.friction;
+      emitter << Key << "Restitution" << ccc.restitution;
+      emitter << Key << "RestitutionThreshold" << ccc.restitution_threshold;
       emitter << EndMap;
     }
 
