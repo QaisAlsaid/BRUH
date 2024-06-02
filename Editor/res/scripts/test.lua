@@ -9,6 +9,18 @@ local karen = Karen.Vec4.new(1);
 local col = Karen.Vec4.new(255);
 --local qais = 1.0;
 
+function lerp(on , dest, speed)
+  if(on == dest) then 
+      return dest
+  elseif on > dest then
+      on = on - speed;
+      return on;
+  elseif on < dest then 
+      on = on + speed;
+      return on;
+    end
+  end
+
 print("made the create")
 function script:onCreate()
   script:export("Karen", karen)
@@ -32,7 +44,11 @@ function script:onCreate()
   sprite = script.entity:addSprite()
   body = script.entity:addRigidBody2D()
   local box = script.entity:addBoxCollider()
-
+  body.gravity_scale = 3
+  box.friction = 0
+  box.restitution = 0.5
+  --box.restitution_threshold = 2
+  box.density = 0.2 
   trans = script.entity:getTransform()
   --print(script.entity:insertRigidBody2D())
   --box = script.entity:insertBoxCollider()
@@ -60,20 +76,37 @@ function script:onCreate()
   print("exited onCreate")
 end
 local num = 0
-
+x = false
 function script:onUpdate()
   --print("Scene*");
   print("===================")
   print("karen: ", karen)
   print("===================")
-  --if(Karen.Input.isKeyPressed(87)) then
-  --body.linear_velocity = Karen.Vec4.new(0, 3) end
-  --if(Karen.Input.isKeyPressed(83)) then
-  --body.linear_velocity = Karen.Vec4.new(0, -3) end
-  --if(Karen.Input.isKeyPressed(65)) then
- -- body.linear_velocity = Karen.Vec4.new(3, 0) end
- -- if(Karen.Input.isKeyPressed(69)) then
- -- body.linear_velocity = Karen.Vec4.new(-3, 0) end
+  if(true) then
+  if(Karen.Input.isKeyPressed(Karen.Keyboard.W)) then
+  body.linear_velocity.y = 5
+  print("W")
+  elseif(Karen.Input.isKeyPressed(Karen.Keyboard.S)) then
+  body.linear_velocity.y = -5 
+  print("S")
+  elseif x then body.linear_velocity.y = lerp(body.linear_velocity.y, 0, 0.5)
+  end
+  
+  if(Karen.Input.isKeyPressed(Karen.Keyboard.D)) then
+  body.linear_velocity.x = 5
+  print("D")
+  elseif(Karen.Input.isKeyPressed(Karen.Keyboard.A)) then
+  body.linear_velocity.x = -5
+  print("A")
+  elseif x then body.linear_velocity.x = lerp(body.linear_velocity.x, 0, 0.5)
+  end
+  end
+  if(Karen.Input.isKeyPressed(Karen.Keyboard.E)) then 
+    body.angular_velocity = lerp(body.angular_velocity, -3, 0.05)
+  elseif(Karen.Input.isKeyPressed(Karen.Keyboard.Q)) then 
+    body.angular_velocity = lerp(body.angular_velocity, 3, 0.05)
+  elseif x then body.angular_velocity = lerp(body.angular_velocity, 0, 0.05)
+  end
 
   --trans.position.x = math.sin(num) * 4
   --trans.position.y = math.cos(num) * 6

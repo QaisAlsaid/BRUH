@@ -236,6 +236,17 @@ namespace Karen
       script.script->onUpdate();
     });
     
+    m_registry.view<TransformComponent, RigidBody2DComponent>().each([&](auto e, TransformComponent& tc, RigidBody2DComponent& rb2dc)
+    {
+      auto* body = rb2dc.body;
+      body->SetGravityScale(rb2dc.gravity_scale);
+      body->SetLinearVelocity({ rb2dc.linear_velocity.x, rb2dc.linear_velocity.y });
+      body->SetAngularVelocity(rb2dc.angular_velocity);
+      //Vec2 position(body->GetPosition().x, body->GetPosition().y);
+      //tc.position = { position, tc.position.z };
+      //tc.rotation.z = body->GetAngle();
+    });
+
     int vel_iters = 6;
     int pos_iters = 2;
     m_physics_world->Step(ts, vel_iters, pos_iters);
@@ -243,9 +254,9 @@ namespace Karen
     m_registry.view<TransformComponent, RigidBody2DComponent>().each([&](auto e, TransformComponent& tc, RigidBody2DComponent& rb2dc)
     {
       auto* body = rb2dc.body;
-      body->SetGravityScale(rb2dc.gravity_scale);
-      body->SetLinearVelocity({ rb2dc.linear_velocity.x, rb2dc.linear_velocity.y });
-      body->SetAngularVelocity(rb2dc.angular_velocity);
+      //body->SetGravityScale(rb2dc.gravity_scale);
+      //body->SetLinearVelocity({ rb2dc.linear_velocity.x, rb2dc.linear_velocity.y });
+      //body->SetAngularVelocity(rb2dc.angular_velocity);
       Vec2 position(body->GetPosition().x, body->GetPosition().y);
       tc.position = { position, tc.position.z };
       tc.rotation.z = body->GetAngle();

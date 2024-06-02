@@ -327,6 +327,7 @@ static float* speed = new float;
   {
     m_scene_state = SceneState::Play;
     m_scene = Scene::copy(m_editor_scene);
+    m_scene_hierarchy_panel.clearSelection();
     m_inspector_panel.setCurrentSelected( { } );
     App::get()->getExportedVariables().clear();
     m_scene->onStart();
@@ -335,9 +336,10 @@ static float* speed = new float;
   void EditorLayer::onSceneStop()
   {
     m_scene_state = SceneState::Stop; 
+    m_scene_hierarchy_panel.clearSelection();
+    m_inspector_panel.setCurrentSelected( { } );
     m_scene->onEnd();
     m_scene = m_editor_scene;
-    m_inspector_panel.setCurrentSelected( { } );
   }
 
   void EditorLayer::onDetach()

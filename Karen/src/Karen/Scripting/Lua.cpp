@@ -8,6 +8,7 @@
 #include <sol/types.hpp>
 
 #include "Lua.h"
+#include "Karen/Core/ButtonsAndKeyCodes.h"
 #include "Karen/Core/Input.h"
 #include "Karen/Core/Log.h"
 #include "Karen/Core/Core.h"
@@ -183,13 +184,50 @@ namespace Karen
       app["getAssetManager"] = [](){ return App::get()->assetManager(); }; 
     }
 
+    using k = Keyboard;
+    //Keyboard & Mouse Codes
+    {
+      karen.new_enum("Keyboard", "Space", k::Space, "Apostrophe", k::Apostrophe, "Comma", k::Comma, 
+      "Minus", k::Minus, "Period", k::Period, "Slash", k::Slash, "Zero", k::Zero, "One", k::One, 
+      "Two", k::Two, "Three", k::Three, "Four", k::Four, "Five", k::Five, "Six", k::Six, 
+      "Seven", k::Seven, "Eight", k::Eight, "Nine", k::Nine, "Semicolon", k::Semicolon,
+      "Equal", k::Equal, "A", k::A, "B", k::B, "C", k::C, "D", k::D, "E", k::E, "F", k::F, "G", k::G,
+      "H", k::H, "I", k::I, "J", k::J, "K", k::K, "L", k::L, "M", k::M, "N", k::N, "O", k::O, "P", k::P,
+      "Q", k::Q, "R", k::R, "S", k::S, "T", k::T, "U", k::U, "V", k::V, "W", k::W, "X", k::X, "Y", k::Y,
+      "Z", k::Z, "LeftBracket", k::LeftBracket, "BackSlash", k::BackSlash, "RightBracket", k::RightBracket, 
+      "Accent", k::Accent, "World1", k::World1, "World2", k::World2, "Escape", k::Escape, "Enter", k::Enter,
+      "Tab", k::Tab, "BackSpace", k::BackSpace, "Insert", k::Insert, "Delete", k::Delete, "Right", k::Right, 
+      "Left", k::Left, "Down", k::Down, "Up", k::Up, "PageUp", k::PageUp, "PageDown", k::PageDown, 
+      "Home", k::Home, "End", k::End, "CapsLock", k::CapsLock, "ScrollLock", k::ScrollLock,
+      "NumLock", k::NumLock, "F1", k::F1, "F2", k::F2, "F3", k::F3, "F4", k::F4, "F5", k::F5, "F6", k::F6,
+      "F7", k::F7, "F8", k::F8, "F9", k::F9, "F10", k::F10, "F11", k::F11, "F12", k::F12, "F13", k::F13,
+      "F14", k::F14, "F15", k::F15, "F16", k::F16, "F17", k::F17, "F18", k::F18, "F19", k::F19, "F20", k::F20, 
+      "F21", k::F21, "F22", k::F22, "F23", k::F23, "F24", k::F24, "F25", k::F25, "NumPad0", k::NumPad0, 
+      "NumPad1", k::NumPad1, "NumPad2", k::NumPad2, "NumPad3", k::NumPad3, "NumPad4", k::NumPad4, 
+      "NumPad5", k::NumPad5, "NumPad6", k::NumPad6, "NumPad7", k::NumPad7, "NumPad8", k::NumPad8, 
+      "NumPad9", k::NumPad9, "NumPadDecimal", k::NumPadDecimal, "NumPadDivide", k::NumPadDivide,
+      "NumPadMultiply", k::NumPadMultiply, "NumPadSubtract", k::NumPadSubtract, "NumPadAdd", k::NumPadAdd,
+      "NumPadEnter", k::NumPadEnter, "NumPadEqual", k::NumPadEqual, "LeftShift", k::LeftShift,
+      "LeftControl", k::LeftControl, "LeftAlt", k::LeftAlt, "LeftSuper", k::LeftSuper,
+      "RightShift", k::RightShift, "RightControl", k::RightControl, "RightAlt", k::RightAlt,
+      "RightSuper", k::RightSuper
+      );
+
+      karen.new_enum("Mouse", 
+      "ButtonLeft", Mouse::ButtonLeft, "ButtonRight", Mouse::ButtonRight, "ButtonMiddel", Mouse::ButtonMiddle,
+      "Button4", Mouse::Button4, "Button5", Mouse::Button5, "Button6", Mouse::ButtonLeft, 
+      "Button7", Mouse::Button7, "Button8", Mouse::Button8
+          );
+
+    }
+
     //Input
     {
       sol::usertype<Input> input = karen.new_usertype<Input>("Input");
-      input["isKeyPressed"]          = &Input::isKeyPressed;
-      input["isKeyReleased"]         = &Input::isKeyReleased;
-      input["isMouseButtonPressed"]  = &Input::isMouseButtonPressed;
-      input["isMouseButtonReleased"] = &Input::isMouseButtonReleased;
+      input["isKeyPressed"]          = [](int k) { return Input::isKeyPressed((Keyboard)k);       };
+      input["isKeyReleased"]         = [](int k) { return Input::isKeyReleased((Keyboard)k);      };
+      input["isMouseButtonPressed"]  = [](int b) { return Input::isMouseButtonPressed((Mouse)b);  };
+      input["isMouseButtonReleased"] = [](int b) { return Input::isMouseButtonReleased((Mouse)b); };
       input["getMousePosition"]      = &Input::getMousePos;
     }
 
