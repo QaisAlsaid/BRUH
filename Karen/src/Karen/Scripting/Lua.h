@@ -1,6 +1,7 @@
-#pragma once
-#include "Karen/Core/App.h"
-#include <functional>
+#ifndef KR_LUA_H
+#define KR_LUA_H
+
+
 #define SOL_ALL_SAFETIES_ON 1
 #include <sol/sol.hpp>
 
@@ -22,3 +23,5 @@ namespace Karen
     static sol::table karen;
   };
 }
+
+#endif //KR_LUA_H

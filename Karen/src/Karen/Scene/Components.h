@@ -58,6 +58,14 @@ namespace Karen
     SpriteComponent(const Vec4& color, const std::string& tux) : texture_handel(tux), color(color) {}
   };
 
+  struct KAREN_API CircleComponent
+  {
+    Vec4 color;
+    float thickness = 0.1f;
+    float blur = 0.005f;
+    CircleComponent() = default;
+  };
+
   struct KAREN_API CameraComponent
   {
     SceneCamera camera;
@@ -102,12 +110,16 @@ namespace Karen
     
     BodyType type = BodyType::Dynamic;
     
-    Vec3  linear_velocity  = { 0.0f, 0.0f, 0.0f };
     float gravity_scale    = 1.0f;
-    float angular_velocity = 0.0f;
     bool  fixed_rotation   = false;
 
     b2Body* body = nullptr;
+  };
+
+  struct MovmentComponent 
+  {
+    Vec3  linear_velocity  = { 0.0f, 0.0f, 0.0f };
+    float angular_velocity = 0.0f;
   };
 
   struct KAREN_API BoxColliderComponent 

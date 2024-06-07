@@ -1,3 +1,4 @@
+#include "Karen/Render/API/Shader.h"
 #include "pch.h"
 #include "Renderer2D.h"
 #include "Karen/Core/Log.h"
@@ -14,29 +15,22 @@ namespace Karen
 
   void Renderer2D::init(const std::string& shaders_2d_config_path)
   {
+    //Shaders
     s_data->shaders.LoadConfig(shaders_2d_config_path);
+    
+    //Default White Texture 
     uint32_t wh_data = 0xffffffff;
     s_data->wh_tux = Texture2D::create(1, 1, sizeof(wh_data), &wh_data);
 
-    /*const float verts[20] =
-    {
-      -0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
-       0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
-       0.5f,  0.5f, 0.0f, 1.0f, 1.0f,
-      -0.5f,  0.5f, 0.0f, 0.0f, 1.0f
-    };
-*/
-    /*const uint32_t inds[6] = 
-    {
-      0, 1, 2,
-      2, 3, 0
-    };*/
+    //Texture Slots
     s_data->texture_slots = new ARef<Texture>[s_data->MAX_TEXTURE_SLOTS];
     s_data->texture_slots[0] = s_data->wh_tux;
 
-    s_data->quad_vertex_base = new QuadVertex[s_data->MAX_VERTS];
+    //Quad
+    s_data->quad_base = (Quad*)new QuadVertex[s_data->MAX_VERTS];
     uint32_t* quad_inds = new uint32_t[s_data->MAX_INDES];
     uint32_t offset = 0;
+    //Same IndexBuffer for both quad and circle
     for(uint32_t i = 0; i < s_data->MAX_INDES; i += 6)
     {
       quad_inds[i + 0] = offset + 0;
@@ -77,16 +71,31 @@ namespace Karen
     s_data->quad_vertex_pos[1] = { 0.5f, -0.5f, 0.0f, 1.0f};
     s_data->quad_vertex_pos[2] = { 0.5f,  0.5f, 0.0f, 1.0f};
     s_data->quad_vertex_pos[3] = {-0.5f,  0.5f, 0.0f, 1.0f};
-    resetStats();
-    delete[] quad_inds;
-  }
+    
+    //Circle 
+    s_data->circle_ptr = new Circle[s_data->MAX_QUADS]();
+    s_data->circle_base = s_data->circle_ptr;
+    
+    s_data->circle_vertex_buff = VertexBuffer::create(sizeof(CircleVertex) * s_data->MAX_VERTS);
+    ARef<IndexBuffer> cib  = IndexBuffer::create(s_data->MAX_INDES, quad_inds, 5);
+    Karen::BufferLayout cbl = 
+    {
+      {"color", Karen::ShaderDataType::Float4},
+      {"pos", Karen::ShaderDataType::Float3},
+      {"local_pos", Karen::ShaderDataType::Float2}, 
+      {"thickness", Karen::ShaderDataType::Float}, 
+      {"blur", Karen::ShaderDataType::Float}
+    };
+    
+    s_data->circle_vertex_buff->setLayout(cbl);
+    s_data->circle_vertex_array = VertexArray::create();
+    s_data->circle_vertex_array->setIndexBuffer(cib);
+    s_data->circle_vertex_array->addVertexBuffer(s_data->circle_vertex_buff);
 
-  void Renderer2D::beginScene(const OrthographicCamera& camera)
-  {
-    s_data->shaders.get("tux_shader")->bind();
-    s_data->shaders.get("tux_shader")->setUniform("u_proj_view", camera.getProjView());
-    s_data->camera_view = camera.getView();
-    reset();
+
+    resetStats();
+
+    delete[] quad_inds;
   }
 
   void Renderer2D::beginScene(const Camera& camera, const Mat4& transform)
@@ -97,8 +106,7 @@ namespace Karen
   void Renderer2D::beginScene(const Mat4& projection, const Mat4& view)
   {
     const auto proj_view = projection * view;
-    s_data->shaders.get("tux_shader")->bind();
-    s_data->shaders.get("tux_shader")->setUniform("u_proj_view", proj_view);
+    s_data->proj_view = proj_view;
     s_data->camera_view = view;
     reset();
   }
@@ -106,16 +114,43 @@ namespace Karen
 
   void Renderer2D::reset()
   {
-    s_data->quad_vertex_ptr = s_data->quad_vertex_base;
+    //Quad
+    s_data->quad_ptr = s_data->quad_base;
     s_data->quad_index_count = 0;
     s_data->texture_slot_index = 1;
+
+    //Circle
+    s_data->circle_ptr = s_data->circle_base;
+    s_data->circle_index_count = 0;
   }
+   
+  void Renderer2D::drawCircle(const Mat4& trans, float thickness, float blur, const Vec4& color)
+  {
+    if(s_data->circle_index_count >= s_data->MAX_INDES)
+    {
+      flushCircle();
+      reset();
+    }
+
+    for(uint8_t i = 0; i < 4; ++i)
+    {
+      s_data->circle_ptr->vertices[i].position = trans * s_data->quad_vertex_pos[i];
+      s_data->circle_ptr->vertices[i].color = color;
+      s_data->circle_ptr->vertices[i].local_position = s_data->quad_vertex_pos[i] * 2;
+      s_data->circle_ptr->vertices[i].thickness = thickness;
+      s_data->circle_ptr->vertices[i].blur = blur;
+    } s_data->circle_ptr++;
     
+    s_data->circle_index_count += 6;
+
+    s_data->stats.quad_count++;
+  }
+ 
   void Renderer2D::drawQuad(const Mat4& trans, const Vec4& color)
   {
    if(s_data->quad_index_count >= s_data->MAX_INDES)
     {
-      flush();
+      flushQuad();
       reset();
     }
 
@@ -128,12 +163,12 @@ namespace Karen
     };
     for(uint8_t i = 0; i < sizeof(tux_coords)/sizeof(tux_coords[0]); ++i)
     {
-      s_data->quad_vertex_ptr->position = trans * s_data->quad_vertex_pos[i];
-      s_data->quad_vertex_ptr->color = color;
-      s_data->quad_vertex_ptr->tux_coord = tux_coords[i];
-      s_data->quad_vertex_ptr->tux_idx = 0.0f;
-      s_data->quad_vertex_ptr++;
-    }
+      s_data->quad_ptr->vertices[i].position = trans * s_data->quad_vertex_pos[i];
+      s_data->quad_ptr->vertices[i].color = color;
+      s_data->quad_ptr->vertices[i].tux_coord = tux_coords[i];
+      s_data->quad_ptr->vertices[i].tux_idx = 0.0f;
+    } s_data->quad_ptr++;
+    
     s_data->quad_index_count += 6;
 
     s_data->stats.quad_count++;
@@ -149,7 +184,7 @@ namespace Karen
   {
     if(s_data->quad_index_count >= s_data->MAX_INDES || s_data->texture_slot_index >= s_data->MAX_TEXTURE_SLOTS)
     {
-      flush();
+      flushQuad();
       reset();
     }
 
@@ -181,12 +216,11 @@ namespace Karen
     
     for(uint8_t i = 0; i < sizeof(tux_coords)/sizeof(tux_coords[0]); ++i)
     {
-      s_data->quad_vertex_ptr->position = trans * s_data->quad_vertex_pos[i];
-      s_data->quad_vertex_ptr->color = color;
-      s_data->quad_vertex_ptr->tux_coord = tux_coords[i];
-      s_data->quad_vertex_ptr->tux_idx = c_tux_slot;
-      s_data->quad_vertex_ptr++;
-    }
+      s_data->quad_ptr->vertices[i].position = trans * s_data->quad_vertex_pos[i];
+      s_data->quad_ptr->vertices[i].color = color;
+      s_data->quad_ptr->vertices[i].tux_coord = tux_coords[i];
+      s_data->quad_ptr->vertices[i].tux_idx = c_tux_slot;
+    } s_data->quad_ptr++;
     s_data->quad_index_count += 6;
 
     s_data->stats.quad_count++;
@@ -227,33 +261,31 @@ namespace Karen
   {
     if(s_data->quad_index_count >= s_data->MAX_INDES || s_data->texture_slot_index >= s_data->MAX_TEXTURE_SLOTS)
     {
-      flush();
+      flushQuad();
       reset();
     }
 
-    s_data->quad_vertex_ptr->position = pos + Vec3(-size.x/2.0f, -size.y/2.0f, 0.0f);
-    s_data->quad_vertex_ptr->color = color;
-    s_data->quad_vertex_ptr->tux_coord = {0.0f, 0.0f};
-    s_data->quad_vertex_ptr->tux_idx = 0.0f;
-    s_data->quad_vertex_ptr++;
+    s_data->quad_ptr->vertices[0].position = pos + Vec3(-size.x/2.0f, -size.y/2.0f, 0.0f);
+    s_data->quad_ptr->vertices[0].color = color;
+    s_data->quad_ptr->vertices[0].tux_coord = {0.0f, 0.0f};
+    s_data->quad_ptr->vertices[0].tux_idx = 0.0f;
 
-    s_data->quad_vertex_ptr->position = pos + /*Vec3(size.x, 0.0f, 0.0f);*/Vec3(size.x/2.0f, -size.y/2.0f, 0.0f);
-    s_data->quad_vertex_ptr->color = color;
-    s_data->quad_vertex_ptr->tux_coord = {1.0f, 0.0f};
-    s_data->quad_vertex_ptr->tux_idx = 0.0f;
-    s_data->quad_vertex_ptr++;
+    s_data->quad_ptr->vertices[1].position = pos + /*Vec3(size.x, 0.0f, 0.0f);*/Vec3(size.x/2.0f, -size.y/2.0f, 0.0f);
+    s_data->quad_ptr->vertices[1].color = color;
+    s_data->quad_ptr->vertices[1].tux_coord = {1.0f, 0.0f};
+    s_data->quad_ptr->vertices[1].tux_idx = 0.0f;
 
-    s_data->quad_vertex_ptr->position = pos + /*Vec3(size.x, size.y, 0.0f);*/Vec3(size.x/2.0f, size.y/2.0f, 0.0f);
-    s_data->quad_vertex_ptr->color = color;
-    s_data->quad_vertex_ptr->tux_coord = {1.0f, 1.0f};
-    s_data->quad_vertex_ptr->tux_idx = 0.0f;
-    s_data->quad_vertex_ptr++;
+    s_data->quad_ptr->vertices[2].position = pos + /*Vec3(size.x, size.y, 0.0f);*/Vec3(size.x/2.0f, size.y/2.0f, 0.0f);
+    s_data->quad_ptr->vertices[2].color = color;
+    s_data->quad_ptr->vertices[2].tux_coord = {1.0f, 1.0f};
+    s_data->quad_ptr->vertices[2].tux_idx = 0.0f;
 
-    s_data->quad_vertex_ptr->position = pos + /*Vec3(0.0f, size.y, 0.0f);*/Vec3(-size.x/2.0f, size.y/2.0f, 0.0f);
-    s_data->quad_vertex_ptr->color = color;
-    s_data->quad_vertex_ptr->tux_coord = {0.0f, 1.0f};
-    s_data->quad_vertex_ptr->tux_idx = 0.0f;
-    s_data->quad_vertex_ptr++;
+    s_data->quad_ptr->vertices[3].position = pos + /*Vec3(0.0f, size.y, 0.0f);*/Vec3(-size.x/2.0f, size.y/2.0f, 0.0f);
+    s_data->quad_ptr->vertices[3].color = color;
+    s_data->quad_ptr->vertices[3].tux_coord = {0.0f, 1.0f};
+    s_data->quad_ptr->vertices[3].tux_idx = 0.0f;
+    
+    s_data->quad_ptr++;
 
     s_data->quad_index_count += 6;
 
@@ -269,7 +301,7 @@ namespace Karen
   {
     if(s_data->quad_index_count >= s_data->MAX_INDES || s_data->texture_slot_index >= s_data->MAX_TEXTURE_SLOTS)
     {
-      flush();
+      flushQuad();
       reset();
     }
 
@@ -290,29 +322,27 @@ namespace Karen
       s_data->texture_slot_index++;
     }
 
-    s_data->quad_vertex_ptr->position = pos + Vec3(-size.x/2.0f, -size.y/2.0f, 0.0f);
-    s_data->quad_vertex_ptr->color = color;
-    s_data->quad_vertex_ptr->tux_coord = {0.0f, 0.0f};
-    s_data->quad_vertex_ptr->tux_idx = c_tux_slot;
-    s_data->quad_vertex_ptr++;
+    s_data->quad_ptr->vertices[0].position = pos + Vec3(-size.x/2.0f, -size.y/2.0f, 0.0f);
+    s_data->quad_ptr->vertices[0].color = color;
+    s_data->quad_ptr->vertices[0].tux_coord = {0.0f, 0.0f};
+    s_data->quad_ptr->vertices[0].tux_idx = c_tux_slot;
 
-    s_data->quad_vertex_ptr->position = pos + /*Vec3(size.x, 0.0f, 0.0f);*/Vec3(size.x/2.0f, -size.y/2.0f, 0.0f);
-    s_data->quad_vertex_ptr->color = color;
-    s_data->quad_vertex_ptr->tux_coord = {1.0f, 0.0f};
-    s_data->quad_vertex_ptr->tux_idx = c_tux_slot;
-    s_data->quad_vertex_ptr++;
+    s_data->quad_ptr->vertices[1].position = pos + /*Vec3(size.x, 0.0f, 0.0f);*/Vec3(size.x/2.0f, -size.y/2.0f, 0.0f);
+    s_data->quad_ptr->vertices[1].color = color;
+    s_data->quad_ptr->vertices[1].tux_coord = {1.0f, 0.0f};
+    s_data->quad_ptr->vertices[1].tux_idx = c_tux_slot;
 
-    s_data->quad_vertex_ptr->position = pos + /*Vec3(size.x, size.y, 0.0f);*/Vec3(size.x/2.0f, size.y/2.0f, 0.0f);
-    s_data->quad_vertex_ptr->color = color;
-    s_data->quad_vertex_ptr->tux_coord = {1.0f, 1.0f};
-    s_data->quad_vertex_ptr->tux_idx = c_tux_slot;
-    s_data->quad_vertex_ptr++;
+    s_data->quad_ptr->vertices[2].position = pos + /*Vec3(size.x, size.y, 0.0f);*/Vec3(size.x/2.0f, size.y/2.0f, 0.0f);
+    s_data->quad_ptr->vertices[2].color = color;
+    s_data->quad_ptr->vertices[2].tux_coord = {1.0f, 1.0f};
+    s_data->quad_ptr->vertices[2].tux_idx = c_tux_slot;
 
-    s_data->quad_vertex_ptr->position = pos + /*Vec3(0.0f, size.y, 0.0f);*/Vec3(-size.x/2.0f, size.y/2.0f, 0.0f);
-    s_data->quad_vertex_ptr->color = color;
-    s_data->quad_vertex_ptr->tux_coord = {0.0f, 1.0f};
-    s_data->quad_vertex_ptr->tux_idx = c_tux_slot;
-    s_data->quad_vertex_ptr++;
+    s_data->quad_ptr->vertices[3].position = pos + /*Vec3(0.0f, size.y, 0.0f);*/Vec3(-size.x/2.0f, size.y/2.0f, 0.0f);
+    s_data->quad_ptr->vertices[3].color = color;
+    s_data->quad_ptr->vertices[3].tux_coord = {0.0f, 1.0f};
+    s_data->quad_ptr->vertices[3].tux_idx = c_tux_slot;
+    
+    s_data->quad_ptr++;
 
     s_data->quad_index_count += 6;
 
@@ -324,56 +354,95 @@ namespace Karen
     drawQuad(Vec3(pos.x, pos.y, 0.0f), size, tux, color);
   }
 
-  void Renderer2D::flush()
+  void Renderer2D::flushQuad()
   {
-    uint32_t data_size = (unsigned char*)s_data->quad_vertex_ptr - (unsigned char*)s_data->quad_vertex_base;
+    uint32_t data_size = ((unsigned char*)s_data->quad_ptr - (unsigned char*)s_data->quad_base) * 4;
     
     //sort for Z position (for blind)
-    struct Quad
-    {
-      QuadVertex refs[4];
+    
+    //struct Quad
+    //{
+     // QuadVertex refs[4];
       /*inline bool operator < (const Quad& other) 
       {
         return this->refs[0]->position.z - s_data->camera_view[3][3] < other.refs[0]->position.z - s_data->camera_view[3][3]; 
       }*/
-    };
+    //};
 
-  auto* arr = s_data->quad_vertex_base;
+  auto* arr = s_data->quad_base;
   uint32_t count = data_size / sizeof(QuadVertex);
      
-  std::sort((Quad*)s_data->quad_vertex_base, (Quad*)s_data->quad_vertex_ptr, 
+  //std::sort((Quad*)s_data->quad_vertex_base, (Quad*)s_data->quad_vertex_ptr, 
+   //   [](const Quad& lhs, const Quad& rhs)
+     // {
+      //  return glm::length(s_data->camera_view[3][2] - lhs.refs[0].position.z) > glm::length(s_data->camera_view[3][2] - rhs.refs[0].position.z); 
+     // });
+     //
+     std::ranges::sort(s_data->quad_base, s_data->quad_ptr, 
       [](const Quad& lhs, const Quad& rhs)
       {
-        return glm::length(s_data->camera_view[3][2] - lhs.refs[0].position.z) > glm::length(s_data->camera_view[3][2] - rhs.refs[0].position.z); 
+        auto f = s_data->camera_view[3][2] - lhs.vertices[0].position.z;
+        auto s = s_data->camera_view[3][2] - rhs.vertices[0].position.z; 
+        return std::abs(f) < std::abs(s);  
       });
+
 
 
     //std::sort(arr, arr);
 //for(size_t i = 0; i < count; ++i)
   //  for(size_t j = 0; j < count - 1 - i; ++j)
     //  if(arr[j] > arr[j+1])
-      //  std::swap(arr[j], arr[j+1]);
-  KAREN_CORE_WARN("vertex count: {0}, quad_count: {1}, first: << pos: {2}, color: {3}, tux_coord: {4}, tux_idx: {5} >>", count, count/4, arr[0].position, arr[0].color, arr[0].tux_coord, arr[0].tux_idx);
+      //  std::swap(arr[j], arr[j+1]);  
+        KAREN_CORE_WARN("vertex count: {0}, quad_count: {1}, first: << pos: {2}, color: {3}, tux_coord: {4}, tux_idx: {5} >>", count, count/4, arr->vertices[0].position, arr->vertices[0].color, arr->vertices[0].tux_coord, arr->vertices[0].tux_idx);
     //std::sort(s_data->quad_vertex_base, s_data->quad_vertex_base + (data_size / sizeof(QuadVertex)));
-  
-    //s_data->quad_vertex_arr->getIndexBuffer();
+
+      //s_data->quad_vertex_arr->getIndexBuffer();
     /* std::sort(s_data->quad_vertex_base, s_data->quad_vertex_ptr, [&](const QuadVertex& lhs, const QuadVertex& rhs)
     {
       return lhs.position.z - s_data->camera_view[3][3] < rhs.position.z - s_data->camera_view[3][3]; 
     });*/
-    s_data->quad_vertex_buff->setData(data_size, s_data->quad_vertex_base);
+    s_data->quad_vertex_buff->setData(data_size, s_data->quad_base);
 
     for(uint8_t i = 0; i < s_data->texture_slot_index; ++i)
     {
       s_data->texture_slots[i]->bind(i);
     }
+
+    s_data->shaders.get("tux_shader")->bind();
+    s_data->shaders.get("tux_shader")->setUniform("u_proj_view", s_data->proj_view);
     RenderCommands::drawIndexed(s_data->quad_vertex_arr, s_data->quad_index_count);
     s_data->stats.draw_calls++;
   }
-  
+   
+  void Renderer2D::flushCircle()
+  {
+    uint32_t data_size = ((unsigned char*)s_data->circle_ptr - (unsigned char*)s_data->circle_base) * 4;
+    
+    auto* arr = s_data->circle_base;
+    uint32_t count = data_size / sizeof(CircleVertex);
+     
+    std::ranges::sort(s_data->circle_base, s_data->circle_ptr, 
+      [](const Circle& lhs, const Circle& rhs)
+      {
+        auto f = s_data->camera_view[3][2] - lhs.vertices[0].position.z;
+        auto s = s_data->camera_view[3][2] - rhs.vertices[0].position.z; 
+        return std::abs(f) < std::abs(s);  
+      });
+
+    KAREN_CORE_WARN("vertex count: {0}, quad_count: {1}, first: << pos: {2}, color: {3} >>", count, count/4, arr->vertices[0].position, arr->vertices[0].color);
+    
+    s_data->circle_vertex_buff->setData(data_size, s_data->circle_base);
+
+    s_data->shaders.get("circle_shader")->bind();
+    s_data->shaders.get("circle_shader")->setUniform("u_proj_view", s_data->proj_view);
+    RenderCommands::drawIndexed(s_data->circle_vertex_array, s_data->circle_index_count);
+    s_data->stats.draw_calls++;
+  }
+
   void Renderer2D::endScene()
   {
-    flush();
+    flushQuad();
+    flushCircle();
     KAREN_CORE_INFO("Scene end");
   }
 

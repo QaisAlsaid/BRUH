@@ -1,4 +1,4 @@
-script = Karen.Script.new()
+local script = Karen.Script.new()
 local sprite;
 local trans;
 local asset_manager;
@@ -7,7 +7,8 @@ local scene_camera_entity;
 local body;
 local karen = Karen.Vec4.new(1);
 local col = Karen.Vec4.new(255);
---local qais = 1.0;
+local move;
+local circle;
 
 function lerp(on , dest, speed)
   if(on == dest) then 
@@ -24,10 +25,7 @@ function lerp(on , dest, speed)
 print("made the create")
 function script:onCreate()
   script:export("Karen", karen)
-  --script:export("Qais", qais)
   script:export("Color", col, true)
-  --script:export("q", q)
-  --script:export("k", k)
 
 
   asset_manager = Karen.App.getAssetManager();
@@ -41,9 +39,13 @@ function script:onCreate()
   print("id", script.entity:getId());
   print("getting sprite")
   --sprite = Karen.Scene.Components.Sprite.new();
-  sprite = script.entity:addSprite()
+  --sprite = script.entity:addSprite()
+  circle = script.entity:addCircle();
   body = script.entity:addRigidBody2D()
   local box = script.entity:addBoxCollider()
+  move = script.entity:addMovment();
+  
+
   body.gravity_scale = 3
   box.friction = 0
   box.restitution = 0.5
@@ -53,16 +55,16 @@ function script:onCreate()
   --print(script.entity:insertRigidBody2D())
   --box = script.entity:insertBoxCollider()
   --box.restitution = 1;
-  print("first color: ", sprite.color);
+  --print("first color: ", sprite.color);
   --print(script.entity:getUUID());
   --local sprite = script.entity:getSprite()
  -- print("sprite: ", sprite)
   print("done getting sprite")
  -- sprite.color = Karen.Math.Vec4.new();
-  sprite.color.x = 0.1;
-  sprite.color.y = 0.5;
-  sprite.color.z = 0.1;
-  sprite.color.w = 1.0;
+  --sprite.color.x = 0.1;
+  --sprite.color.y = 0.5;
+  --sprite.color.z = 0.1;
+  --sprite.color.w = 1.0;
 
   print("getting trans")
   --trans = script.entity:insertTransform()
@@ -76,7 +78,7 @@ function script:onCreate()
   print("exited onCreate")
 end
 local num = 0
-x = false
+x = true
 function script:onUpdate()
   --print("Scene*");
   print("===================")
@@ -84,28 +86,28 @@ function script:onUpdate()
   print("===================")
   if(true) then
   if(Karen.Input.isKeyPressed(Karen.Keyboard.W)) then
-  body.linear_velocity.y = 5
+  move.linear_velocity.y = 5
   print("W")
   elseif(Karen.Input.isKeyPressed(Karen.Keyboard.S)) then
-  body.linear_velocity.y = -5 
+  move.linear_velocity.y = -5 
   print("S")
-  elseif x then body.linear_velocity.y = lerp(body.linear_velocity.y, 0, 0.5)
+  elseif x then move.linear_velocity.y = lerp(move.linear_velocity.y, 0, 0.5)
   end
   
   if(Karen.Input.isKeyPressed(Karen.Keyboard.D)) then
-  body.linear_velocity.x = 5
+  move.linear_velocity.x = 5
   print("D")
   elseif(Karen.Input.isKeyPressed(Karen.Keyboard.A)) then
-  body.linear_velocity.x = -5
+  move.linear_velocity.x = -5
   print("A")
-  elseif x then body.linear_velocity.x = lerp(body.linear_velocity.x, 0, 0.5)
+  elseif x then move.linear_velocity.x = lerp(move.linear_velocity.x, 0, 0.5)
   end
   end
   if(Karen.Input.isKeyPressed(Karen.Keyboard.E)) then 
-    body.angular_velocity = lerp(body.angular_velocity, -3, 0.05)
+    move.angular_velocity = lerp(move.angular_velocity, -3, 0.05)
   elseif(Karen.Input.isKeyPressed(Karen.Keyboard.Q)) then 
-    body.angular_velocity = lerp(body.angular_velocity, 3, 0.05)
-  elseif x then body.angular_velocity = lerp(body.angular_velocity, 0, 0.05)
+    move.angular_velocity = lerp(move.angular_velocity, 3, 0.05)
+  elseif x then move.angular_velocity = lerp(move.angular_velocity, 0, 0.05)
   end
 
   --trans.position.x = math.sin(num) * 4
@@ -127,10 +129,11 @@ function script:onUpdate()
   --Karen.Renderer2D.drawQuad(pos, size, color)
   --Karen.Renderer2D.endScene()
   local ts = script:getTimestep()
-  sprite.color = col;
+  circle.color = col;
+  --sprite.color = col;
   --sprite.color.z = math.tan(num)
 --  if not ts == nil then
-    print(sprite.color)
+  --  print(sprite.color)
     print(ts)
   --else print("ts is nill")
   --end

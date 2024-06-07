@@ -53,11 +53,13 @@ namespace Karen
       RenderCommands::clear(s_data->clear_color);
     }
 
-    static void beginScene(const OrthographicCamera& camera);//TODO:REOMVE AND the ortho 
-
     static void beginScene(const Camera& camera, const Mat4& transform);
     static void beginScene(const Mat4& projection, const Mat4& view);
 
+    //Circle
+    static void drawCircle(const Mat4& transform, float thickness, float blur, const Vec4& color = Vec4(1.0f));
+    
+    //Quad
     static void drawQuad(const Mat4& transform, const Vec4& color = Vec4(1.0f));
     static void drawQuad(const Mat4& transform, const ARef<Texture2D>& tux, const Vec4& color = Vec4(1.0f));
     
@@ -77,54 +79,73 @@ namespace Karen
     static void drawQuad(const Vec3& pos = Vec3(0.0f), const Vec2& size = Vec2(1.0f), const ARef<Texture2D>& tux = nullptr, const Vec4& color = Vec4(1.0f));
     static void drawQuad(const Vec2& pos = Vec2(0.0f), const Vec2& size = Vec2(1.0f), const ARef<Texture2D>& tux = nullptr, const Vec4& color = Vec4(1.0f));
     
-    static void flush();
     static void endScene();
   
     static void shutDown();
   private:
     static void reset();
+    static void flushQuad();
+    static void flushCircle();
   private:
     struct QuadVertex
-     {
-       glm::vec4 color;
-       glm::vec3 position;
-       glm::vec2 tux_coord;
-       float     tux_idx;
-       bool operator < (const QuadVertex& other)
-       {
-         return this->position.z - s_data->camera_view[3][3] < other.position.z - s_data->camera_view[3][3]; 
- //        return s_data->camera_view[3][3] - this->position.z < 
-       }
-       bool operator > (const QuadVertex& other)
-       {
-         return this->position.z - s_data->camera_view[3][3] > other.position.z - s_data->camera_view[3][3]; 
- //        return s_data->camera_view[3][3] - this->position.z < 
-       }
+    {
+      glm::vec4 color;
+      glm::vec3 position;
+      glm::vec2 tux_coord;
+      float     tux_idx;
+    };
 
-     };
-     
-     struct Data
-     {
-       const uint32_t MAX_QUADS = 10000;
-       const uint32_t MAX_VERTS = MAX_QUADS * 4;
-       const uint32_t MAX_INDES = MAX_QUADS * 6;
+    struct CircleVertex
+    {
+      glm::vec4 color;
+      glm::vec3 position;
+      glm::vec2 local_position;
+      float thickness = 0.1f;
+      float blur = 0.005f;
+    };
 
-       ARef<VertexArray> quad_vertex_arr;
-       ARef<Texture2D> wh_tux;
-       ARef<VertexBuffer> quad_vertex_buff;
-       ShaderManager shaders;
-       QuadVertex* quad_vertex_base = nullptr;
-       QuadVertex* quad_vertex_ptr  = nullptr;
-       uint32_t quad_index_count = 0;
-       
-       uint32_t MAX_TEXTURE_SLOTS = 8; //<= HACK
-       ARef<Texture>* texture_slots;
-       uint32_t texture_slot_index = 1;
-       Vec4 quad_vertex_pos[4];
-       Stats stats;
-       Mat4 camera_view = Mat4(1.0f);
-       Vec4 clear_color = Vec4(0.2, 0.2, 0.2, 1.0f);
-     };
+    struct Quad 
+    {
+      QuadVertex vertices[4];
+    };
+    
+    struct Circle 
+    {
+      CircleVertex vertices[4];
+    };
+
+    struct Data
+    {
+      const uint32_t MAX_QUADS = 10000;
+      const uint32_t MAX_VERTS = MAX_QUADS * 4;
+      const uint32_t MAX_INDES = MAX_QUADS * 6;
+
+      ShaderManager shaders;
+      
+      ARef<Texture2D> wh_tux;
+      
+      Vec4 quad_vertex_pos[4];
+      
+      ARef<VertexArray> quad_vertex_arr;
+      ARef<VertexBuffer> quad_vertex_buff;
+      Quad* quad_base = nullptr;
+      Quad* quad_ptr  = nullptr;
+      uint32_t quad_index_count = 0;
+      
+      ARef<VertexArray> circle_vertex_array;
+      ARef<VertexBuffer> circle_vertex_buff;
+      Circle* circle_base = nullptr;
+      Circle* circle_ptr  = nullptr; 
+      uint32_t circle_index_count;
+
+      uint32_t MAX_TEXTURE_SLOTS = 8; //<= HACK
+      ARef<Texture>* texture_slots;
+      uint32_t texture_slot_index = 1;
+      Stats stats;
+      Mat4 proj_view = Mat4(1.0f);
+      Mat4 camera_view = Mat4(1.0f);
+      Vec4 clear_color = Vec4(0.2, 0.2, 0.2, 1.0f);
+    };
 
     static Data* s_data;
   public:

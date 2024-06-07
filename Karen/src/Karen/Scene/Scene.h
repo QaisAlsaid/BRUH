@@ -12,7 +12,8 @@
 class b2World;
 
 namespace Karen
-{ 
+{
+  class ScriptComponent;
   class Entity;
 
   class KAREN_API Scene
@@ -45,6 +46,7 @@ namespace Karen
     Entity getEntity(const std::string& name);
     Entity getEntity(UUID id);
 
+    void onLoad();
     void onStart();
     void onUpdate(Timestep ts);
     void onEditorUpdate(Timestep ts);
@@ -57,6 +59,8 @@ namespace Karen
     b2World* m_physics_world = nullptr;
     uint32_t m_viewport_width = 1280, m_viewport_height = 720;
     EditorCamera m_editor_camera;
+                                //     Entity
+    std::unordered_map<uint64_t, std::pair<uint32_t, Scene*>> m_fast_access; 
   private:
     friend class Entity;
     friend class SceneHierarchy;

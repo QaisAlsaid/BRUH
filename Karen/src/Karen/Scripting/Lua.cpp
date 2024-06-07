@@ -20,10 +20,6 @@
 #include "Karen/Scene/Entity.h"
 #include "Karen/Scene/SceneCamera.h"
 #include "Script.h"
-#include "glm/detail/qualifier.hpp"
-#include "glm/ext/matrix_transform.hpp"
-#include "glm/ext/quaternion_common.hpp"
-#include "glm/fwd.hpp"
 
 
 #define ADD_COMPONENT_FUNCTIONS(component_prefex) \
@@ -68,6 +64,8 @@ namespace Karen
     KAREN_CORE_WARN("initRenderer exited");
     initScene();
 
+    initScripting();
+
 #if 0
     karen.new_usertype<Scene>("Scene", "addEntity", sol::resolve<Entity(const std::string&)>(&Scene::addEntity), 
         "clear", &Scene::clear, "removeEntity", &Scene::removeEntity);
@@ -97,46 +95,7 @@ namespace Karen
 
     //karen.set_function("getScene", [&](const char* name){return App::get()->assetManager().getScene(name);});
 #endif
-    KAREN_CORE_WARN("init Script started exited");
-    sol::usertype<Script> script = karen.new_usertype<Script>("Script");
-    script["onCreate"] = &Script::onCreate;
-    script["onUpdate"] = &Script::onUpdate;
-    script["onDestroy"] = &Script::onDestroy;
-    script["entity"] = &Script::entity;
-    script["getTimestep"] = &Script::getTimestep;
-    script["export"] = sol::overload(
-            [](Script* _this, const char* as, Vec4* v4){
-              App::get()->pushExportVariable(as, { ExportType::Type::Vec4, v4 },
-                  _this->entity.getComponent<IDComponent>().ID);
-              }, 
-            [](Script* _this, const char* as, Vec3* v3){
-              App::get()->pushExportVariable(as, { ExportType::Type::Vec3, v3 }, 
-                  _this->entity.getComponent<IDComponent>().ID);
-              }, 
-            [](Script* _this, const char* as, Vec2* v2){
-              App::get()->pushExportVariable(as, { ExportType::Type::Vec2, v2 }, 
-                  _this->entity.getComponent<IDComponent>().ID);
-              },
-              [](Script* _this, const char* as, Vec4* v4, bool dummy){ 
-              App::get()->pushExportVariable(as, { ExportType::Type::RGBA_Color, v4 },
-                  _this->entity.getComponent<IDComponent>().ID);
-              } 
-            //[](Script* _this, const char* as, float* f){
-            //  App::get()->pushExportVariable(as, { ExportType::Type::Float, f }, 
-            //      _this->entity.getComponent<IDComponent>().ID);
-            //  },
-            //[](Script* _this, const char* as, int* i){
-            //  App::get()->pushExportVariable(as, { ExportType::Type::Int, i }, 
-            //      _this->entity.getComponent<IDComponent>().ID);
-            //  },
-            //[](Script* _this, const char* as, const char* s){
-            //  App::get()->pushExportVariable(as, { ExportType::Type::String, s }, 
-            //      _this->entity.getComponent<IDComponent>().ID);  
-            //  }
-    );
-
-    KAREN_CORE_WARN("init Script done exited");
-    /*
+        /*
     lua.script(R"(
     app = App.get();
     app:print();
@@ -242,25 +201,25 @@ namespace Karen
     //UUID
     {
       sol::usertype<UUID> uuid = karen.new_usertype<UUID>("UUID", 
-          sol::constructors<UUID(), UUID(uint64_t)>()
+          sol::constructors<UUID(), UUID(const UUID&), UUID(uint64_t)>()
           );
       uuid["asNumber"] = &UUID::operator unsigned long;
     }
 
     //AssetManager:
     {
-      sol::usertype<AssetManager> am = karen.new_usertype<AssetManager>("AssetManager");
-      am["getScene"]     = &AssetManager::getScene; 
-      am["getTexture2D"] = &AssetManager::getTexture2D;
+      sol::usertype<AssetManager> asset = karen.new_usertype<AssetManager>("AssetManager");
+      asset["getScene"]     = &AssetManager::getScene; 
+      asset["getTexture2D"] = &AssetManager::getTexture2D;
     }
 
     //Window
     {
-      sol::usertype<Window> wi = karen.new_usertype<Window>("Window");
-      wi["getWidth"]  = &Window::getWidth;
-      wi["getHieght"] = &Window::getHeight;
-      wi["isVsync"]   = &Window::isVsync;
-      wi["setVsync"]  = &Window::setVsync;
+      sol::usertype<Window> window = karen.new_usertype<Window>("Window");
+      window["getWidth"]  = &Window::getWidth;
+      window["getHieght"] = &Window::getHeight;
+      window["isVsync"]   = &Window::isVsync;
+      window["setVsync"]  = &Window::setVsync;
     }
 
   }
@@ -355,30 +314,30 @@ namespace Karen
           sol::resolve<Vec4(const Mat4&, const Vec4&)>(&glm::operator/)
           );
     
-      m4["transpose"] = [](Mat4* mat){ *mat = glm::transpose(*mat); };
-      m4["inverse"]   = [](Mat4* mat){ *mat = glm::inverse(*mat); };
+      m4["transpose"] = [](Mat4* _this){ *_this = glm::transpose(*_this); };
+      m4["inverse"]   = [](Mat4* _this){ *_this = glm::inverse(*_this); };
 
       m4["transposed"] = &glm::transpose<4, 4, glm::f32, glm::defaultp>;
       m4["inversed"]   = &glm::inverse<4, 4, glm::f32, glm::defaultp>;
       
-      m4["translate"] = [](Mat4* mat, const Vec3& vec) {
-        *mat = glm::translate(*mat, vec); 
-        return mat;
+      m4["translate"] = [](Mat4* _this, const Vec3& vec) {
+        *_this = glm::translate(*_this, vec); 
+        return _this;
       };
-      m4["rotate"]    = [](Mat4* mat, float angle, const Vec3& vec) {
-        *mat = glm::rotate(*mat, angle, vec); 
-        return mat;
+      m4["rotate"]    = [](Mat4* _this, float angle, const Vec3& vec) {
+        *_this = glm::rotate(*_this, angle, vec); 
+        return _this;
       };
-      m4["scale"]     = [](Mat4* mat, const Vec3& vec) { 
-        *mat = glm::translate(*mat, vec); 
-        return mat;
+      m4["scale"]     = [](Mat4* _this, const Vec3& vec) { 
+        *_this = glm::translate(*_this, vec); 
+        return _this;
       };
-      m4["transform"] = [](Mat4* mat, float angle, const Vec3& translation, 
+      m4["transform"] = [](Mat4* _this, float angle, const Vec3& translation, 
           const Vec3& scale, const Vec3& rotation) {
-        *mat = glm::translate(*mat, translation);
-        *mat = glm::rotate(*mat, angle, rotation);
-        *mat = glm::scale(*mat, scale);
-        return mat;
+        *_this = glm::translate(*_this, translation);
+        *_this = glm::rotate(*_this, angle, rotation);
+        *_this = glm::scale(*_this, scale);
+        return _this;
       };
       
       m4["decompose"] = &Karen::decompose;
@@ -399,8 +358,8 @@ namespace Karen
           sol::resolve<Vec3(const Mat3&, const Vec3&)>(&glm::operator/)
           );
     
-      m3["transpose"] = [](Mat3* mat){ *mat = glm::transpose(*mat); return mat; };
-      m3["inverse"]   = [](Mat3* mat){ *mat = glm::inverse(*mat); return mat ;};
+      m3["transpose"] = [](Mat3* _this){ *_this = glm::transpose(*_this); return _this; };
+      m3["inverse"]   = [](Mat3* _this){ *_this = glm::inverse(*_this); return _this ;};
 
       m3["transposed"] = &glm::transpose<3, 3, glm::f32, glm::defaultp>;
       m3["inversed"]   = &glm::inverse<3, 3, glm::f32, glm::defaultp>;
@@ -421,8 +380,8 @@ namespace Karen
           sol::resolve<Vec2(const Mat2&, const Vec2&)>(&glm::operator/)
           );
       
-      m2["transpose"] = [](Mat2* mat){ *mat = glm::transpose(*mat); return mat; };
-      m2["inverse"]   = [](Mat2* mat){ *mat = glm::inverse(*mat); return mat; };
+      m2["transpose"] = [](Mat2* _this){ *_this = glm::transpose(*_this); return _this; };
+      m2["inverse"]   = [](Mat2* _this){ *_this = glm::inverse(*_this); return _this; };
 
       m2["transposed"] = &glm::transpose<2, 2, glm::f32, glm::defaultp>;
       m2["inversed"]   = &glm::inverse<2, 2, glm::f32, glm::defaultp>;
@@ -654,11 +613,10 @@ namespace Karen
       }
 
       //TagComponent
-      //TODO: make it (NameComponent)
       {
-        sol::usertype<TagComponent> name = comps.new_usertype<TagComponent>("Name", 
+        sol::usertype<TagComponent> tag = comps.new_usertype<TagComponent>("Tag", 
           sol::constructors<TagComponent(), TagComponent(const std::string&)>());
-        name["name"] = &TagComponent::name;
+        tag["tag"] = &TagComponent::name;
       }
 
       //TransformComponent
@@ -670,15 +628,23 @@ namespace Karen
         trans["position"] = &TransformComponent::position;
         trans["scale"]    = &TransformComponent::scale;
         trans["rotation"] = &TransformComponent::rotation;
-        trans["asMat4"] = &TransformComponent::getTransformationMatrix;
+        trans["asMat4"]   = &TransformComponent::getTransformationMatrix;
       }
 
       //SpriteComponent
       {
         //no constructors because it will change soon (with the asset manager)
         sol::usertype<SpriteComponent> sprite = comps.new_usertype<SpriteComponent>("Sprite");
-        sprite["color"] = &SpriteComponent::color;
+        sprite["color"]   = &SpriteComponent::color;
         sprite["texture"] = &SpriteComponent::texture_handel;
+      }
+
+      //CircleComponent
+      {
+        sol::usertype<CircleComponent> circle = comps.new_usertype<CircleComponent>("Circle");
+        circle["color"]     = &CircleComponent::color;
+        circle["thickness"] = &CircleComponent::thickness;
+        circle["blur"]      = &CircleComponent::blur;
       }
 
       //ScriptComponent
@@ -700,11 +666,16 @@ namespace Karen
       //RigidBody2DComponent
       {
         sol::usertype<RigidBody2DComponent> rb2d = comps.new_usertype<RigidBody2DComponent>("RigidBody2D");
-        rb2d["type"]             = &RigidBody2DComponent::type;
-        rb2d["fixed_rotation"]   = &RigidBody2DComponent::fixed_rotation;
-        rb2d["linear_velocity"]  = &RigidBody2DComponent::linear_velocity;
-        rb2d["angular_velocity"] = &RigidBody2DComponent::angular_velocity;
-        rb2d["gravity_scale"]    = &RigidBody2DComponent::gravity_scale;
+        rb2d["type"]           = &RigidBody2DComponent::type;
+        rb2d["fixed_rotation"] = &RigidBody2DComponent::fixed_rotation;
+        rb2d["gravity_scale"] = &RigidBody2DComponent::gravity_scale;
+      }
+
+      //MovmentComponent
+      {
+        sol::usertype<MovmentComponent> mc = comps.new_usertype<MovmentComponent>("Movment");
+        mc["linear_velocity"]  = &MovmentComponent::linear_velocity;
+        mc["angular_velocity"] = &MovmentComponent::angular_velocity;
       }
 
       //BoxColliderComponent
@@ -769,26 +740,32 @@ namespace Karen
       ADD_COMPONENT_FUNCTIONS(Tag);
       ADD_COMPONENT_FUNCTIONS(Transform);
       ADD_COMPONENT_FUNCTIONS(Sprite);
+      ADD_COMPONENT_FUNCTIONS(Circle);
       ADD_COMPONENT_FUNCTIONS(Script);
       ADD_COMPONENT_FUNCTIONS(Camera);
       ADD_COMPONENT_FUNCTIONS(RigidBody2D);
+      ADD_COMPONENT_FUNCTIONS(Movment);
       ADD_COMPONENT_FUNCTIONS(BoxCollider);
+      ADD_COMPONENT_FUNCTIONS(CircleCollider);
       
       sol::usertype<Entity> entity = karen.new_usertype<Entity>("Entity", 
           sol::constructors<Entity(uint64_t, Scene*)>()
           );
-      entity["getId"]         = &Entity::operator unsigned int;//Debug
-      entity["valid"]         = &Entity::operator bool;
-      entity["same"]          = &Entity::operator==;
+      entity["getId"] = &Entity::operator unsigned int;//Debug
+      entity["valid"] = &Entity::operator bool;
+      entity["same"]  = &Entity::operator==;
 
       REGESTER_COMPONENT_FUNCTIONS(ID, entity);
       REGESTER_COMPONENT_FUNCTIONS(Tag, entity);
       REGESTER_COMPONENT_FUNCTIONS(Transform, entity);
       REGESTER_COMPONENT_FUNCTIONS(Sprite, entity);
+      REGESTER_COMPONENT_FUNCTIONS(Circle, entity);
       REGESTER_COMPONENT_FUNCTIONS(Script, entity);
       REGESTER_COMPONENT_FUNCTIONS(Camera, entity);
       REGESTER_COMPONENT_FUNCTIONS(RigidBody2D, entity);
+      REGESTER_COMPONENT_FUNCTIONS(Movment, entity);
       REGESTER_COMPONENT_FUNCTIONS(BoxCollider, entity);
+      REGESTER_COMPONENT_FUNCTIONS(CircleCollider, entity);
     }
 
     KAREN_CORE_WARN("We exited initScene");
@@ -836,6 +813,51 @@ namespace Karen
             
             ));
     }
+  }
+
+
+  void Lua::initScripting()
+  {
+    KAREN_CORE_WARN("init Script started");
+    sol::usertype<Script> script = karen.new_usertype<Script>("Script");
+    script["onCreate"] = &Script::onCreate;
+    script["onUpdate"] = &Script::onUpdate;
+    script["onDestroy"] = &Script::onDestroy;
+    script["entity"] = &Script::entity;
+    script["getTimestep"] = &Script::getTimestep;
+    
+    script["export"] = sol::overload(
+            [](Script* _this, const char* as, Vec4* v4){
+              App::get()->pushExportVariable(as, { ExportType::Type::Vec4, v4 },
+                  _this->entity.getComponent<IDComponent>().ID);
+              }, 
+            [](Script* _this, const char* as, Vec3* v3){
+              App::get()->pushExportVariable(as, { ExportType::Type::Vec3, v3 }, 
+                  _this->entity.getComponent<IDComponent>().ID);
+              }, 
+            [](Script* _this, const char* as, Vec2* v2){
+              App::get()->pushExportVariable(as, { ExportType::Type::Vec2, v2 }, 
+                  _this->entity.getComponent<IDComponent>().ID);
+              },
+              [](Script* _this, const char* as, Vec4* v4, bool dummy){ 
+              App::get()->pushExportVariable(as, { ExportType::Type::RGBA_Color, v4 },
+                  _this->entity.getComponent<IDComponent>().ID);
+              } 
+            //[](Script* _this, const char* as, float* f){
+            //  App::get()->pushExportVariable(as, { ExportType::Type::Float, f }, 
+            //      _this->entity.getComponent<IDComponent>().ID);
+            //  },
+            //[](Script* _this, const char* as, int* i){
+            //  App::get()->pushExportVariable(as, { ExportType::Type::Int, i }, 
+            //      _this->entity.getComponent<IDComponent>().ID);
+            //  },
+            //[](Script* _this, const char* as, const char* s){
+            //  App::get()->pushExportVariable(as, { ExportType::Type::String, s }, 
+            //      _this->entity.getComponent<IDComponent>().ID);  
+            //  }
+    );
+
+    KAREN_CORE_WARN("init Script done exited");
   }
 }
 

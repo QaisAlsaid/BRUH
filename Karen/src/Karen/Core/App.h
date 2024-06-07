@@ -15,7 +15,7 @@ namespace Karen
 {
   typedef std::pair<const char*, ExportType> ExportedPair;
   typedef std::vector<ExportedPair> ExportedVector;
-  typedef std::map<UUID, ExportedVector> ExportedMap;
+  typedef std::map<uint64_t, ExportedVector> ExportedMap;
   
 
   class KAREN_API App

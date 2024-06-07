@@ -174,6 +174,16 @@ namespace Karen
         }
       });
 
+      drawComponent<CircleComponent>(m_current, "Circle", [&](auto* circle_comp, bool removed)
+      {
+        ImGui::ColorEdit4("Color", glm::value_ptr(circle_comp->color));
+        ImGui::DragFloat("Thickness", &circle_comp->thickness, 0.05f, 0.0f, 1.0f);
+        ImGui::DragFloat("Blur", &circle_comp->blur, 0.05f, 0.0f, 1.0f);
+        
+        if(removed)
+          m_current.removeComponent<CircleComponent>();
+      });
+
       drawComponent<RigidBody2DComponent>(m_current, "Rigid Body", [&](auto* rb2dc, bool removed)
       {
         const char* current_body_type_str = body_type_str[(int)rb2dc->type];
@@ -191,9 +201,21 @@ namespace Karen
           }
           ImGui::EndCombo();
         }
+        
         ImGui::Checkbox("Fixed Rotation", &rb2dc->fixed_rotation);
+        ImGui::DragFloat("Gravity Scale", &rb2dc->gravity_scale);
+
         if(removed)
           m_current.removeComponent<RigidBody2DComponent>();
+      });
+
+      drawComponent<MovmentComponent>(m_current, "Movment", [&](MovmentComponent* movment_comp, bool removed)
+      {
+        ImGui::DragFloat3("Linear Velocity", glm::value_ptr(movment_comp->linear_velocity));
+        ImGui::DragFloat("Angular Velocity", &movment_comp->angular_velocity);
+        
+        if(removed)
+          m_current.removeComponent<MovmentComponent>();
       });
 
       drawComponent<BoxColliderComponent>(m_current, "Box Collider", [&](auto* bcc, bool removed)
@@ -236,13 +258,17 @@ namespace Karen
           m_current.insertComponent<CameraComponent>();
         if(ImGui::MenuItem("Sprite"))
           m_current.insertComponent<SpriteComponent>();
+        if(ImGui::MenuItem("Circle"))
+          m_current.insertComponent<CircleComponent>();
         if(ImGui::MenuItem("Rigid Body 2D"))
           m_current.insertComponent<RigidBody2DComponent>();
+        if(ImGui::MenuItem("Movment Component"))
+          m_current.insertComponent<MovmentComponent>();
         if(ImGui::MenuItem("Box Collider"))
           m_current.insertComponent<BoxColliderComponent>();
         if(ImGui::MenuItem("Circle Collider"))
           m_current.insertComponent<CircleColliderComponent>();
-        if(ImGui::Button("Cancle"))
+        if(ImGui::Button("Cancel"))
           ImGui::CloseCurrentPopup();
         ImGui::EndPopup();
         ImGui::CloseCurrentPopup();
@@ -314,6 +340,7 @@ namespace Karen
           ImGui::ColorEdit4(exp.first, glm::value_ptr(*exp.second.getAs<Vec4>()));
           break;
         }
+        default: break;
       }
     }
   }

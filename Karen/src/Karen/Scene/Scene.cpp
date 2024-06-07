@@ -12,7 +12,6 @@
 #include <box2d/b2_world.h>
 #include <box2d/b2_fixture.h>
 #include <box2d/b2_polygon_shape.h>
-#include <functional>
 
 
 namespace Karen
@@ -26,8 +25,10 @@ namespace Karen
   Scene::Scene(const Scene& other)
     : m_name(other.m_name), m_viewport_width(other.m_viewport_width), m_viewport_height(other.m_viewport_height)
   {
+    m_fast_access.clear();
+    m_fast_access.reserve(other.m_fast_access.size());
     //TODO: template
-    //old / new
+    //                          old / new
     std::unordered_map<entt::entity, entt::entity> entt_ids;
     auto& cpyreg = other.m_registry;
     {
@@ -35,8 +36,10 @@ namespace Karen
       for(auto& e : view)
       {
         auto en = this->addEntity();
-        en.insertComponent<IDComponent>(view.get<IDComponent>(e));
+        const auto& new_uuid = en.insertComponent<IDComponent>(view.get<IDComponent>(e)).ID;
         en.insertComponent<TagComponent>(cpyreg.get<TagComponent>(e));
+                                            //id
+        m_fast_access[(uint64_t)new_uuid] = { en, this };
         entt_ids[e] = en;
       }
     }
@@ -62,6 +65,14 @@ namespace Karen
       }
     }
     {
+      auto view = cpyreg.view<CircleComponent>();
+      for(auto& e : view)
+      {
+        m_registry.emplace_or_replace<CircleComponent>(entt_ids.at(e), view.get<CircleComponent>(e));
+      }
+    }
+
+    {
       auto view = cpyreg.view<NativeScriptComponent>();
       for(auto& e : view)
       {
@@ -73,6 +84,13 @@ namespace Karen
       for(auto& e : view)
       {
         m_registry.emplace_or_replace<RigidBody2DComponent>(entt_ids.at(e), view.get<RigidBody2DComponent>(e));
+      }
+    }
+    {
+      auto view = cpyreg.view<MovmentComponent>();
+      for(auto& e : view)
+      {
+        m_registry.emplace_or_replace<MovmentComponent>(entt_ids.at(e), view.get<MovmentComponent>(e));
       }
     }
     {
@@ -109,12 +127,13 @@ namespace Karen
   Entity Scene::addEntity(const std::string& tag)
   {
     Entity e(m_registry.create(), this);
-    e.addComponent<IDComponent>();
+    const auto& id = e.addComponent<IDComponent>().ID;
     e.addComponent<TransformComponent>();
-    if(tag == "")
+    if(tag.empty())
       e.addComponent<TagComponent>("Entity");
     else 
       e.addComponent<TagComponent>(tag);
+    m_fast_access[(uint64_t)id] = { e, this };
     return e;
   }
  
@@ -122,6 +141,7 @@ namespace Karen
   {
     auto e = addEntity(tag);
     e.getComponent<IDComponent>().ID = uuid;
+    m_fast_access[(uint64_t)uuid] = { e, this };
     return e;
   }
 
@@ -129,21 +149,50 @@ namespace Karen
   {
     auto eid = m_registry.create();
     Entity en(e, eid, this);
+    m_fast_access[(uint64_t)en.getComponent<IDComponent>().ID] = { en, this };
     return en;
   }
 
   void Scene::removeEntity(const Entity& e)
   {
+    const auto& iter = m_fast_access.find((uint64_t)e.getComponent<IDComponent>().ID);
+    m_fast_access.erase(iter);
     m_registry.destroy(e);
   }
 
   void Scene::clear()
   {
     m_registry.clear();
+    m_fast_access.clear();
+  }
+
+  //for now it loads every thing it should load only changed scripts
+  void Scene::onLoad()
+  {
+    auto& lua = Lua::get();
+    m_registry.view<ScriptComponent>().each([&](auto e, ScriptComponent& script)
+    {
+      lua.safe_script_file(script.path);
+      auto res = lua["GetObject"];
+      if(res.valid())
+      {
+        sol::function fun = res;
+        script.script = fun();
+        //std::cout << "from entt::registry: id: " << uint32_t(e)<<std::endl;
+        script.script->entity = { e, this };
+      }
+      else 
+      {
+        sol::error e = res;
+        std::cerr << e.what();
+      }
+    });
   }
 
   void Scene::onStart()
   {
+    //TODO: FIXME: remove it
+    onLoad();
     m_physics_world = new b2World({0.0f, -9.8f});
     
     //scripts might add physics components
@@ -154,27 +203,27 @@ namespace Karen
       native_script.instance->onCreate();
     });
 
-    auto& lua = Lua::get();
+   // auto& lua = Lua::get();
     m_registry.view<ScriptComponent>().each([&](auto e, ScriptComponent& script)
     {
-      lua.safe_script_file(script.path);
-      auto res = lua["GetObject"];
-      if(res.valid())
-      {
-        sol::function fun = res;
-        script.script = fun();
-        std::cout << "from entt::registry: id: " << uint32_t(e)<<std::endl; 
-        script.script->entity = { e, this };
-        std::cout << "inside Karen::Entity::m_id: " << (uint32_t)script.script->entity << std::endl;
-        std::cout << "calling onCreate from c++ << ";
+      //lua.safe_script_file(script.path);
+      //auto res = lua["GetObject"];
+      //if(res.valid())
+      //{
+      //  sol::function fun = res;
+      //  script.script = fun();
+      //  std::cout << "from entt::registry: id: " << uint32_t(e)<<std::endl; 
+      //  script.script->entity = { e, this };
+      //  std::cout << "inside Karen::Entity::m_id: " << (uint32_t)script.script->entity << std::endl;
+      //  std::cout << "calling onCreate from c++ << ";
         script.script->onCreate();
-        std::cout << " >> " << std::endl;
-      }
-      else 
-      {
-        sol::error e = res;
-        std::cerr << e.what();
-      }
+     //   std::cout << " >> " << std::endl;
+     // }
+     // else 
+     // {
+       // sol::error e = res;
+       // std::cerr << e.what();
+     // }
     });
 
 
@@ -236,12 +285,11 @@ namespace Karen
       script.script->onUpdate();
     });
     
-    m_registry.view<TransformComponent, RigidBody2DComponent>().each([&](auto e, TransformComponent& tc, RigidBody2DComponent& rb2dc)
+    m_registry.view<MovmentComponent, RigidBody2DComponent>().each([&](auto e, MovmentComponent& mc, RigidBody2DComponent& rb2dc)
     {
       auto* body = rb2dc.body;
-      body->SetGravityScale(rb2dc.gravity_scale);
-      body->SetLinearVelocity({ rb2dc.linear_velocity.x, rb2dc.linear_velocity.y });
-      body->SetAngularVelocity(rb2dc.angular_velocity);
+      body->SetLinearVelocity({ mc.linear_velocity.x, mc.linear_velocity.y });
+      body->SetAngularVelocity(mc.angular_velocity);
       //Vec2 position(body->GetPosition().x, body->GetPosition().y);
       //tc.position = { position, tc.position.z };
       //tc.rotation.z = body->GetAngle();
@@ -254,9 +302,7 @@ namespace Karen
     m_registry.view<TransformComponent, RigidBody2DComponent>().each([&](auto e, TransformComponent& tc, RigidBody2DComponent& rb2dc)
     {
       auto* body = rb2dc.body;
-      //body->SetGravityScale(rb2dc.gravity_scale);
-      //body->SetLinearVelocity({ rb2dc.linear_velocity.x, rb2dc.linear_velocity.y });
-      //body->SetAngularVelocity(rb2dc.angular_velocity);
+      body->SetGravityScale(rb2dc.gravity_scale);
       Vec2 position(body->GetPosition().x, body->GetPosition().y);
       tc.position = { position, tc.position.z };
       tc.rotation.z = body->GetAngle();
@@ -283,17 +329,31 @@ namespace Karen
     if(camera) [[likely]]
     {
       Renderer2D::beginScene(*camera, camera_trans);
-      auto view = m_registry.view<TransformComponent, SpriteComponent>();
-      for(const auto& e : view)
+      
+      //Quads
       {
-        auto &&[trans, sprite] = view.get<TransformComponent, SpriteComponent>(e);
-        if(!sprite.texture_handel.empty())
+        auto view = m_registry.view<TransformComponent, SpriteComponent>();
+        for(const auto& e : view)
         {
-          Renderer2D::drawQuad(trans.getTransformationMatrix(),
+          auto &&[trans, sprite] = view.get<TransformComponent, SpriteComponent>(e);
+          if(!sprite.texture_handel.empty())
+          {
+            Renderer2D::drawQuad(trans.getTransformationMatrix(),
               App::get()->assetManager()->getTexture2D(sprite.texture_handel), sprite.color);
+          }
+          else
+            Renderer2D::drawQuad(trans.getTransformationMatrix(), sprite.color);
         }
-        else
-          Renderer2D::drawQuad(trans.getTransformationMatrix(), sprite.color);
+      }
+
+      //Circles 
+      {
+        auto view = m_registry.view<TransformComponent, CircleComponent>();
+        for(const auto& e : view)
+        {
+          auto &&[trans, circle] = view.get<TransformComponent, CircleComponent>(e);
+          Renderer2D::drawCircle(trans.getTransformationMatrix(), circle.thickness, circle.blur, circle.color);
+        }
       }
       Renderer2D::endScene();
     }
@@ -340,17 +400,32 @@ namespace Karen
     else KAREN_CORE_WARN("No main Camera found in Scene");
 */
     Renderer2D::beginScene(m_editor_camera.projection, m_editor_camera.view);
-    auto view = m_registry.view<TransformComponent, SpriteComponent>();
-    for(const auto& e : view)
+   
+    //Quads
     {
-      auto &&[trans, sprite] = view.get<TransformComponent, SpriteComponent>(e);
-      if(!sprite.texture_handel.empty())
+      auto view = m_registry.view<TransformComponent, SpriteComponent>();
+      for(const auto& e : view)
       {
-        Renderer2D::drawQuad(trans.getTransformationMatrix(),
-        App::get()->assetManager()->getTexture2D(sprite.texture_handel), sprite.color);
+        auto &&[trans, sprite] = view.get<TransformComponent, SpriteComponent>(e);
+        if(!sprite.texture_handel.empty())
+        {
+          Renderer2D::drawQuad(trans.getTransformationMatrix(),
+          App::get()->assetManager()->getTexture2D(sprite.texture_handel), sprite.color);
+        }
+        else
+          Renderer2D::drawQuad(trans.getTransformationMatrix(), sprite.color);
       }
-      else
-        Renderer2D::drawQuad(trans.getTransformationMatrix(), sprite.color);
+    }
+
+    
+    //Circles 
+    {
+      auto view = m_registry.view<TransformComponent, CircleComponent>();
+      for(const auto& e : view)
+      {
+        auto &&[trans, circle] = view.get<TransformComponent, CircleComponent>(e);
+        Renderer2D::drawCircle(trans.getTransformationMatrix(), circle.thickness, circle.blur, circle.color);
+      }
     }
     Renderer2D::endScene();
 }
@@ -374,14 +449,13 @@ namespace Karen
   
   Entity Scene::getEntity(UUID id)
   {
-    auto view = m_registry.view<IDComponent>();
-    for(const auto& e : view)
+    if(m_fast_access.find((uint64_t)id) != m_fast_access.end())
     {
-      if(view.get<IDComponent>(e).ID == id)
-        return Entity(e, this);
+      const auto& pair = m_fast_access.at((uint64_t)id);
+      return { pair.first, pair.second };
     }
+    KAREN_CORE_WARN("Entity with UUID: {0} Not found", id);
     return {};
-
   }
 
   void Scene::onEnd()

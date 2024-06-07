@@ -44,6 +44,12 @@ namespace Karen
       this->insertComponent<SpriteComponent>(*sprc);
     }
 
+    auto* circ = e.tryGetComponent<CircleComponent>();
+    if(circ)
+    {
+      this->insertComponent<CircleComponent>(*circ);
+    }
+
     auto* nsc = e.tryGetComponent<NativeScriptComponent>();
     if(nsc)
     {
@@ -55,7 +61,13 @@ namespace Karen
     {
       this->insertComponent<RigidBody2DComponent>(*rb2dc);
     }
-      
+
+    auto* mc = e.tryGetComponent<MovmentComponent>();
+    if(mc)
+    {
+      this->insertComponent<MovmentComponent>(*mc);
+    }
+
     auto* bcc = e.tryGetComponent<BoxColliderComponent>();
     if(bcc)
     {

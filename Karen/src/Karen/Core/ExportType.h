@@ -16,7 +16,7 @@ namespace Karen
     ExportType(Type T, void* data) 
       :m_data_type(T), m_raw_data(data) {} ;
 
-    inline Type getType()           const { return m_data_type; }
+    inline Type getType()     const { return m_data_type; }
     inline void* getRawData() const { return m_raw_data;  }
 
     template<typename T>

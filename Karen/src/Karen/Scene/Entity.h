@@ -18,60 +18,60 @@ namespace Karen
     Entity(uint32_t id, Scene* scene);
     inline void inst(){}
 
-    inline void destroy() 
+    inline void destroy() const 
     {
       m_scene->removeEntity(*this);
     }
 
     template<typename T>
-    inline bool hasComponent()
+    inline bool hasComponent() const
     {
       return m_scene->m_registry.any_of<T>(m_id);
     }
 
     template<typename... Ts>
-    inline bool hasAll()
+    inline bool hasAll() const
     {
       return m_scene->m_registry.all_of<Ts...>(m_id);
     }
 
     template<typename... Ts>
-    inline bool hasAny()
+    inline bool hasAny() const
     {
       return m_scene->m_registry.any_of<Ts...>(m_id);
     }
   
     template<typename T>
-    inline T& getComponent()
+    inline T& getComponent() const
     {
       return m_scene->m_registry.get<T>(m_id);
     }
 
     template<typename T>
-    inline T* tryGetComponent()
+    inline T* tryGetComponent() const
     {
       return m_scene->m_registry.try_get<T>(m_id);
     }
 
     template<typename T, typename... TArgs>
-    inline T& addComponent(TArgs&&... args)
+    inline T& addComponent(TArgs&&... args) const
     {
       return m_scene->m_registry.emplace<T>(m_id, std::forward<TArgs>(args)...);
     }
     template<typename T, typename... TArgs>
-    inline T& insertComponent(TArgs&&... args)
+    inline T& insertComponent(TArgs&&... args) const
     {
       return m_scene->m_registry.emplace_or_replace<T>(m_id, std::forward<TArgs>(args)...);
     }
 
     template<typename T>
-    inline void removeComponent()
+    inline void removeComponent() const
     {
       m_scene->m_registry.erase<T>(m_id);
     }
 
     template<typename T>
-    inline void tryRemoveComponent()
+    inline void tryRemoveComponent() const
     {
       m_scene->m_registry.remove<T>(m_id);
     }
