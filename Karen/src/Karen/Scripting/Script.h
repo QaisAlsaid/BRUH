@@ -1,8 +1,6 @@
 #ifndef KR_SCRIPT_H
 #define KR_SCRIPT_H
 
-#include "Karen/Core/App.h"
-#include "Karen/Core/ExportType.h"
 #include "Karen/Core/Timestep.h"
 #include "Karen/Scene/Entity.h"
 

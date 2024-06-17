@@ -5,6 +5,7 @@
 #include "Karen/Core/App.h"
 #include "Karen/Core/ButtonsAndKeyCodes.h"
 #include "Karen/Core/Events/KeyEvents.h"
+#include "Karen/Core/Log.h"
 #include "Karen/Core/Timestep.h"
 #include "Karen/Scene/Components.h"
 #include "Karen/Scene/SceneSerializer.h"
@@ -16,6 +17,9 @@
 #include <Karen/Karen.h>
 #include <imgui.h>
 #include <ImGuizmo.h>
+
+
+#include "Karen/Core/AssetManager.h"
 
 #ifdef KAREN_PLATFORM_LINUX
 #include <dlfcn.h>
@@ -58,8 +62,9 @@ namespace Karen
   };
 
   EditorLayer::EditorLayer()
-    : Layer("EditorLayer"), m_content_browser("../res"), m_asset_manager_panel(App::get()->assetManager())
+    : Layer("EditorLayer"), m_content_browser("../res")
   {
+    AssetManager::loadConfig("../res/config/assets.test.xml");
     activate();
 
     KAREN_START_INSTRUMENTOR();
@@ -77,8 +82,9 @@ namespace Karen
 static float* speed = new float;
   void EditorLayer::onAttach()
   {
-    m_editor_scene = App::get()->assetManager()->getScene("scene");
-    std::cout << "Scene* : "<< std::hex << App::get()->assetManager()->getScene("scene").get()<<std::endl;
+    auto uuid = AssetManager::getUUID("../res/config/scene.yaml");
+    m_editor_scene = AssetManager::get<AssetManager::SceneAsset>(uuid)->scene;
+
     
     m_scene = m_editor_scene;
     m_helper_windows["Stats"] = createScoped<StatsWindow>();
@@ -129,9 +135,6 @@ static float* speed = new float;
    //TODO: Native script instance* is templated to the type given
     //speed = &((Script*)nsc.instance)->speed;
   
-    auto eee = m_scene->addEntity("script");
-    auto& sc = eee.addComponent<ScriptComponent>();
-    sc.path = "../res/scripts/test.lua";
   }
 
 
@@ -353,7 +356,6 @@ static float* speed = new float;
 
   void EditorLayer::updatePanels()
   {
-    m_asset_manager_panel.onImGuiUpdate();
     m_content_browser.onImGuiUpdate();
     m_helper_windows["Stats"]->onImGuiUpdate();
     m_scene_hierarchy_panel.onGuiUpdate();

@@ -7,7 +7,6 @@
 #include "Panels/Inspector.h"
 #include "HelperWindows.h"
 #include "Panels/ContentBrowser.h"
-#include "Panels/AssetManagerGui.h"
 #include "EditorCamera.h"
 
 
@@ -89,7 +88,6 @@ namespace Karen
     
     ARef<Karen::FrameBuffer> m_frame_buff;
     
-    AssetManagerPanel m_asset_manager_panel;
     ContentBrowser m_content_browser;
     SceneHierarchy m_scene_hierarchy_panel;
     Inspector m_inspector_panel;

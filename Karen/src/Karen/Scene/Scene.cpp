@@ -167,24 +167,29 @@ namespace Karen
   }
 
   //for now it loads every thing it should load only changed scripts
+  //this should be in the file watcher
   void Scene::onLoad()
   {
     auto& lua = Lua::get();
     m_registry.view<ScriptComponent>().each([&](auto e, ScriptComponent& script)
     {
-      lua.safe_script_file(script.path);
-      auto res = lua["GetObject"];
-      if(res.valid())
+      auto script_ptr = AssetManager::get<AssetManager::ScriptAsset>(script.script_handle);
+      if(script_ptr->is_valid)
       {
-        sol::function fun = res;
-        script.script = fun();
-        //std::cout << "from entt::registry: id: " << uint32_t(e)<<std::endl;
-        script.script->entity = { e, this };
-      }
-      else 
-      {
-        sol::error e = res;
-        std::cerr << e.what();
+        lua.safe_script_file(script_ptr->meta.path);
+        auto res = lua["GetObject"];
+        if(res.valid())
+        {
+          sol::function fun = res;
+          script_ptr->script = fun();
+          //std::cout << "from entt::registry: id: " << uint32_t(e)<<std::endl;
+          script_ptr->script->entity = { e, this };
+        }
+        else 
+        {
+          sol::error e = res;
+          std::cerr << e.what();
+        }
       }
     });
   }
@@ -216,7 +221,8 @@ namespace Karen
       //  script.script->entity = { e, this };
       //  std::cout << "inside Karen::Entity::m_id: " << (uint32_t)script.script->entity << std::endl;
       //  std::cout << "calling onCreate from c++ << ";
-        script.script->onCreate();
+    auto script_ptr = AssetManager::get<AssetManager::ScriptAsset>(script.script_handle);    
+    script_ptr->script->onCreate();
      //   std::cout << " >> " << std::endl;
      // }
      // else 
@@ -280,9 +286,10 @@ namespace Karen
 
     m_registry.view<ScriptComponent>().each([&](auto e, auto& script)
     {
-      script.script->entity = { e, this };
-      script.script->timestep = ts;
-      script.script->onUpdate();
+      const auto& script_ptr = AssetManager::get<AssetManager::ScriptAsset>(script.script_handle);
+      script_ptr->script->entity = { e, this };
+      script_ptr->script->timestep = ts;
+      script_ptr->script->onUpdate();
     });
     
     m_registry.view<MovmentComponent, RigidBody2DComponent>().each([&](auto e, MovmentComponent& mc, RigidBody2DComponent& rb2dc)
@@ -336,10 +343,10 @@ namespace Karen
         for(const auto& e : view)
         {
           auto &&[trans, sprite] = view.get<TransformComponent, SpriteComponent>(e);
-          if(!sprite.texture_handel.empty())
+          if(sprite.texture_handle)
           {
             Renderer2D::drawQuad(trans.getTransformationMatrix(),
-              App::get()->assetManager()->getTexture2D(sprite.texture_handel), sprite.color);
+              AssetManager::get<AssetManager::Texture2DAsset>(sprite.texture_handle)->texture, sprite.color);
           }
           else
             Renderer2D::drawQuad(trans.getTransformationMatrix(), sprite.color);
@@ -407,10 +414,10 @@ namespace Karen
       for(const auto& e : view)
       {
         auto &&[trans, sprite] = view.get<TransformComponent, SpriteComponent>(e);
-        if(!sprite.texture_handel.empty())
+        if(sprite.texture_handle)
         {
           Renderer2D::drawQuad(trans.getTransformationMatrix(),
-          App::get()->assetManager()->getTexture2D(sprite.texture_handel), sprite.color);
+          AssetManager::get<AssetManager::Texture2DAsset>(sprite.texture_handle)->texture, sprite.color);
         }
         else
           Renderer2D::drawQuad(trans.getTransformationMatrix(), sprite.color);
@@ -465,10 +472,11 @@ namespace Karen
       native_script.instance->onDestroy();
     });
     
-    m_registry.view<ScriptComponent>().each([&](auto e, auto& script)
+    m_registry.view<ScriptComponent>().each([&](auto e, auto& script_comp)
     {
       //script.script.entity = { e, this };
-      script.script->onDestroy();
+      auto script_asset = AssetManager::get<AssetManager::ScriptAsset>(script_comp.script_handle);
+      script_asset->script->onDestroy();
     });
 
     delete m_physics_world;

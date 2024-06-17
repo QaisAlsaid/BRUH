@@ -1,40 +1,43 @@
-#include "Karen/Render/API/Texture.h"
-#include "pch.h"
-#include "ContentBrowser.h"
-
-
 #include <filesystem>
-#include <imgui.h>
+#include <pch.h>
+#include "ContentBrowser.h"
+#include "Karen/Core/AssetManager.h"
+#include "Karen/Render/API/Texture.h"
+#include "imgui.h"
 
-namespace Karen
-{
-  //TODO: All paths must be relative to res dir and all names in the map shold be the full path from the res dir 
-  //for delete the deleted stuff(from desk) from the map
-  //TODO: Everything should have a timer
-  ContentBrowser::ContentBrowser(const std::string& rp)
-    :m_asset_manager_modal(App::get()->assetManager()), m_current_dir(rp), m_res_dir(rp)
+namespace Karen 
+{   
+  ContentBrowser::ContentBrowser(const std::string& res_dir)
+    : m_res_dir(res_dir) 
   {
-    uint32_t counter = 0;
+    auto tex = Texture2D::create("../res/textuers/folder_icon.png");
+    
+    m_names["Scene"] = UUID();
+    m_names["Script"] = UUID();
+    m_names["Cpp"] = UUID();
+    m_names["H"] = UUID();
+    m_names["Yaml"] = UUID();
+    m_names["Xml"] = UUID();
+    m_names["Glsl"] = UUID();
+    m_names["Dir"] = UUID();
+    m_names["Other"] = UUID();
+
+    m_default_icons[m_names.at("Scene")] = tex;
+    m_default_icons[m_names.at("Script")] = tex;
+    m_default_icons[m_names.at("Cpp")] = tex;
+    m_default_icons[m_names.at("H")] = tex;
+    m_default_icons[m_names.at("Yaml")] = tex;
+    m_default_icons[m_names.at("Xml")] = tex;
+    m_default_icons[m_names.at("Glsl")] = tex;
+    m_default_icons[m_names.at("Dir")] = tex;
+    m_default_icons[m_names.at("Other")] = tex;
     for(auto& entry : std::filesystem::recursive_directory_iterator(m_res_dir))
     {
       if(!entry.is_directory() && !entry.is_fifo() && !entry.is_symlink() && !entry.is_socket())
       {
-        if(isImage(getFileType(entry.path())))
-          counter++;
+        loadOrGet(entry.path(), getFileType(entry));
       }
     }
-    
-    m_thumbnails.reserve(counter);
-    
-    for(auto& entry : std::filesystem::recursive_directory_iterator(m_res_dir))
-    {
-      if(!entry.is_directory() && !entry.is_fifo() && !entry.is_symlink() && !entry.is_socket())
-      {
-        if(isImage(getFileType(entry.path())))
-          loadOrGet(entry.path());
-      }
-    }
-    //TODO: when the res folder is only for the project files load the folder image and default icons alone
   }
 
   void ContentBrowser::onImGuiUpdate()
@@ -57,16 +60,20 @@ namespace Karen
     }
     
     ImGui::Columns(cols, 0, false);
-    
-    for(auto& entry : std::filesystem::directory_iterator(m_current_dir))
+    for(auto& entry : std::filesystem::recursive_directory_iterator(m_current_dir))
     {
       ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
       const auto& path = entry.path();
       const auto& file_name = path.filename();
       const auto& relative_path = std::filesystem::relative(path, m_res_dir);
-      if(entry.is_directory())
+      auto ft = getFileType(entry);
+
+      auto id = loadOrGet(path, ft);
+
+      if(ft != FileType::Image)
       {
-        ImGui::ImageButton((ImTextureID)(uintptr_t)m_thumbnails.at("folder_icon.png")->getRendererID(), {thm_width, thm_width}, {0, 1}, {1, 0});
+        ImGui::ImageButton((ImTextureID)(uintptr_t)m_default_icons.at(id)->getRendererID(),
+            {thm_width, thm_width}, {0, 1}, {1, 0});
         if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
         {
           m_current_dir /= file_name;
@@ -74,18 +81,34 @@ namespace Karen
       }
       else 
       {
-        const auto type = getFileType(file_name);
-        const auto icon = isImage(type) ? loadOrGet(path) : getDefaultIcon(type);
-        ImGui::ImageButton((ImTextureID)(uintptr_t)icon->getRendererID(), {thm_width, thm_width}, {0, 1}, {1, 0});
-        if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) && isImage(type)/*&& type.is_loadable*/)
+        ImGui::ImageButton((ImTextureID)(uintptr_t)AssetManager::get<AssetManager::Texture2DAsset>(id)->texture->getRendererID(), {thm_width, thm_width}, {0, 1}, {1, 0});
+      }
+      if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) && isAsset(ft))
+      {
+        m_asset_manager_modal.show(id);
+      }
+      if(isAsset(ft))
+      {
+        if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
         {
-          m_asset_manager_modal.setToLoadContext({ path, AssetManagerModal::TypeEnum::Texture2D });
-          m_asset_manager_modal.show();
-          //TODO: show AssetManager Loading dialog
+          switch(ft)
+          {
+            case FileType::Image:
+              dragAndDropTexture(id , {50, 50});
+              break;
+            case FileType::Scene:
+              dragAndDropScene(id, {50, 50});
+              break;
+            case FileType::Script:
+              dragAndDropScript(id, {50, 50});
+              break;
+            default: break;
+          }
         }
       }
       ImGui::PopStyleColor();
-      ImGui::TextWrapped("%s", file_name.string().c_str());
+      std::string file_name_str = file_name.string();
+      ImGui::TextWrapped("%s", file_name_str.c_str());
       ImGui::NextColumn();
     }
 
@@ -93,36 +116,67 @@ namespace Karen
     
     ImGui::End();
     
-    ImGui::Begin("__DEBUG__");
-    
-    ImGui::SliderFloat("Icon Size", &thm_width, 16, 512);
-    ImGui::SliderFloat("Padding", &padding, 0, 32);
-    uint32_t counter = 0;
-    for(auto& x : m_thumbnails) ++counter;
-    ImGui::Text("%u", counter);
 
-    ImGui::End();
-    m_asset_manager_modal.onImGuiUpdate();
-    //TODO: 
-    /*
-    for(const auto& iter : m_thumbnails)
-    {
-      for(auto& entry : std::filesystem::directory_iterator(m_current_dir))
-      {
-        const auto& iter = m_thumbnails.find(entry.path().filename());
-        if(iter != m_thumbnails.end())
-        {
-          m_thumbnails.erase(iter);
-        }
-      }
-    }
-    */
   }
 
-
-  ContentBrowser::FileType ContentBrowser::getFileType(const std::filesystem::path& file_path)
+  UUID ContentBrowser::loadOrGet(const std::filesystem::path& entry, FileType ft)
   {
-    const auto& file_ex = file_path.extension();
+    AssetManager::Asset::Meta meta;
+    meta.path = entry.string();
+    switch(ft)
+    {
+      case FileType::Image:
+      {
+        meta.type = AssetManager::Asset::Type::Texture2D;
+        return AssetManager::loadOrGet(meta);
+      }
+      case FileType::Script:
+      {
+        meta.type = AssetManager::Asset::Type::Script;
+        if(AssetManager::loadOrGet(meta))
+          return getDefaultIcon(ft);
+        else return UUID::invalid;
+      }
+      case FileType::Scene:
+      {
+        meta.type = AssetManager::Asset::Type::Scene;
+        if(AssetManager::loadOrGet(meta))
+          return getDefaultIcon(ft);
+        else return UUID::invalid;
+      }
+      default: return getDefaultIcon(ft);
+    }
+  }
+
+  UUID ContentBrowser::getDefaultIcon(FileType ft)
+  {
+    switch(ft)
+    {
+      case FileType::Image:  return UUID::invalid;
+      case FileType::Scene:  return m_names.at("Scene");
+      case FileType::Script: return m_names.at("Script");
+      case FileType::Dir:    return m_names.at("Dir");
+      case FileType::H:      return m_names.at("H");
+      case FileType::Cpp:    return m_names.at("Cpp");
+      case FileType::Xml:    return m_names.at("Xml");
+      case FileType::Glsl:   return m_names.at("Glsl");
+      case FileType::Yaml:   return m_names.at("Yaml");
+      default:               return m_names.at("Other");
+    }
+  }
+
+  bool ContentBrowser::isAsset(FileType ft)
+  {
+    if(ft == FileType::Image || ft == FileType::Scene || ft == FileType::Script)
+      return true;
+    return false;
+  }
+
+  ContentBrowser::FileType ContentBrowser::getFileType(const std::filesystem::directory_entry& entry)
+  {
+    if(entry.is_directory()) return FileType::Dir;
+
+    const auto& file_ex = entry.path().extension();
     if(file_ex == ".Karen") return FileType::Karen;
     if(file_ex == ".png") return FileType::Png;
     if(file_ex == ".jpeg") return FileType::Jpeg;
@@ -136,34 +190,29 @@ namespace Karen
     else return FileType::Other;
   }
 
-  bool ContentBrowser::isImage(const FileType ft)
+  void ContentBrowser::dragAndDropTexture(UUID id, const Vec2& thm_size)
   {
-    switch(ft)
-    {
-      case FileType::Png  : return true;
-      case FileType::Jpeg : return true;
-      case FileType::Jpg  : return true;
-      default             : return false;
-    }
+    auto rid = AssetManager::get<AssetManager::Texture2DAsset>(id)->texture->getRendererID();
+    ImGui::SetDragDropPayload("TEXTURE2D_ASSET_HANDEL", (void*)(uintptr_t)id, sizeof(UUID));
+    ImGui::Image((void*)(uintptr_t)rid, { thm_size.x, thm_size.y }, {0, 1}, {1, 0});
+    ImGui::EndDragDropSource();
   }
 
-  ARef<Texture2D> ContentBrowser::loadOrGet(const std::filesystem::path& p)
+  void ContentBrowser::dragAndDropScene(UUID id, const Vec2& thm_size)
   {
-    if(m_thumbnails.find(p.filename()) != m_thumbnails.end())
-      return m_thumbnails.at(p.filename());
-    else
-    {
-      const auto& ct = Texture2D::create(p);
-      m_thumbnails[p.filename()] = ct;
-      return ct;
-    }
+    //auto rid = AssetManager::get<AssetManager::SceneAsset>(id);
+    auto rid = getDefaultIcon(FileType::Scene);
+    ImGui::SetDragDropPayload("SCENE_ASSET_HANDEL", (void*)(uintptr_t)id, sizeof(UUID));
+    ImGui::Image((void*)(uintptr_t)rid, { thm_size.x, thm_size.y }, {0, 1}, {1, 0});
+    ImGui::EndDragDropSource();
   }
-
-  ARef<Texture2D> ContentBrowser::getDefaultIcon(const FileType ft)
+  
+  void ContentBrowser::dragAndDropScript(UUID id, const Vec2& thm_size)
   {
-    switch(ft)
-    {
-      default : return m_thumbnails.at("folder_icon.png");
-    }
+    auto rid = AssetManager::get<AssetManager::Texture2DAsset>(id)->texture->getRendererID();
+    ImGui::SetDragDropPayload("TEXTURE2D_ASSET_HANDEL", (void*)(uintptr_t)id, sizeof(UUID));
+    ImGui::Image((void*)(uintptr_t)rid, { thm_size.x, thm_size.y }, {0, 1}, {1, 0});
+    ImGui::EndDragDropSource();
   }
+ 
 }

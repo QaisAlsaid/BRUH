@@ -189,8 +189,8 @@ namespace Karen
           auto& csprite = e.addComponent<SpriteComponent>();
           const auto& color = csprite_n["Color"].as<Vec4>();
           csprite.color = color / 255.0f;
-          const auto& texture_handel = csprite_n["TextureHandel"].as<std::string>();
-          csprite.texture_handel = texture_handel;
+          const auto& texture_handel = csprite_n["TextureHandel"].as<uint64_t>();
+          csprite.texture_handle = texture_handel;
         }
         const auto& ccamera_n = entity["CameraComponent"];
         if(ccamera_n)
@@ -283,7 +283,7 @@ namespace Karen
       auto& sprite = e.getComponent<SpriteComponent>();
 
       emitter << Key << "Color" << Value << sprite.color * 255.0f;
-      emitter << Key << "TextureHandel" << Value << sprite.texture_handel;
+      emitter << Key << "TextureHandel" << Value << sprite.texture_handle;
       emitter << EndMap;
     }
 

@@ -14,9 +14,9 @@ namespace Karen
 {
   struct ScriptComponent
   {
-    std::string path;
-    Script* script;
+    UUID script_handle = UUID::invalid;
   };
+
   struct KAREN_API IDComponent
   {
     UUID ID;
@@ -52,10 +52,10 @@ namespace Karen
 
   struct KAREN_API SpriteComponent
   {
-    std::string texture_handel;
+    UUID texture_handle = UUID::invalid;
     Vec4 color;
     SpriteComponent() = default;
-    SpriteComponent(const Vec4& color, const std::string& tux) : texture_handel(tux), color(color) {}
+    SpriteComponent(const Vec4& color, UUID tux) : texture_handle(tux), color(color) {}
   };
 
   struct KAREN_API CircleComponent

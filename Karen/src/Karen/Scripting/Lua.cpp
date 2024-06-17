@@ -1,4 +1,3 @@
-#include <functional>
 #include <pch.h>
 #include <sol/forward.hpp>
 #include <sol/object.hpp>
@@ -19,6 +18,7 @@
 #include "Karen/Scene/Components.h"
 #include "Karen/Scene/Entity.h"
 #include "Karen/Scene/SceneCamera.h"
+#include "Karen/Core/App.h"
 #include "Script.h"
 
 
@@ -140,7 +140,6 @@ namespace Karen
       sol::usertype<App> app = karen.new_usertype<App>("App");
       app["print"] = [](){ App::get()->print(); };
       //app["getWindow"] = [](){ return App::get()->getWindow(); };
-      app["getAssetManager"] = [](){ return App::get()->assetManager(); }; 
     }
 
     using k = Keyboard;
@@ -208,9 +207,48 @@ namespace Karen
 
     //AssetManager:
     {
-      sol::usertype<AssetManager> asset = karen.new_usertype<AssetManager>("AssetManager");
-      asset["getScene"]     = &AssetManager::getScene; 
-      asset["getTexture2D"] = &AssetManager::getTexture2D;
+      sol::usertype<AssetManager> asset_manager = karen.new_usertype<AssetManager>("AssetManager");
+      asset_manager["get"] = sol::resolve<ARef<AssetManager::Asset>(UUID)>(&AssetManager::get);
+      asset_manager["getTexture2D"] = sol::resolve<ARef<AssetManager::Texture2DAsset>(UUID)>(&AssetManager::get<AssetManager::Texture2DAsset>);
+      asset_manager["getScene"] = sol::resolve<ARef<AssetManager::SceneAsset>(UUID)>(&AssetManager::get<AssetManager::SceneAsset>);
+      asset_manager["getScript"] = sol::resolve<ARef<AssetManager::SceneAsset>(UUID)>(&AssetManager::get<AssetManager::SceneAsset>);
+      asset_manager["getUUID"] = &AssetManager::getUUID;
+      asset_manager["loadConfig"] = &AssetManager::loadConfig;
+      asset_manager["load"] = sol::overload(
+          [](const AssetManager::Asset::Meta& meta, UUID id) { return AssetManager::load(meta, id); }, 
+          [](const AssetManager::Asset::Meta& meta) { return AssetManager::load(meta); });
+      asset_manager["reload"]  = sol::resolve<bool(UUID)>(AssetManager::reload);
+      asset_manager["clear"]   = &AssetManager::clear;
+      asset_manager["remove"]  = &AssetManager::remove;
+      asset_manager["getPath"] = &AssetManager::getPath;
+
+      //Asset
+      sol::usertype<AssetManager::Asset> asset = karen.new_usertype<AssetManager::Asset>("Asset");
+      asset["meta"]     = &AssetManager::Asset::meta;
+      asset["onReload"] = &AssetManager::Asset::onReload;
+      asset["is_valid"] = &AssetManager::Asset::is_valid;
+      
+      //Meta
+      sol::usertype<AssetManager::Asset::Meta> meta = karen.new_usertype<AssetManager::Asset::Meta>("Meta");
+      meta["path"] = &AssetManager::Asset::Meta::path;
+      meta["type"] = &AssetManager::Asset::Meta::type;
+      
+      //Type
+      karen.new_enum("AssetType", "None", AssetManager::Asset::Type::None,
+          "Texture2D", AssetManager::Asset::Type::Texture2D, "Scene", AssetManager::Asset::Type::Scene, 
+          "Script", AssetManager::Asset::Type::Script);
+      
+      //Texture2DAsset
+      sol::usertype<AssetManager::Texture2DAsset> t2d_asset = karen.new_usertype<AssetManager::Texture2DAsset>("Texture2DAsset");
+      t2d_asset["texture"] = &AssetManager::Texture2DAsset::texture;
+      
+      //SceneAsset
+      sol::usertype<AssetManager::SceneAsset> scene_asset = karen.new_usertype<AssetManager::SceneAsset>("SceneAsset");
+      scene_asset["scene"] = &AssetManager::SceneAsset::scene;
+      
+      //ScriptAsset
+      sol::usertype<AssetManager::ScriptAsset> script_asset = karen.new_usertype<AssetManager::ScriptAsset>("ScriptAsset");
+      script_asset["script"] = &AssetManager::ScriptAsset::script;
     }
 
     //Window
@@ -634,9 +672,10 @@ namespace Karen
       //SpriteComponent
       {
         //no constructors because it will change soon (with the asset manager)
-        sol::usertype<SpriteComponent> sprite = comps.new_usertype<SpriteComponent>("Sprite");
+        sol::usertype<SpriteComponent> sprite = comps.new_usertype<SpriteComponent>("Sprite", 
+            sol::constructors<SpriteComponent(const Vec4& ,UUID)>());
         sprite["color"]   = &SpriteComponent::color;
-        sprite["texture"] = &SpriteComponent::texture_handel;
+        sprite["handle"] = &SpriteComponent::texture_handle;
       }
 
       //CircleComponent
@@ -650,9 +689,9 @@ namespace Karen
       //ScriptComponent
       {
         sol::usertype<ScriptComponent> script = comps.new_usertype<ScriptComponent>("Script", 
-            sol::constructors<ScriptComponent(), ScriptComponent(const std::string& path)>()
+            sol::constructors<ScriptComponent()>()
             );
-        script["path"] = &ScriptComponent::path;
+        script["handle"] = &ScriptComponent::script_handle;
       }
 
       //CameraComponent

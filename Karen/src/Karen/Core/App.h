@@ -34,16 +34,6 @@ namespace Karen
       return *m_window.get();
     }
 
-    inline AssetManager* assetManager()
-    {
-      return m_asset_manager.get();
-    }
-
-    inline const AssetManager* assetManager() const
-    {
-      return m_asset_manager.get();
-    }
-    
     inline static App* get()
     {
       KAREN_CORE_ASSERT_MSG(s_instance, "No App Created");
@@ -71,12 +61,10 @@ namespace Karen
     }
   private:
     float m_last_time = 0.0f;
-    Scoped<AssetManager> m_asset_manager;
     Scoped<Window> m_window;
     GuiLayer* m_gui_layer = nullptr;
     bool m_running = true;
     LayerStack m_layers;
-    //idk if this is Efficient
     ExportedMap m_export_vars;
     static App* s_instance;
   protected:

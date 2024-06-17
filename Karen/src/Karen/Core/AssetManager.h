@@ -1,93 +1,232 @@
-#ifndef KR_ASSET_MANAGER_H
-#define KR_ASSET_MANAGER_H
+#ifndef ASSET_MANAGER_H
+#define ASSET_MANAGER_H
 
-#include "Karen/Core/Core.h"
+
+#include "Karen/Core/UUID.h"
 #include "Karen/Render/API/Texture.h"
 #include "Karen/Scene/Scene.h"
-#include <string_view>
-#include <unordered_map>
+#include "Karen/Scripting/Script.h"
+#include <string>
 
 
 namespace Karen
-{
-  
-  class KAREN_API AssetManager
+{ 
+  class AssetManager 
   {
   public:
-    struct KAREN_API Asset 
+    struct Asset 
     {
-      std::string path;
+      Asset() = default;
+      Asset(bool is_valid) : is_valid(is_valid) {}
+      enum class Type { None = 0, Texture2D, Scene, Script };
+      template<typename T> 
+      static Type getTypeEnum();
+      struct Meta 
+      {
+        std::string path;
+        Type type;
+      };
+      Meta meta;
+      std::function<void(void)> onReload;
+      static const ARef<Asset> invalid;
+      bool is_valid = true;
+      operator bool() { return is_valid; }  
     };
 
-    struct KAREN_API Texture2DAsset : public Asset
+    struct Texture2DAsset : public Asset 
     {
       ARef<Texture2D> texture;
     };
 
-    struct KAREN_API SceneAsset : public Asset 
+    struct SceneAsset : public Asset 
     {
       ARef<Scene> scene;
     };
 
+    struct ScriptAsset : public Asset 
+    {
+      ARef<Script> script;
+    };
+  
+    struct AssetLoader
+    {
+      template<typename T>
+      static bool load(const T&);
+      static bool loadTexture2D(const ARef<Texture2DAsset>& asset);
+      static bool loadScene(const ARef<SceneAsset>& asset);
+      static bool loadScript(const ARef<ScriptAsset>& asset);
+    };
+
   public:
     AssetManager() = default;
-    AssetManager(const char* config_path);
+    AssetManager(const std::string& config_path);
+    static void shutDown();
+    static bool loadConfig(const std::string& path);
 
-    bool loadConfig(const char* path);
-    
-    void reload();
-    void reloadTexture(const std::string& name);
-    void addTexture(const std::string& name, const ARef<Texture2D>& tux, const std::string& path);
-    
-    inline const ARef<Texture2D>& getTexture2D(const std::string& name) const
+    static inline ARef<Asset> get(UUID id)
     {
-      KAREN_CORE_ASSERT_MSG(m_textures.find(name) != m_textures.end(), "Texture: " + std::string(name) + " Not Found");
-      return (m_textures.at(name).texture);
+      if(s_instance->m_assets.find(id) != s_instance->m_assets.end())
+        return s_instance->m_assets.at(id);
+      return Asset::invalid;
     }
 
-    inline void deleteTexture(const std::string& name)
+    template<typename T>
+    static inline ARef<T> get(UUID id)
     {
-      auto iter = m_textures.find(name);
-      if(iter != m_textures.end())
-        m_textures.erase(iter);
+      if(s_instance->m_assets.find(id) != s_instance->m_assets.end())
+        return std::static_pointer_cast<T>(s_instance->m_assets.at(id));
+      return std::static_pointer_cast<T>(Asset::invalid);
     }
 
-    inline void clearTextures() { m_textures.clear(); }
-     
-    
-    void reloadScene(const std::string& name);
-    void addScene(const std::string& name, const ARef<Scene>& scene, const std::string& path);
-    
-    inline const ARef<Scene>& getScene(const std::string& name) const
+    template<typename T>
+    static inline ARef<T> get(const std::string& path)
     {
-      KAREN_CORE_ASSERT_MSG(m_scenes.find(name) != m_scenes.end(), "Scene: " + std::string(name) + " Not Found");
-      return (m_scenes.at(name).scene);
+      return get<T>(getUUID(path));
     }
 
-    inline void deletescene(const std::string& name)
+    static inline UUID getUUID(const std::string& path)
     {
-      auto iter = m_scenes.find(name);
-      if(iter != m_scenes.end())
-        m_scenes.erase(iter);
+      if(s_instance->m_paths.find(path) != s_instance->m_paths.end())
+        return s_instance->m_paths.at(path);
+      KAREN_CORE_ERROR("(AssetManager): Can't find Asset: {0}", path);
+      return UUID::invalid;
     }
 
-    inline void clearScenes() { m_scenes.clear(); }
-
-    inline void clear() 
+    static inline const std::string& getPath(UUID id)
     {
-      m_scenes.clear();
-      m_textures.clear();
+      auto asset = get(id);
+      if(asset) return asset->meta.path;
+      KAREN_CORE_ERROR("(AssetManager): Can't find Asset: {0}", id);
+      return s_instance->error_string;
     }
 
-    inline const std::unordered_map<std::string, Texture2DAsset>& Textures() const { return m_textures; }
+    static inline const std::unordered_map<UUID, ARef<Asset>>& get()      { return s_instance->m_assets; }
+    static inline const std::unordered_map<std::string, UUID>& getPaths() { return s_instance->m_paths; }
 
-    inline const std::unordered_map<std::string, SceneAsset>& Scenes() const { return m_scenes;}
+    template<typename T>
+    static UUID load(const Asset::Meta& meta, UUID id = UUID())
+    {
+      auto asset = createARef<T>();
+      asset->meta = meta;
+      asset->meta.type = Asset::getTypeEnum<T>();
+      
+      if(!AssetLoader::load(asset))
+      {
+        KAREN_CORE_ERROR("(AssetManager): Can't Load Asset: {0}", meta.path);
+        return UUID::invalid;
+      }
+      id = add(std::static_pointer_cast<Asset>(asset), id, meta.path);
+      if(id != UUID::invalid)
+        return id;
+      KAREN_CORE_ERROR("Can't Load Asset: {0}", meta.path);
+      return id;
+    }
+
+    static UUID load(const Asset::Meta& meta, UUID id = UUID())
+    {
+      switch(meta.type)
+      {
+        case Asset::Type::None:
+        {
+          KAREN_CORE_ERROR("Can't Load Asset: {0}, With Asset::Type::None", meta.path);
+          return UUID::invalid;
+        }
+        case Asset::Type::Texture2D:
+        {
+          return load<Texture2DAsset>(meta, id);
+        }
+        case Asset::Type::Scene:
+        {
+          return load<SceneAsset>(meta, id);
+        }
+        case Asset::Type::Script:
+        {
+          return load<ScriptAsset>(meta, id);
+        }
+      }
+      KAREN_CORE_ERROR("Invalid Asset::Type: {0}", (int)meta.type);
+      return UUID::invalid;
+    }
+
+    static UUID loadOrGet(const Asset::Meta& meta)
+    {
+      auto id = getUUID(meta.path); 
+      if(id != UUID::invalid)
+        return id;
+      else 
+        return load(meta);
+    }
+
+    template<typename T>
+    static inline bool reload(UUID id)
+    {
+      auto asset = get<T>(id);
+      auto it = std::find_if(s_instance->m_paths.begin(), s_instance->m_paths.end(), [&id](auto& it)
+          { return it.second == id; });
+      s_instance->m_paths.erase(it);
+      s_instance->m_paths[asset->meta.path] = id;
+      return AssetLoader::load(asset);
+    }
+
+    static bool reload(UUID id)
+    {
+      auto asset = get(id);
+      switch(asset->meta.type)
+      {
+        case Asset::Type::None:
+        {
+          KAREN_CORE_ERROR("Can't Reload Asset: {0}, With Asset::Type::None", asset->meta.path);
+          return false;
+        }
+        case Asset::Type::Texture2D:
+        {
+          return reload<Texture2DAsset>(id);
+        }
+        case Asset::Type::Scene:
+        {
+          return reload<SceneAsset>(id);
+        }
+        case Asset::Type::Script:
+        {
+          return reload<ScriptAsset>(id);
+        }
+      }
+      KAREN_CORE_ERROR("Invalid Asset::Type: {0}", (int)asset->meta.type);
+      return false;
+    }
+
+    static bool reload()
+    {
+      for(auto iter : s_instance->m_assets)
+      {
+        bool is = reload(iter.first);
+        if(!is) return false;
+      }
+      return true;
+    }
+
+    static inline void clear() 
+    {
+      s_instance->m_assets.clear();
+      s_instance->m_paths.clear();
+    } 
+
+    static inline void remove(UUID id)
+    {
+      const auto& asset = get(id);
+      s_instance->m_paths.erase(s_instance->m_paths.find(asset->meta.path));
+      s_instance->m_assets.erase(s_instance->m_assets.find(id));
+    }
+
   private:
-    std::unordered_map<std::string, SceneAsset>     m_scenes;
-    std::unordered_map<std::string, Texture2DAsset> m_textures;
+    static UUID add(const ARef<Asset>& asset, UUID uuid, const std::string& path);
+  private:
+    static AssetManager* s_instance;
+    std::unordered_map<UUID, ARef<Asset>> m_assets;
+    std::unordered_map<std::string, UUID> m_paths;
+    std::string error_string;
   };
 }
 
 
-
-#endif //KR_ASSET_MANAGER_H
+#endif //ASSET_MANAGER_H_TEST

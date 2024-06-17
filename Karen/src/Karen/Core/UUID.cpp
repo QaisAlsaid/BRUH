@@ -9,12 +9,19 @@ static std::uniform_int_distribution<uint64_t> s_ud;
 namespace Karen 
 {
   UUID::UUID()
-    :m_id(s_ud(s_engine))
   {
+    m_id = gen(0);
   }
 
   UUID::UUID(uint64_t uint64)
     : m_id(uint64) 
   {
+  }
+
+  uint64_t UUID::gen(uint8_t fault)
+  {
+    auto id = s_ud(s_engine);
+    if(id == invalid) gen(++fault);
+    return id;
   }
 }

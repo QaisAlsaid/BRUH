@@ -1,36 +1,43 @@
-#ifndef KR_CONTENT_BROWSER_H
-#define KR_CONTENT_BROWSER_H
+#ifndef CONTENT_BROWSER_TEST_H
+#define CONTENT_BROWSER_TEST_H
 
-#include "Karen/Karen.h"
 #include "AssetManagerGui.h"
+#include "Karen/Core/AssetManager.h"
+#include "Karen/Render/API/Texture.h"
 #include <filesystem>
-#include <vector>
 
 
-namespace Karen
+namespace Karen 
 {
   class ContentBrowser
   {
   public:
-    ContentBrowser(const std::string& res_dir);//TODO: Takes project
-    
+    ContentBrowser(const std::string& res_path);//Should Take Project
     void onImGuiUpdate();
-    std::string getResDir() { return m_res_dir; };
   private:
     enum class FileType 
     {
-      Karen, Png, Jpeg, Jpg, Yaml, Xml, Cpp, H, Lua, Glsl, Other
+      Karen, Png, Jpeg, Jpg, Yaml, Xml, Cpp, H, Lua, Glsl, Dir, Other, 
+      Image = Png || Jpeg || Jpg, Script = Lua, Scene = Karen
     };
-    ARef<Texture2D> loadOrGet(const std::filesystem::path& tux_path); //TODO: template when you have m_thumbnails for scenes or models
-    ARef<Texture2D> getDefaultIcon(const FileType file_type);
-    FileType getFileType(const std::filesystem::path& file_path);
-    bool isImage(const FileType file_type);
   private:
-    AssetManagerModal            m_asset_manager_modal;
-    std::filesystem::path        m_current_dir;
-    const std::string            m_res_dir;
-    std::unordered_map<std::string, ARef<Texture2D>>    m_thumbnails;
+    UUID loadOrGet(const std::filesystem::path& path, FileType type);
+    void draw(const std::filesystem::path& path, UUID handle);
+    FileType getFileType(const std::filesystem::directory_entry& entry);
+    AssetManager::Asset::Type getAssetManagerType(FileType);
+    UUID getDefaultIcon(FileType ft);
+    bool isAsset(FileType ft);
+    void dragAndDropTexture(UUID, const Vec2&);
+    void dragAndDropScene(UUID, const Vec2&);
+    void dragAndDropScript(UUID, const Vec2&);
+  private:
+    std::filesystem::path m_res_dir;
+    std::filesystem::path m_current_dir;
+    std::map<UUID, ARef<Texture2D>> m_default_icons;
+    std::map<std::string, UUID>     m_names;
+    AssetManagerModal m_asset_manager_modal;
   };
 }
 
-#endif //KR_CONTENT_BROWSER_H
+
+#endif //CONTENT_BROWSER_TEST_H

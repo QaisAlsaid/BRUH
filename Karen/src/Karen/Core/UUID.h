@@ -15,6 +15,10 @@ namespace Karen
     UUID(const UUID&) = default;
 
     operator uint64_t() const { return m_id; }
+  public:
+    constexpr static const uint64_t invalid = 0;
+  private:
+    uint64_t gen(uint8_t fault);
   private:
     uint64_t m_id;
   };

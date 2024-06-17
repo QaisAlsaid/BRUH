@@ -61,14 +61,28 @@ namespace Karen
 
       drawComponent<ScriptComponent>(m_current, "Script", [](auto* script_comp, bool removed)
       {
-        auto& path = script_comp->path;
+        bool change = false;
+        auto script = AssetManager::get<AssetManager::ScriptAsset>(script_comp->script_handle);
+        auto& path = script->meta.path;
         char buffer[256];
         memset(buffer, 0, sizeof(buffer));
         strcpy(buffer, path.c_str());
         if(ImGui::InputText("ScriptPath", buffer, sizeof(buffer)))
         {
+          change = true;
           path = std::string(buffer);
         }
+        if(ImGui::BeginDragDropTarget())
+        {
+          if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TEXTURE2D_ASSET_HANDEL"))
+          {
+            change = true;
+            UUID* asset_handle = (UUID*)payload->Data;
+            script_comp->script_handle = *asset_handle;
+          }
+          ImGui::EndDragDropTarget();
+        }
+        if(change) AssetManager::reload(script_comp->script_handle);
       });
 
       drawComponent<TransformComponent>(m_current, "Transform", [&](auto* trans_comp, bool removed)
@@ -160,13 +174,13 @@ namespace Karen
         {
           if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TEXTURE2D_ASSET_HANDEL"))
           {
-            const char* asset_handel = (const char*)payload->Data;
-            sprite_comp->texture_handel = asset_handel;
+            UUID* asset_handle = (UUID*)payload->Data;
+            sprite_comp->texture_handle = *asset_handle;
             current_texture_type_str = texture_type_str[1];
           }
           ImGui::EndDragDropTarget();
         }
-        ImGui::Text("TextureHandel %s", sprite_comp->texture_handel.c_str());
+        ImGui::Text("TextureHandel %li", (uint64_t)sprite_comp->texture_handle);
         ImGui::ColorEdit4("Color", glm::value_ptr(sprite_comp->color)); 
         if(removed)
         {

@@ -29,8 +29,6 @@ namespace Karen
     s_instance = this;
     m_window = std::unique_ptr<Window>(Window::create());
     m_window->setEventCallbackFunction(BIND_EVENT_FUNCTION(App::onEvent));
-    m_asset_manager = Karen::createScoped<AssetManager>();
-    m_asset_manager->loadConfig("../res/config/assets.xml");
     m_gui_layer = new GuiLayer("Base GuiLayer");
     m_gui_layer->activate();
     pushOverlay(m_gui_layer);
@@ -42,6 +40,7 @@ namespace Karen
     {
       (*it)->onDetach();
     }
+    AssetManager::shutDown();
   }
 
   void App::onEvent(Event& event)

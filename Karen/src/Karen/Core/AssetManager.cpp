@@ -1,33 +1,23 @@
-#include "Karen/Core/Log.h"
-#include "Karen/Scene/SceneSerializer.h"
-#include "pch.h"
 #include "AssetManager.h"
+#include "Karen/Scene/Components.h"
+#include "Karen/Scene/Scene.h"
+#include "Karen/Scene/SceneSerializer.h"
+#include "Karen/Scripting/Lua.h"
+#include "Karen/Scripting/Script.h"
 
 #include <pugixml.hpp>
+#include <string>
+
 
 namespace Karen
 {
-  AssetManager::AssetManager(const char* cfg)
-  {
-    loadConfig(cfg);
-  }
+  const ARef<AssetManager::Asset> AssetManager::Asset::invalid = createARef<AssetManager::Asset>(false);
+  AssetManager* AssetManager::s_instance = new AssetManager;
 
-  void AssetManager::reload()
-  {
-    for(auto iter : m_textures)
-    {
-      reloadTexture(iter.first);
-    }
-    for(auto iter : m_scenes)
-    {
-      reloadScene(iter.first);
-    }
-  }
-
-  bool AssetManager::loadConfig(const char* cfg)
+  bool AssetManager::loadConfig(const std::string& path)
   {
     pugi::xml_document doc;
-    pugi::xml_parse_result result = doc.load_file(cfg ,
+    pugi::xml_parse_result result = doc.load_file(path.c_str(),
     pugi::parse_default | pugi::parse_declaration);
     if (!result)
     {
@@ -38,89 +28,152 @@ namespace Karen
     auto assets = doc.child("Assets");
     for(auto asset : assets)
     {
-      const std::string& type = asset.child_value("Type");
-      //TODO: switch on type hash
-      if(type == "Texture2D")
+      std::string uuid_str = asset.child_value("UUID");
+      if(uuid_str.empty())
       {
-        const std::string& name = asset.child_value("Name");
-        const std::string& path = asset.child_value("Path");
-        if(name.empty()) { KAREN_CORE_ERROR("No Name in Textuer"); return false; }
-        if(path.empty()) { KAREN_CORE_ERROR("No Path in Texture: {0}", name); return false; }
-        const std::string& flip = asset.child_value("Flip");
-        const std::string& filter = asset.child_value("Filter");
-        bool bool_flip = flip != "False";
-        const auto& gen_tux = Karen::Texture2D::create(path, bool_flip);
-        //TODO: filter
-        addTexture(name, gen_tux, path);
+        KAREN_CORE_WARN("(AssetManager): Trying to Load Asset with no UUID");
+        continue;
       }
-      else if(type == "Scene")
+      auto meta_n = asset.child("Meta");
+      std::string path = meta_n.child_value("Path");
+      if(path.empty())
       {
-        const std::string path = asset.child_value("Path");
-        const std::string& name = asset.child_value("Name");
-        
-        if(name.empty()) { KAREN_CORE_ERROR("No Name in Scene"); return false; }
-        if(path.empty()) { KAREN_CORE_ERROR("No Path in Scene: {0}", name); return false; }
-        
-        ARef<Scene> gen_scene;
-        gen_scene.reset(new Scene(name));
-        addScene(name, gen_scene, path);
+        KAREN_CORE_WARN("(AssetManager): Trying to Load Asset: {0} with no Meta::Path", uuid_str);
+        continue;
       }
-      else
+      std::string type_str = meta_n.child_value("Type");
+      if(type_str.empty())
       {
-        KAREN_CORE_ASSERT(false);
+        KAREN_CORE_WARN("(AssetManager): Trying to Load Asset: {0} with no Meta::Type", uuid_str);
+        continue;
       }
+
+      UUID uuid = std::stoll(uuid_str);
+      if(uuid == UUID::invalid) uuid = UUID();
+      Asset::Type type = Asset::Type::None;
+      if(type_str == "Texture2D") type = Asset::Type::Texture2D; 
+      else if(type_str == "Scene") type = Asset::Type::Scene;
+      else if(type_str == "Script") type = Asset::Type::Script;
+      else { KAREN_CORE_WARN("(AssetManager): invalid Asset::Type from Asset: {0}", uuid_str); continue; }
+
+      Asset::Meta meta;
+      meta.path = path;
+      meta.type = type;
+      load(meta, uuid);
     }
+ 
     return true;
   }
 
-  void AssetManager::addScene(const std::string& name, const ARef<Scene>& scene, const std::string& path)
+  bool AssetManager::AssetLoader::loadTexture2D(const ARef<Texture2DAsset>& asset)
   {
-    if(m_scenes.find(name) != m_scenes.end())
-      KAREN_CORE_WARN("Scenes must have unique names, name: " + std::string(name) + " is already taken");
-    else [[likely]]
-    {
-      SceneAsset a_scene;
-      a_scene.path = path;
-      a_scene.scene = scene;
-      m_scenes[name] = a_scene;
-      KAREN_CORE_ERROR("Scene added name: {0}", name);
-    }
+    asset->texture = Texture2D::create(asset->meta.path);
+    if(asset->onReload)
+      asset->onReload();
+    return true;
   }
 
-  void AssetManager::reloadScene(const std::string& name)
+  bool AssetManager::AssetLoader::loadScene(const ARef<SceneAsset>& asset)
   {
-    if(m_scenes.find(name) == m_scenes.end())
-      KAREN_CORE_ERROR("Called reloadScene() with unknown scene name: {0}", name);
-    else [[likely]]
-    {
-      auto& a_scene = m_scenes.at(name);
-      SceneSerializer ss(a_scene.scene);
-      if(!ss.deSerializeText(a_scene.path.c_str()))
-        KAREN_CORE_ERROR("Failed to load Scene from Path: {0}", a_scene.path);
-    }
-  }
-  
-  void AssetManager::addTexture(const std::string& name, const ARef<Texture2D>& tux, const std::string& path)
-  {
-    if(m_textures.find(name) != m_textures.end())
-      KAREN_CORE_WARN("Textures must have unique names, name:" + std::string(name) + "is already taken");
-    else [[likely]]
-    {
-      Texture2DAsset a_tux;
-      a_tux.path = path;
-      a_tux.texture = tux;
-      m_textures[name] = a_tux;
-      KAREN_CORE_ERROR("TUX added name: {0}", name);
-    }
+    SceneSerializer ss(asset->scene);
+    if(!ss.deSerializeText(asset->meta.path.c_str()))
+      return false;
+    if(asset->onReload)
+      asset->onReload();
+    return true;
   }
 
-  void AssetManager::reloadTexture(const std::string& name)
+  bool AssetManager::AssetLoader::loadScript(const ARef<ScriptAsset>& asset)
   {
-    if(m_textures.find(name) == m_textures.end())
-      KAREN_CORE_ERROR("Called reloadTexture() with unknown texture name: {0}", name);
-    else [[likely]]
+    auto& lua = Lua::get();
+    lua.safe_script_file(asset->meta.path);
+    auto res = lua["GetObject"];
+    if(res.valid())
     {
-      m_textures.at(name).texture = Texture2D::create(m_textures.at(name).path);
+      sol::function fun = res;
+      asset->script = fun();
     }
+    else 
+    {
+      sol::error e = res;
+      KAREN_CORE_ERROR("{0}", e.what());
+      return false;
+    }
+    if(asset->onReload)
+      asset->onReload();
+    return true;
   }
+
+  UUID AssetManager::add(const ARef<Asset>& asset, UUID uuid, const std::string& path)
+  {
+    UUID id = uuid;
+    if(s_instance->m_assets.find(uuid) != s_instance->m_assets.end())
+    {
+      id = UUID();
+      add(asset, id, path);
+    }
+    if(s_instance->m_paths.find(path) != s_instance->m_paths.end())
+    {
+      KAREN_CORE_ERROR("(AssetManager): Asset With Path: {0} already exist", path);
+      return UUID::invalid;
+    }
+    s_instance->m_assets[id] = asset;
+    s_instance->m_paths[path] = id;
+    return id;
+  }
+
+  void AssetManager::shutDown()
+  {
+    delete s_instance;
+    s_instance = nullptr;
+  }
+
+  template<typename T>
+  bool AssetManager::AssetLoader::load(const T&)
+  {
+    return false;
+  }
+
+  template<>
+  bool AssetManager::AssetLoader::load(const ARef<Texture2DAsset>& t)
+  {
+    return AssetLoader::loadTexture2D(t);
+  }
+
+  template<>
+  bool AssetManager::AssetLoader::load(const ARef<SceneAsset>& t)
+  {
+    return AssetLoader::loadScene(t);
+  }
+
+ template<>
+  bool AssetManager::AssetLoader::load(const ARef<ScriptAsset>& t)
+  {
+    return AssetLoader::loadScript(t);
+  }
+
+ template<typename T>
+ AssetManager::Asset::Type AssetManager::Asset::getTypeEnum()
+ {
+   return Type::None;
+ }
+
+ template<>
+ AssetManager::Asset::Type AssetManager::Asset::getTypeEnum<AssetManager::Texture2DAsset>()
+ {
+   return Type::Texture2D;
+ }
+ 
+ template<>
+ AssetManager::Asset::Type AssetManager::Asset::getTypeEnum<AssetManager::SceneAsset>()
+ {
+   return Type::Scene;
+ }
+ 
+ template<>
+ AssetManager::Asset::Type AssetManager::Asset::getTypeEnum<AssetManager::ScriptAsset>()
+ {
+   return Type::Script;
+ }
+
 }
