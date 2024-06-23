@@ -9,7 +9,7 @@ Entities:
       Scale: [1, 1, 1]
     SpriteComponent:
       Color: [0, 193, 83, 255]
-      TextureHandel: ""
+      TextureHandle: 0
     RigidBody2DComponent:
       Type: 2
       FixedRotatiin: false
@@ -29,7 +29,7 @@ Entities:
       Scale: [6.99700022, 12.6049995, 1]
     SpriteComponent:
       Color: [0, 0, 0, 255]
-      TextureHandel: ""
+      TextureHandle: 0
     RigidBody2DComponent:
       Type: 2
       FixedRotatiin: false
@@ -49,7 +49,7 @@ Entities:
       Scale: [1, 1, 1]
     SpriteComponent:
       Color: [135, 255, 212, 255]
-      TextureHandel: ""
+      TextureHandle: 0
     RigidBody2DComponent:
       Type: 2
       FixedRotatiin: false
@@ -69,7 +69,7 @@ Entities:
       Scale: [26.6650009, 0.49000001, 1]
     SpriteComponent:
       Color: [69, 82, 0, 255]
-      TextureHandel: ""
+      TextureHandle: 0
     RigidBody2DComponent:
       Type: 2
       FixedRotatiin: false
@@ -89,7 +89,7 @@ Entities:
       Scale: [1, 12.6789999, 1]
     SpriteComponent:
       Color: [177, 168, 53, 255]
-      TextureHandel: ""
+      TextureHandle: 0
     RigidBody2DComponent:
       Type: 0
       FixedRotatiin: false
@@ -109,7 +109,7 @@ Entities:
       Scale: [100, 2.148, 1]
     SpriteComponent:
       Color: [100, 0, 0, 255]
-      TextureHandel: ""
+      TextureHandle: 0
     RigidBody2DComponent:
       Type: 0
       FixedRotatiin: true

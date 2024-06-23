@@ -45,26 +45,32 @@ namespace Karen
     if(ImGui::Button("Reload"))
       AssetManager::reload(id);
     
-    auto script = AssetManager::get<AssetManager::ScriptAsset>(id)->script;
-    ImGui::Text("Use Count: %li", script.use_count());
+    //auto script = AssetManager::get<AssetManager::ScriptAsset>(id)->script;
+   // ImGui::Text("Use Count: %li", script.use_count());
   }
 
-  void AssetManagerModal::show(UUID id)
+  void AssetManagerModal::onImGuiUpdate()
   {
+    bool safe_ret = false;
+    if(!m_is_shown || m_context == UUID::invalid) return;
     static std::string name = "Asset";
     ImGui::OpenPopup("AssetStats");
     if(ImGui::BeginPopupModal("AssetStats", NULL, ImGuiWindowFlags_MenuBar))
     {
-      auto type = AssetManager::get(id)->meta.type;
+      auto type = AssetManager::get(m_context)->meta.type;
       switch(type)
       {
-        case AssetManager::Asset::Type::None: return;
-        case AssetManager::Asset::Type::Texture2D: drawTextuerStats(id);
-        case AssetManager::Asset::Type::Scene: drawSceneStats(id);
-        case AssetManager::Asset::Type::Script: drawScriptStats(id);
+        case AssetManager::Asset::Type::None: safe_ret = true; ;
+        case AssetManager::Asset::Type::Texture2D: drawTextuerStats(m_context);
+        case AssetManager::Asset::Type::Scene: drawSceneStats(m_context);
+        case AssetManager::Asset::Type::Script: drawScriptStats(m_context);
       }
-      if(ImGui::Button("Cancel"))
+      if(ImGui::Button("Cancel") || safe_ret)
+      {
+        m_is_shown = false;
         ImGui::CloseCurrentPopup();
+        m_context = UUID::invalid;
+      }
       ImGui::EndPopup();
     }
   }

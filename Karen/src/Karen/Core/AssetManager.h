@@ -45,7 +45,7 @@ namespace Karen
 
     struct ScriptAsset : public Asset 
     {
-      ARef<Script> script;
+      Script* script = nullptr;
     };
   
     struct AssetLoader

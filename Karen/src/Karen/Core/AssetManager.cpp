@@ -7,6 +7,7 @@
 
 #include <pugixml.hpp>
 #include <string>
+#include <system_error>
 
 
 namespace Karen
@@ -47,7 +48,7 @@ namespace Karen
         KAREN_CORE_WARN("(AssetManager): Trying to Load Asset: {0} with no Meta::Type", uuid_str);
         continue;
       }
-
+      
       UUID uuid = std::stoll(uuid_str);
       if(uuid == UUID::invalid) uuid = UUID();
       Asset::Type type = Asset::Type::None;
@@ -59,7 +60,9 @@ namespace Karen
       Asset::Meta meta;
       meta.path = path;
       meta.type = type;
+      KAREN_CORE_WARN("START LOADING ASSET: {0}", meta.path);
       load(meta, uuid);
+      KAREN_CORE_WARN("DONE");
     }
  
     return true;
@@ -75,6 +78,7 @@ namespace Karen
 
   bool AssetManager::AssetLoader::loadScene(const ARef<SceneAsset>& asset)
   {
+    asset->scene = createARef<Scene>();
     SceneSerializer ss(asset->scene);
     if(!ss.deSerializeText(asset->meta.path.c_str()))
       return false;

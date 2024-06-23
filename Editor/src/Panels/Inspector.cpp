@@ -59,7 +59,7 @@ namespace Karen
         }
       }); 
 
-      drawComponent<ScriptComponent>(m_current, "Script", [](auto* script_comp, bool removed)
+      drawComponent<ScriptComponent>(m_current, "Script", [&](auto* script_comp, bool removed)
       {
         bool change = false;
         auto script = AssetManager::get<AssetManager::ScriptAsset>(script_comp->script_handle);
@@ -69,20 +69,21 @@ namespace Karen
         strcpy(buffer, path.c_str());
         if(ImGui::InputText("ScriptPath", buffer, sizeof(buffer)))
         {
-          change = true;
           path = std::string(buffer);
         }
         if(ImGui::BeginDragDropTarget())
         {
           if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TEXTURE2D_ASSET_HANDEL"))
           {
-            change = true;
-            UUID* asset_handle = (UUID*)payload->Data;
-            script_comp->script_handle = *asset_handle;
+            UUID asset_handle = *(UUID*)payload->Data;
+            KAREN_CORE_WARN("Accepting drag and drop id: {0}", asset_handle);
+            script_comp->script_handle = asset_handle;
           }
           ImGui::EndDragDropTarget();
         }
-        if(change) AssetManager::reload(script_comp->script_handle);
+
+        if(removed)
+          m_current.removeComponent<ScriptComponent>();
       });
 
       drawComponent<TransformComponent>(m_current, "Transform", [&](auto* trans_comp, bool removed)
@@ -174,8 +175,9 @@ namespace Karen
         {
           if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TEXTURE2D_ASSET_HANDEL"))
           {
-            UUID* asset_handle = (UUID*)payload->Data;
-            sprite_comp->texture_handle = *asset_handle;
+            UUID asset_handle = *(UUID*)payload->Data;
+            KAREN_CORE_WARN("Accepting drag and drop id: {0}", asset_handle);
+            sprite_comp->texture_handle = asset_handle;
             current_texture_type_str = texture_type_str[1];
           }
           ImGui::EndDragDropTarget();

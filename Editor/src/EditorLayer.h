@@ -52,6 +52,7 @@ namespace Karen
 
     void onGuiUpdate() override;
   private:
+    void changeScene(UUID id);
     void onScenePlay();
     void onSceneStop();
     
@@ -72,6 +73,7 @@ namespace Karen
     void handelCMD(int key);
   private:
     Timestep m_time_step;
+    UUID m_scene_handle = UUID::invalid;
     SceneState m_scene_state = SceneState::Stop;
     bool m_show_imgui_demo = true;
     bool m_default_editor = false;
@@ -91,6 +93,7 @@ namespace Karen
     ContentBrowser m_content_browser;
     SceneHierarchy m_scene_hierarchy_panel;
     Inspector m_inspector_panel;
+
 
     std::unordered_map<std::string, Scoped<HelperWindow>> m_helper_windows;
     std::unordered_map<std::string, Vec4> m_colors;

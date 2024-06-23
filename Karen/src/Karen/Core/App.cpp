@@ -4,6 +4,7 @@
 #include "Karen/Core/App.h"
 #include "Karen/Core/Log.h"
 #include "Karen/Render/API/RendererAPI.h"
+#include "Karen/Scripting/Lua.h"
 
 
 #ifdef KAREN_EMSCRIPTEN
@@ -32,7 +33,8 @@ namespace Karen
     m_gui_layer = new GuiLayer("Base GuiLayer");
     m_gui_layer->activate();
     pushOverlay(m_gui_layer);
-   }
+    Lua::init(); 
+  }
 
   App::~App()
   {

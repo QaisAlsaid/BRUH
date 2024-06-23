@@ -38,6 +38,8 @@ namespace Karen
         loadOrGet(entry.path(), getFileType(entry));
       }
     }
+    m_current_dir = m_res_dir;
+    KAREN_CORE_WARN("EXIT ContentBrowser CTOR");
   }
 
   void ContentBrowser::onImGuiUpdate()
@@ -60,7 +62,7 @@ namespace Karen
     }
     
     ImGui::Columns(cols, 0, false);
-    for(auto& entry : std::filesystem::recursive_directory_iterator(m_current_dir))
+    for(auto& entry : std::filesystem::directory_iterator(m_current_dir))
     {
       ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
       const auto& path = entry.path();
@@ -68,39 +70,43 @@ namespace Karen
       const auto& relative_path = std::filesystem::relative(path, m_res_dir);
       auto ft = getFileType(entry);
 
-      auto id = loadOrGet(path, ft);
+      auto thm_id = loadOrGet(path, ft);
+
+      auto asset_id = AssetManager::getUUID(path);
 
       if(ft != FileType::Image)
       {
-        ImGui::ImageButton((ImTextureID)(uintptr_t)m_default_icons.at(id)->getRendererID(),
+        ImGui::ImageButton((ImTextureID)(uintptr_t)m_default_icons.at(thm_id)->getRendererID(),
             {thm_width, thm_width}, {0, 1}, {1, 0});
-        if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+        if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) && entry.is_directory())
         {
           m_current_dir /= file_name;
         }
       }
       else 
       {
-        ImGui::ImageButton((ImTextureID)(uintptr_t)AssetManager::get<AssetManager::Texture2DAsset>(id)->texture->getRendererID(), {thm_width, thm_width}, {0, 1}, {1, 0});
+        ImGui::ImageButton((ImTextureID)(uintptr_t)AssetManager::get<AssetManager::Texture2DAsset>(asset_id)->texture->getRendererID(), {thm_width, thm_width}, {0, 1}, {1, 0});
       }
       if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) && isAsset(ft))
       {
-        m_asset_manager_modal.show(id);
+        m_asset_manager_modal.setContext(asset_id);
+        m_asset_manager_modal.show();
       }
       if(isAsset(ft))
       {
         if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
         {
+          KAREN_CORE_WARN("Drag and drop started handle: {0}", asset_id);
           switch(ft)
           {
             case FileType::Image:
-              dragAndDropTexture(id , {50, 50});
+              dragAndDropTexture(asset_id , {50, 50});
               break;
             case FileType::Scene:
-              dragAndDropScene(id, {50, 50});
+              dragAndDropScene(asset_id, {50, 50});
               break;
             case FileType::Script:
-              dragAndDropScript(id, {50, 50});
+              dragAndDropScript(asset_id, {50, 50});
               break;
             default: break;
           }
@@ -115,7 +121,8 @@ namespace Karen
     ImGui::Columns(1);
     
     ImGui::End();
-    
+
+    m_asset_manager_modal.onImGuiUpdate();
 
   }
 
@@ -193,7 +200,7 @@ namespace Karen
   void ContentBrowser::dragAndDropTexture(UUID id, const Vec2& thm_size)
   {
     auto rid = AssetManager::get<AssetManager::Texture2DAsset>(id)->texture->getRendererID();
-    ImGui::SetDragDropPayload("TEXTURE2D_ASSET_HANDEL", (void*)(uintptr_t)id, sizeof(UUID));
+    ImGui::SetDragDropPayload("TEXTURE2D_ASSET_HANDEL", &id, sizeof(UUID));
     ImGui::Image((void*)(uintptr_t)rid, { thm_size.x, thm_size.y }, {0, 1}, {1, 0});
     ImGui::EndDragDropSource();
   }
@@ -201,17 +208,19 @@ namespace Karen
   void ContentBrowser::dragAndDropScene(UUID id, const Vec2& thm_size)
   {
     //auto rid = AssetManager::get<AssetManager::SceneAsset>(id);
-    auto rid = getDefaultIcon(FileType::Scene);
-    ImGui::SetDragDropPayload("SCENE_ASSET_HANDEL", (void*)(uintptr_t)id, sizeof(UUID));
-    ImGui::Image((void*)(uintptr_t)rid, { thm_size.x, thm_size.y }, {0, 1}, {1, 0});
+    //auto rid = getDefaultIcon(FileType::Scene);
+    ImGui::Image((void*)(uintptr_t)m_default_icons.at(getDefaultIcon(FileType::Scene))->getRendererID(),
+        { thm_size.x, thm_size.y }, {0, 1}, {1, 0});
+    ImGui::SetDragDropPayload("SCENE_ASSET_HANDEL", &id, sizeof(UUID));
+    //ImGui::Image((void*)(uintptr_t)rid, { thm_size.x, thm_size.y }, {0, 1}, {1, 0});
     ImGui::EndDragDropSource();
   }
   
   void ContentBrowser::dragAndDropScript(UUID id, const Vec2& thm_size)
   {
-    auto rid = AssetManager::get<AssetManager::Texture2DAsset>(id)->texture->getRendererID();
-    ImGui::SetDragDropPayload("TEXTURE2D_ASSET_HANDEL", (void*)(uintptr_t)id, sizeof(UUID));
-    ImGui::Image((void*)(uintptr_t)rid, { thm_size.x, thm_size.y }, {0, 1}, {1, 0});
+    ImGui::SetDragDropPayload("TEXTURE2D_ASSET_HANDEL", &id, sizeof(UUID));
+    ImGui::Image((void*)(uintptr_t)m_default_icons.at(getDefaultIcon(FileType::Script))->getRendererID(),
+        { thm_size.x, thm_size.y }, {0, 1}, {1, 0});
     ImGui::EndDragDropSource();
   }
  

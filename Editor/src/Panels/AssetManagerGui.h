@@ -8,7 +8,12 @@ namespace Karen
   class AssetManagerModal
   {
   public:
-    void show(UUID id);
+    void show() { m_is_shown = true; }
+    void onImGuiUpdate();
+    void setContext(UUID ctx) { m_context = ctx; }
+  private:
+    UUID m_context = UUID::invalid;
+    bool m_is_shown = false;
   };
 }
 

@@ -1,4 +1,3 @@
-#include <iostream>
 #include <pch.h>
 #include "EditorLayer.h"
 #include "EditorSerializer.h"
@@ -21,14 +20,14 @@
 
 #include "Karen/Core/AssetManager.h"
 
-#ifdef KAREN_PLATFORM_LINUX
-#include <dlfcn.h>
+//#ifdef KAREN_PLATFORM_LINUX
+//#include <dlfcn.h>
 //#include "../res/scripts/Test.h"
 
 
 //FIXME: change the native script API 'ASAP'
 
-
+/*
 void* handle;
 Karen::ScriptEntity* (*create)();
 void (*destroy)(Karen::ScriptEntity*);
@@ -47,10 +46,10 @@ static Karen::ScriptEntity* loadNativeScript(const char* path)
   KAREN_INFO("Loaded");
   return myClass;
 }
-#endif
+#endif*/
 namespace Karen
 {
-  class Scriptt : public ScriptEntity
+  /*class Scriptt : public ScriptEntity
   {
     public:
     float speed = 1;
@@ -59,12 +58,14 @@ namespace Karen
       m_entity.getComponent<TransformComponent>().position.x += speed * ts;
     }
     void onDestroy() override{}
-  };
+  };*/
 
   EditorLayer::EditorLayer()
     : Layer("EditorLayer"), m_content_browser("../res")
   {
-    AssetManager::loadConfig("../res/config/assets.test.xml");
+    KAREN_CORE_WARN("EditorLayer CTOR");
+    bool x = AssetManager::loadConfig("../res/config/assets.test.xml");
+    KAREN_CORE_WARN("EXITED AssetManager::loadConfig WITH: {0}", x);
     activate();
 
     KAREN_START_INSTRUMENTOR();
@@ -72,17 +73,20 @@ namespace Karen
     RenderCommands::init();
     Renderer2D::init("../res/shaders/Shaders2D/config.xml");
 
-#ifdef KAREN_PLATFORM_LINUX
+/*#ifdef KAREN_PLATFORM_LINUX
   native = loadNativeScript("../res/scripts/build/Script.so");
   scriptInit(Karen::App::get());
-#endif
+#endif*/
   }
 
 
 static float* speed = new float;
   void EditorLayer::onAttach()
   {
-    auto uuid = AssetManager::getUUID("../res/config/scene.yaml");
+    KAREN_CORE_WARN("CALLED ON ATTACH");
+    auto uuid = AssetManager::getUUID("../res/config/scene.Karen");
+    if(uuid == UUID::invalid) KAREN_CORE_ERROR("invalid main scene, UUID: {0}", uuid);
+    m_scene_handle = uuid;
     m_editor_scene = AssetManager::get<AssetManager::SceneAsset>(uuid)->scene;
 
     
@@ -93,13 +97,6 @@ static float* speed = new float;
     m_default_font_size = 18;
     m_default_font = "../res/fonts/Roboto/Roboto-Regular.ttf";
     m_imgui_ini_path = ".";
-
-
-    //TODO: FIXME: wtf is it static or not :-()
-    Lua l;
-    l.init();
-    std::cout<<"lua";
-    std::cin.get();
 
     setColorScheme(); 
     deSerializeEditor("../res/config/test.xml");
@@ -120,10 +117,8 @@ static float* speed = new float;
     KAREN_CORE_SET_LOGLEVEL(Log::LogLevel::Warn);
 
     m_scene_hierarchy_panel.setContext(m_scene);
-    auto e = m_scene->addEntity("Camera");
-    auto& nsc = e.addComponent<NativeScriptComponent>();
     
-    nsc.bind<Scriptt>();
+//    nsc.bind<Scriptt>();
 
     
     /*auto nen = native->getEntity();
@@ -142,6 +137,15 @@ static float* speed = new float;
   
   void EditorLayer::onUpdate(Timestep ts)
   {
+    if(m_scene_handle != UUID::invalid)
+    {
+      if(m_scene_state != SceneState::Play)
+      {
+        m_scene = AssetManager::get<AssetManager::SceneAsset>(m_scene_handle)->scene;
+        m_editor_scene = m_scene;
+      }
+    }
+    else KAREN_CORE_ERROR("UUID::invalid Can't be used as Scene Handle");
     m_camera.onUpdate(ts);
     m_scene->setEditorCamera(m_camera.getView(), m_camera.getProjection());
     //TODO: callbacks for the context or something
@@ -154,7 +158,8 @@ static float* speed = new float;
     //m_frame_buff->bindWriteFb(6);
     //Renderer2D::clear({200, 200, 200, 200});
     Renderer2D::clear(Vec4(0.25f, 0.25f, 0.25f, 1.0f));
-#ifdef KAREN_PLATFORM_LINUX
+/*
+ #ifdef KAREN_PLATFORM_LINUX
     //if(Input::isKeyPressed(Keyboard::Z))
     //{
       if(native)
@@ -163,15 +168,16 @@ static float* speed = new float;
         //std::cout<<"in Layer App*: "<<App::get()<<std::endl;
       }
     //}
-    /*if(Input::isKeyPressed(Keyboard::P))
+    if(Input::isKeyPressed(Keyboard::P))
     {
       if(native)
         destroy(native);
       if(handle)
         dlclose(handle);
       native = loadNativeScript("../res/scripts/build/Script.so");
-    }*/
+    }
 #endif
+    */
     switch(m_scene_state)
     {
       case SceneState::Play:
@@ -326,6 +332,11 @@ static float* speed = new float;
       ImGui::SaveIniSettingsToDisk(m_imgui_ini_path.c_str());
   }
 
+  void EditorLayer::changeScene(UUID id)
+  {
+    m_scene_handle = id;
+  }
+
   void EditorLayer::onScenePlay()
   {
     m_scene_state = SceneState::Play;
@@ -379,6 +390,16 @@ static float* speed = new float;
     m_camera.aspect_ratio = m_viewport_size.x/m_viewport_size.y;
     ImGui::Image((void*)(uintptr_t)m_frame_buff->getColorAttachmentId("render_buffer"), panel_size, ImVec2(0, 1), ImVec2(1, 0));
 
+    if(ImGui::BeginDragDropTarget())
+    {
+      if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("SCENE_ASSET_HANDEL"))
+      {
+        UUID asset_handle = *(UUID*)payload->Data;
+        KAREN_CORE_WARN("Accepting drag and drop id: {0}", asset_handle);
+        changeScene(asset_handle);
+      }
+      ImGui::EndDragDropTarget();
+    }
     auto window_size = ImGui::GetWindowSize();
     auto min_vp_bounds = ImGui::GetWindowPos();
 

@@ -17,7 +17,7 @@ option(KAREN_IS_SHARED "builds as shared lib" OFF)
 option(KAREN_EMSCRIPTEN "builds for the web" OFF)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  add_compile_options(-Wall -g -O0)
+  add_compile_options(-Wall -g -O0 -fPIC)
   set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   add_compile_options(-fPIC -Wall -g -O0)
