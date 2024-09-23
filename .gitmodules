@@ -1,33 +1,33 @@
 [submodule "Karen/vendor/spdlog"]
-	path = BRUH/vendor/spdlog
+	path = Real-Engine/vendor/spdlog
 	url = https://github.com/gabime/spdlog.git
 [submodule "Karen/vendor/glm"]
-	path = BRUH/vendor/glm
+	path = Real-Engine/vendor/glm
 	url = https://github.com/g-truc/glm.git
 [submodule "Karen/vendor/glfw"]
-	path = BRUH/vendor/glfw
+	path = Real-Engine/vendor/glfw
 	url = https://github.com/glfw/glfw.git
 [submodule "Karen/vendor/imgui"]
-	path = BRUH/vendor/imgui
+	path = Real-Engine/vendor/imgui
 	url = https://github.com/QaisAlsaid/imgui.git
 [submodule "Karen/vendor/pugixml"]
-	path = BRUH/vendor/pugixml
+	path = Real-Engine/vendor/pugixml
 	url = https://github.com/zeux/pugixml.git
 [submodule "Karen/vendor/entt"]
-	path = BRUH/vendor/entt
+	path = Real-Engine/vendor/entt
 	url = https://github.com/skypjack/entt.git
 [submodule "Karen/vendor/yaml-cpp"]
-	path = BRUH/vendor/yaml-cpp
+	path = Real-Engine/vendor/yaml-cpp
 	url = https://github.com/jbeder/yaml-cpp.git
 [submodule "Karen/vendor/Box2D"]
-	path = BRUH/vendor/Box2D
+	path = Real-Engine/vendor/Box2D
 	url = https://github.com/QaisAlsaid/box2d.git
 [submodule "Karen/vendor/Imguizmo"]
-	path = BRUH/vendor/Imguizmo
+	path = Real-Engine/vendor/Imguizmo
 	url = https://github.com/QaisAlsaid/ImGuizmo.git
 [submodule "Karen/vendor/LuaJit"]
-	path = BRUH/vendor/LuaJit
+	path = Real-Engine/vendor/LuaJit
 	url = https://github.com/QaisAlsaid/LuaJIT.git
 [submodule "Karen/vendor/sol2"]
-	path = BRUH/vendor/sol2
+	path = Real-Engine/vendor/sol2
 	url = https://github.com/ThePhD/sol2.git
