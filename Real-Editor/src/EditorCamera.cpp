@@ -1,11 +1,11 @@
 #include "EditorCamera.h"
-#include "Karen/Core/ButtonsAndKeyCodes.h"
-#include "Karen/Core/Input.h"
+#include "Real-Engine/Core/ButtonsAndKeyCodes.h"
+#include "Real-Engine/Core/Input.h"
 #include "glm/ext/matrix_clip_space.hpp"
 #include "glm/ext/quaternion_common.hpp"
 
 
-namespace Karen
+namespace Real
 {
   void EditorCamera::onUpdate(Timestep ts)
   {

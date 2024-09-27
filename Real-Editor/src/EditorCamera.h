@@ -1,13 +1,13 @@
 #ifndef EDITOR_CAMERA_H
 #define EDITOR_CAMERA_H
 
-#include "Karen/Render/Camera.h"
-#include "Karen/Core/Events/MouseEvents.h"
-#include "Karen/Core/Math/math.h"
-#include "Karen/Core/Timestep.h"
+#include "Real-Engine/Render/Camera.h"
+#include "Real-Engine/Core/Events/MouseEvents.h"
+#include "Real-Engine/Core/Math/math.h"
+#include "Real-Engine/Core/Timestep.h"
 
 
-namespace Karen
+namespace Real
 {
   constexpr auto pi = glm::pi<float>();
 

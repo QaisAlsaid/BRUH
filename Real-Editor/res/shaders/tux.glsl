@@ -1,4 +1,4 @@
-#KAREN_SHADER_TYPE KAREN_VERTEX
+#REAL_SHADER_TYPE REAL_VERTEX
 #version 330 core
 
 layout (location = 0) in vec3 posin;
@@ -15,7 +15,7 @@ void main()
   tux_coord_out = tux_coord;
 }
 
-#KAREN_SHADER_TYPE KAREN_FRAGMENT
+#REAL_SHADER_TYPE REAL_FRAGMENT
 #version 330 core
 
 in vec2 tux_coord_out;

@@ -1,4 +1,4 @@
-#KAREN_SHADER_TYPE KAREN_VERTEX
+#REAL_SHADER_TYPE REAL_VERTEX
 #version 330 core
 
 layout (location = 0) in vec4 i_color;
@@ -24,8 +24,8 @@ void main()
   //v_id = i_id;
 }
 
-#KAREN_SHADER_TYPE KAREN_FRAGMENT
-#KAREN_SAMPLE_TEMPLATE frag_color = texture(u_textures[${KAREN_CURRENT_SWITCH_CASE}], v_tux_coord) * v_color;
+#REAL_SHADER_TYPE REAL_FRAGMENT
+#REAL_SAMPLE_TEMPLATE frag_color = texture(u_textures[${REAL_CURRENT_SWITCH_CASE}], v_tux_coord) * v_color;
 
 #version 330 core
 
@@ -37,14 +37,14 @@ in vec4 v_color;
 flat in int v_tux_idx;
 //in int v_id;
 
-uniform sampler2D u_textures[${KAREN_MAX_TEXTUERS}];
+uniform sampler2D u_textures[${REAL_MAX_TEXTUERS}];
 
 
 void main()
 {
   e_id = 1;
   int idx = v_tux_idx;
-  #KAREN_MAX_TEXTUER_SWITCH(idx)
-  if(frag_color.a < 0.001)
+  #REAL_MAX_TEXTUER_SWITCH(idx)
+ if(frag_color.a < 0.001)
     discard;
 }

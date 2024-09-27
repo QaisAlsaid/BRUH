@@ -1,11 +1,11 @@
 #include "Inspector.h"
-#include "Karen/Scene/Components.h"
+#include "Real-Engine/Scene/Components.h"
 #include "glm/trigonometric.hpp"
 #include "imgui.h"
 
 
 
-namespace Karen
+namespace Real
 {
   static const char* projection_type_str[2] = {"Orthographic", "Perspective"};
   static const char* texture_type_str[2] = {"None", "Texture2D"};
@@ -76,7 +76,7 @@ namespace Karen
           if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TEXTURE2D_ASSET_HANDEL"))
           {
             UUID asset_handle = *(UUID*)payload->Data;
-            KAREN_CORE_WARN("Accepting drag and drop id: {0}", asset_handle);
+            REAL_CORE_WARN("Accepting drag and drop id: {0}", asset_handle);
             script_comp->script_handle = asset_handle;
           }
           ImGui::EndDragDropTarget();
@@ -176,7 +176,7 @@ namespace Karen
           if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TEXTURE2D_ASSET_HANDEL"))
           {
             UUID asset_handle = *(UUID*)payload->Data;
-            KAREN_CORE_WARN("Accepting drag and drop id: {0}", asset_handle);
+            REAL_CORE_WARN("Accepting drag and drop id: {0}", asset_handle);
             sprite_comp->texture_handle = asset_handle;
             current_texture_type_str = texture_type_str[1];
           }
@@ -300,42 +300,42 @@ namespace Karen
     for(uint32_t i = 0; i < ev->size(); ++i)
     {
       const auto& exp = ev->at(i);
-      KAREN_CORE_WARN("Recived var: {0}", exp.first);
+      REAL_CORE_WARN("Recived var: {0}", exp.first);
       switch(exp.second.getType())
       {
         case ExportType::Type::Vec4:
         {
           auto* data = exp.second.getAs<Vec4>();
           ImGui::DragFloat4(exp.first, glm::value_ptr(*data));
-          KAREN_CORE_WARN("var; {0}, data: {1}", exp.first, *data);
+          REAL_CORE_WARN("var; {0}, data: {1}", exp.first, *data);
           break;
         }
         case ExportType::Type::Vec3:
         {
           auto* data = exp.second.getAs<Vec3>();
           ImGui::DragFloat3(exp.first, glm::value_ptr(*data));
-          KAREN_CORE_WARN("var; {0}, data: {1}", exp.first, *data);
+          REAL_CORE_WARN("var; {0}, data: {1}", exp.first, *data);
           break;
         }
         case ExportType::Type::Vec2:
         {
           auto* data = exp.second.getAs<Vec2>();
           ImGui::DragFloat2(exp.first, glm::value_ptr(*data));
-          KAREN_CORE_WARN("var; {0}, data: {1}", exp.first, *data);
+          REAL_CORE_WARN("var; {0}, data: {1}", exp.first, *data);
           break;
         }
         case ExportType::Type::Float:
         {
           auto* data = exp.second.getAs<float>();
           ImGui::DragFloat(exp.first, data); 
-          KAREN_CORE_WARN("var; {0}, data: {1}", exp.first, *data);
+          REAL_CORE_WARN("var; {0}, data: {1}", exp.first, *data);
           break;
         }
         case ExportType::Type::Int:
         {
           auto* data = exp.second.getAs<int>();
           ImGui::DragInt(exp.first, data);
-          KAREN_CORE_WARN("var; {0}, data: {1}", exp.first, *data);
+          REAL_CORE_WARN("var; {0}, data: {1}", exp.first, *data);
           break;
         }
         case ExportType::Type::String:
@@ -348,7 +348,7 @@ namespace Karen
           {
             *data = buffer;
           }
-          KAREN_CORE_WARN("var; {0}, data: {1}", exp.first, *data);
+          REAL_CORE_WARN("var; {0}, data: {1}", exp.first, *data);
           break;
         }
         case ExportType::Type::RGBA_Color:

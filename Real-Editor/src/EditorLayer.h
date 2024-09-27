@@ -1,8 +1,8 @@
-#ifndef KR_EDITOR_LAYER_H
-#define KR_EDITOR_LAYER_H
+#ifndef EDITOR_LAYER_H
+#define EDITOR_LAYER_H
 
 
-#include <Karen/Karen.h>
+#include <Real-Engine/Real-Engine.h>
 #include "Panels/SceneHierarchy.h"
 #include "Panels/Inspector.h"
 #include "HelperWindows.h"
@@ -10,9 +10,9 @@
 #include "EditorCamera.h"
 
 
-namespace Karen
+namespace Real
 {
-  class EditorLayer : public Karen::Layer
+  class EditorLayer : public Real::Layer
   {
   public:
     enum class SceneState {Stop, Play};
@@ -46,9 +46,9 @@ namespace Karen
 
     void onDetach() override;
 
-    void onUpdate(Karen::Timestep ts) override;
+    void onUpdate(Real::Timestep ts) override;
 
-    void onEvent(Karen::Event& e) override;
+    void onEvent(Real::Event& e) override;
 
     void onGuiUpdate() override;
   private:
@@ -88,7 +88,7 @@ namespace Karen
     ARef<Scene> m_editor_scene;
     GizmoOp m_op = GizmoOp::Bounds;
     
-    ARef<Karen::FrameBuffer> m_frame_buff;
+    ARef<Real::FrameBuffer> m_frame_buff;
     
     ContentBrowser m_content_browser;
     SceneHierarchy m_scene_hierarchy_panel;
@@ -103,4 +103,4 @@ namespace Karen
   };
 }
 
-#endif //KR_EDITOR_LAYER_H
+#endif //EDITOR_LAYER_H

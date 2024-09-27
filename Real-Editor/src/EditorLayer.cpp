@@ -1,26 +1,26 @@
 #include <pch.h>
 #include "EditorLayer.h"
 #include "EditorSerializer.h"
-#include "Karen/Core/App.h"
-#include "Karen/Core/ButtonsAndKeyCodes.h"
-#include "Karen/Core/Events/KeyEvents.h"
-#include "Karen/Core/Log.h"
-#include "Karen/Core/Timestep.h"
-#include "Karen/Scene/Components.h"
-#include "Karen/Scene/SceneSerializer.h"
-#include "Karen/Scene/ScriptEntity.h"
+#include "Real-Engine/Core/App.h"
+#include "Real-Engine/Core/ButtonsAndKeyCodes.h"
+#include "Real-Engine/Core/Events/KeyEvents.h"
+#include "Real-Engine/Core/Log.h"
+#include "Real-Engine/Core/Timestep.h"
+#include "Real-Engine/Scene/Components.h"
+#include "Real-Engine/Scene/SceneSerializer.h"
+#include "Real-Engine/Scene/ScriptEntity.h"
 #include "glm/ext/quaternion_common.hpp"
 #include "glm/gtc/type_ptr.hpp"
-#include "Karen/Scripting/Lua.h"
+#include "Real-Engine/Scripting/Lua.h"
 #include "glm/trigonometric.hpp"
-#include <Karen/Karen.h>
+#include <Real-Engine/Real-Engine.h>
 #include <imgui.h>
 #include <ImGuizmo.h>
 
 
-#include "Karen/Core/AssetManager.h"
+#include "Real-Engine/Core/AssetManager.h"
 
-//#ifdef KAREN_PLATFORM_LINUX
+//#ifdef REAL_PLATFORM_LINUX
 //#include <dlfcn.h>
 //#include "../res/scripts/Test.h"
 
@@ -29,25 +29,25 @@
 
 /*
 void* handle;
-Karen::ScriptEntity* (*create)();
-void (*destroy)(Karen::ScriptEntity*);
-void (*scriptInit)(Karen::App*);
-static Karen::ScriptEntity* native = nullptr;
+Real-Engine::ScriptEntity* (*create)();
+void (*destroy)(Real-Engine::ScriptEntity*);
+void (*scriptInit)(Real-Engine::App*);
+static Real-Engine::ScriptEntity* native = nullptr;
 
-static Karen::ScriptEntity* loadNativeScript(const char* path)
+static Real-Engine::ScriptEntity* loadNativeScript(const char* path)
 {
   handle = dlopen(path, RTLD_NOW);
-  KAREN_CORE_ASSERT(handle);
-  create = (Karen::ScriptEntity* (*)())dlsym(handle, "createScript");
-  destroy = (void (*)(Karen::ScriptEntity*))dlsym(handle, "destroyScript");
-  scriptInit = (void (*)(Karen::App*))dlsym(handle, "scriptInit");
+  REAL_CORE_ASSERT(handle);
+  create = (Real-Engine::ScriptEntity* (*)())dlsym(handle, "createScript");
+  destroy = (void (*)(Real-Engine::ScriptEntity*))dlsym(handle, "destroyScript");
+  scriptInit = (void (*)(Real-Engine::App*))dlsym(handle, "scriptInit");
 
-  Karen::ScriptEntity* myClass = (Karen::ScriptEntity*)create();
-  KAREN_INFO("Loaded");
+  Real-Engine::ScriptEntity* myClass = (Karen::ScriptEntity*)create();
+  REAL_INFO("Loaded");
   return myClass;
 }
 #endif*/
-namespace Karen
+namespace Real
 {
   /*class Scriptt : public ScriptEntity
   {
@@ -63,19 +63,19 @@ namespace Karen
   EditorLayer::EditorLayer()
     : Layer("EditorLayer"), m_content_browser("../res")
   {
-    KAREN_CORE_WARN("EditorLayer CTOR");
+    REAL_CORE_WARN("EditorLayer CTOR");
     bool x = AssetManager::loadConfig("../res/config/assets.test.xml");
-    KAREN_CORE_WARN("EXITED AssetManager::loadConfig WITH: {0}", x);
+    REAL_CORE_WARN("EXITED AssetManager::loadConfig WITH: {0}", x);
     activate();
 
-    KAREN_START_INSTRUMENTOR();
+    REAL_START_INSTRUMENTOR();
     
     RenderCommands::init();
     Renderer2D::init("../res/shaders/Shaders2D/config.xml");
 
-/*#ifdef KAREN_PLATFORM_LINUX
+/*#ifdef REAL_PLATFORM_LINUX
   native = loadNativeScript("../res/scripts/build/Script.so");
-  scriptInit(Karen::App::get());
+  scriptInit(Real-Engine::App::get());
 #endif*/
   }
 
@@ -83,9 +83,9 @@ namespace Karen
 static float* speed = new float;
   void EditorLayer::onAttach()
   {
-    KAREN_CORE_WARN("CALLED ON ATTACH");
-    auto uuid = AssetManager::getUUID("../res/config/scene.Karen");
-    if(uuid == UUID::invalid) KAREN_CORE_ERROR("invalid main scene, UUID: {0}", uuid);
+    REAL_CORE_WARN("CALLED ON ATTACH");
+    auto uuid = AssetManager::getUUID("../res/config/scene.Real");
+    if(uuid == UUID::invalid) REAL_CORE_ERROR("invalid main scene, UUID: {0}", uuid);
     m_scene_handle = uuid;
     m_editor_scene = AssetManager::get<AssetManager::SceneAsset>(uuid)->scene;
 
@@ -114,7 +114,7 @@ static float* speed = new float;
     s.height = 720;
     s.is_swap_chain_target = true;
     m_frame_buff = FrameBuffer::create(s);
-    KAREN_CORE_SET_LOGLEVEL(Log::LogLevel::Warn);
+    REAL_CORE_SET_LOGLEVEL(Log::LogLevel::Warn);
 
     m_scene_hierarchy_panel.setContext(m_scene);
     
@@ -145,7 +145,7 @@ static float* speed = new float;
         m_editor_scene = m_scene;
       }
     }
-    else KAREN_CORE_ERROR("UUID::invalid Can't be used as Scene Handle");
+    else REAL_CORE_ERROR("UUID::invalid Can't be used as Scene Handle");
     m_camera.onUpdate(ts);
     m_scene->setEditorCamera(m_camera.getView(), m_camera.getProjection());
     //TODO: callbacks for the context or something
@@ -159,7 +159,7 @@ static float* speed = new float;
     //Renderer2D::clear({200, 200, 200, 200});
     Renderer2D::clear(Vec4(0.25f, 0.25f, 0.25f, 1.0f));
 /*
- #ifdef KAREN_PLATFORM_LINUX
+ #ifdef REAL_PLATFORM_LINUX
     //if(Input::isKeyPressed(Keyboard::Z))
     //{
       if(native)
@@ -200,12 +200,12 @@ static float* speed = new float;
         
 
      // mouse = m_max_vp_bounds;
-      //KAREN_CORE_WARN("MOUSE: {0}", mouse);
+      //REAL_CORE_WARN("MOUSE: {0}", mouse);
       /*
       if(mouse.x > 0 && mouse.y > 0 && mouse.x < vp_size.x && mouse.y < vp_size.y)
       {
         int x = m_frame_buff->readPixelI(1, mouse.x, mouse.y);
-        KAREN_CORE_ERROR("ID: {0}, MOUSE: {1}", x, mouse);
+        REAL_CORE_ERROR("ID: {0}, MOUSE: {1}", x, mouse);
       }
       auto se = m_scene_hierarchy_panel.getCurrentSelected(); 
       if(se && se.hasComponent<TransformComponent>())
@@ -216,10 +216,10 @@ static float* speed = new float;
           auto& scale = tsc.scale;
           //if(mouse.x > pos.x + scale.x/2.0f && mouse.x < pos.x - scale.x/2.0f &&
           //   mouse.y > pos.y + scale.y/2.0f && mouse.y < pos.y - scale.y/2.0f)
-          KAREN_CORE_ERROR("True entity id: {0}", (uint32_t)e);
+          REAL_CORE_ERROR("True entity id: {0}", (uint32_t)e);
         });
         auto val = m_frame_buff->readPixelI(1, mouse.x, mouse.y);
-        KAREN_ERROR("Value: {0}, mouse: {1}", val, mouse);
+        REAL_ERROR("Value: {0}, mouse: {1}", val, mouse);
       }
       */
       m_frame_buff->unbind();
@@ -395,7 +395,7 @@ static float* speed = new float;
       if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("SCENE_ASSET_HANDEL"))
       {
         UUID asset_handle = *(UUID*)payload->Data;
-        KAREN_CORE_WARN("Accepting drag and drop id: {0}", asset_handle);
+        REAL_CORE_WARN("Accepting drag and drop id: {0}", asset_handle);
         changeScene(asset_handle);
       }
       ImGui::EndDragDropTarget();
@@ -415,7 +415,7 @@ static float* speed = new float;
 
     const ImVec2 win_pos = ImGui::GetWindowPos();
 
-   /* auto mp = Karen::Input::getMousePos();
+   /* auto mp = Real-Engine::Input::getMousePos();
     auto t_x = mp.x - win_pos.x;
     t_x = (t_x/window_size.x) * App::get()->getWindow().getWidth();
 
@@ -452,29 +452,29 @@ static float* speed = new float;
         if(ImGui::MenuItem("Open", "Ctrl+O")) 
         {
           //TODO : redirect to asset manager after open file
-          const auto& path = FileDialogs::OpenFile("yaml", "Karen Scene (.yaml)");
-          KAREN_TRACE("path: {0}", path);
+          const auto& path = FileDialogs::OpenFile("yaml", "Real-Engine Scene (.yaml)");
+          REAL_TRACE("path: {0}", path);
           if(!path.empty())
           {
             SceneSerializer ss(m_scene);
             if(!ss.deSerializeText(path.c_str()))
             {
-              KAREN_CORE_ERROR("Error in deSerializeText(): Scene: {0}", path);
+              REAL_CORE_ERROR("Error in deSerializeText(): Scene: {0}", path);
               m_scene = createARef<Scene>("Scene");
             }
             m_scene_hierarchy_panel.setContext(m_scene);
             m_scene_hierarchy_panel.clearSelection();
             m_inspector_panel.setCurrentSelected({});
           }
-          else KAREN_TRACE("Cancele");
+          else REAL_TRACE("Cancele");
         }
 
         ImGui::Separator();
   
         if(ImGui::MenuItem("Save As..")) 
         {
-          const auto& path = FileDialogs::SaveFile("yaml", "Karen Scene (.Karen)");
-          KAREN_TRACE("path: {0}", path);
+          const auto& path = FileDialogs::SaveFile("yaml", "Real-Engine Scene (.Karen)");
+          REAL_TRACE("path: {0}", path);
           if(!path.empty())
           {
             SceneSerializer ss(m_scene);
@@ -516,7 +516,7 @@ static float* speed = new float;
         Entity e(e_id, m_scene.get());
         camera = cc.is_primary ? &cc.camera : nullptr;
         tc = e.tryGetComponent<TransformComponent>();
-        KAREN_CORE_ASSERT(tc);
+        REAL_CORE_ASSERT(tc);
       });
       if(camera && tc)
       {
@@ -551,7 +551,7 @@ static float* speed = new float;
   {
     EditorSerializer es(this);
     if(!es.serialize(path))
-      KAREN_ASSERT(false);
+      REAL_ASSERT(false);
   }
 
   void EditorLayer::deSerializeEditor(const char* path)

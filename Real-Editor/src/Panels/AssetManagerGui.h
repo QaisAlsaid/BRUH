@@ -1,9 +1,9 @@
-#ifndef KR_ASSET_MANAGER_GUI_H
-#define KR_ASSET_MANAGER_GUI_H
+#ifndef ASSET_MANAGER_GUI_H
+#define ASSET_MANAGER_GUI_H
 
-#include <Karen/Karen.h>
+#include <Real-Engine/Real-Engine.h>
 
-namespace Karen
+namespace Real
 {
   class AssetManagerModal
   {
@@ -18,4 +18,4 @@ namespace Karen
 }
 
 
-#endif //KR_ASSET_MANAGER_PANEL_H
+#endif //ASSET_MANAGER_PANEL_H

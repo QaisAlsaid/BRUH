@@ -2,12 +2,12 @@
 #define CONTENT_BROWSER_TEST_H
 
 #include "AssetManagerGui.h"
-#include "Karen/Core/AssetManager.h"
-#include "Karen/Render/API/Texture.h"
+#include "Real-Engine/Core/AssetManager.h"
+#include "Real-Engine/Render/API/Texture.h"
 #include <filesystem>
 
 
-namespace Karen 
+namespace Real 
 {
   class ContentBrowser
   {
@@ -17,8 +17,8 @@ namespace Karen
   private:
     enum class FileType 
     {
-      Karen, Png, Jpeg, Jpg, Yaml, Xml, Cpp, H, Lua, Glsl, Dir, Other, 
-      Image = Png || Jpeg || Jpg, Script = Lua, Scene = Karen
+      Real, Png, Jpeg, Jpg, Yaml, Xml, Cpp, H, Lua, Glsl, Dir, Other, 
+      Image = Png || Jpeg || Jpg, Script = Lua, Scene = Real
     };
   private:
     UUID loadOrGet(const std::filesystem::path& path, FileType type);

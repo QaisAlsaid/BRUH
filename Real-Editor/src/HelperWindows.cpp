@@ -1,7 +1,9 @@
+//WTF is this
+
 #include "HelperWindows.h"
 #include <imgui.h>
 
-namespace Karen
+namespace Real
 { 
   void StatsWindow::onImGuiUpdate()
   {

@@ -1,12 +1,12 @@
-local script = Karen.Script.new()
+local script = Real.Script.new()
 local sprite;
 local trans;
 local asset_manager;
 local scene;
 local scene_camera_entity;
 local body;
-local karen = Karen.Vec4.new(1);
-local col = Karen.Vec4.new(255);
+local karen = Real.Vec4.new(1);
+local col = Real.Vec4.new(255);
 local move;
 local circle;
 
@@ -24,21 +24,21 @@ function lerp(on , dest, speed)
 
 print("made the create")
 function script:onCreate()
-  script:export("Karen", karen)
+  script:export("Real", karen)
   script:export("Color", col, true)
 
 
-  asset_manager = Karen.App.getAssetManager();
+  asset_manager = Real.App.getAssetManager();
   print(asset_manager)
   scene = asset_manager:getScene("scene")
   print("making entity")
-  --e = Karen.Entity.new(3, scene);
+  --e = Real.Entity.new(3, scene);
   --print("entity id: ", e:getId());
   scene_camera_entity = scene:getEntity("Camera");
   print("onCreate Called")
   print("id", script.entity:getId());
   print("getting sprite")
-  --sprite = Karen.Scene.Components.Sprite.new();
+  --sprite = Real.Scene.Components.Sprite.new();
   --sprite = script.entity:addSprite()
   circle = script.entity:addCircle();
   body = script.entity:addRigidBody2D()
@@ -60,7 +60,7 @@ function script:onCreate()
   --local sprite = script.entity:getSprite()
  -- print("sprite: ", sprite)
   print("done getting sprite")
- -- sprite.color = Karen.Math.Vec4.new();
+ -- sprite.color = Real.Math.Vec4.new();
   --sprite.color.x = 0.1;
   --sprite.color.y = 0.5;
   --sprite.color.z = 0.1;
@@ -68,11 +68,11 @@ function script:onCreate()
 
   print("getting trans")
   --trans = script.entity:insertTransform()
-  --trans.rotation = Karen.Vec4.new()
+  --trans.rotation = Real.Vec4.new()
   print("done getting trans")
 
-  --trans.position.x = Karen.Vec4.new()
-  --trans.position.y = Karen.Vec4.new()
+  --trans.position.x = Real.Vec4.new()
+  --trans.position.y = Real.Vec4.new()
   --trans.rotation.z = 
   --print(vec1 + vec2)
   print("exited onCreate")
@@ -85,27 +85,27 @@ function script:onUpdate()
   print("karen: ", karen)
   print("===================")
   if(true) then
-  if(Karen.Input.isKeyPressed(Karen.Keyboard.W)) then
+  if(Real.Input.isKeyPressed(Real.Keyboard.W)) then
   move.linear_velocity.y = 5
   print("W")
-  elseif(Karen.Input.isKeyPressed(Karen.Keyboard.S)) then
+  elseif(Real.Input.isKeyPressed(Real.Keyboard.S)) then
   move.linear_velocity.y = -5 
   print("S")
   elseif x then move.linear_velocity.y = lerp(move.linear_velocity.y, 0, 0.5)
   end
   
-  if(Karen.Input.isKeyPressed(Karen.Keyboard.D)) then
+  if(Real.Input.isKeyPressed(Real.Keyboard.D)) then
   move.linear_velocity.x = 5
   print("D")
-  elseif(Karen.Input.isKeyPressed(Karen.Keyboard.A)) then
+  elseif(Real.Input.isKeyPressed(Real.Keyboard.A)) then
   move.linear_velocity.x = -5
   print("A")
   elseif x then move.linear_velocity.x = lerp(move.linear_velocity.x, 0, 0.5)
   end
   end
-  if(Karen.Input.isKeyPressed(Karen.Keyboard.E)) then 
+  if(Real.Input.isKeyPressed(Real.Keyboard.E)) then 
     move.angular_velocity = lerp(move.angular_velocity, -3, 0.05)
-  elseif(Karen.Input.isKeyPressed(Karen.Keyboard.Q)) then 
+  elseif(Real.Input.isKeyPressed(Real.Keyboard.Q)) then 
     move.angular_velocity = lerp(move.angular_velocity, 3, 0.05)
   elseif x then move.angular_velocity = lerp(move.angular_velocity, 0, 0.05)
   end
@@ -114,20 +114,20 @@ function script:onUpdate()
   --trans.position.y = math.cos(num) * 6
  -- trans.rotation.z = math.tan(num);
 
-  local pos = Karen.Vec3.new(0, 0, -0.1)
-  --local rot = Karen
-  local size = Karen.Vec2.new(0, 0)
-  local color = Karen.Vec4.new(0.3, 0.3, 0.8, 1.0)
+  local pos = Real.Vec3.new(0, 0, -0.1)
+  --local rot = Real
+  local size = Real.Vec2.new(0, 0)
+  local color = Real.Vec4.new(0.3, 0.3, 0.8, 1.0)
 --camera matrix 
-  local cam_transform = Karen.Mat4.new(1);
-  cam_transform = cam_transform:translate(Karen.Vec4.new(0))
+  local cam_transform = Real.Mat4.new(1);
+  cam_transform = cam_transform:translate(Real.Vec4.new(0))
   --
-  --local _pos = pos:sub(Karen.Vec3.new(size.x, size.y, 1):dev(2))
+  --local _pos = pos:sub(Real.Vec3.new(size.x, size.y, 1):dev(2))
 --  local cam_proj = scene_camera_entity:getCamera().camera:getProjection()
 --  local cam_trans = scene_camera_entity:getTransform():asMat4()
-  --Karen.Renderer2D.beginScene(cam_proj, cam_trans)
-  --Karen.Renderer2D.drawQuad(pos, size, color)
-  --Karen.Renderer2D.endScene()
+  --Real.Renderer2D.beginScene(cam_proj, cam_trans)
+  --Real.Renderer2D.drawQuad(pos, size, color)
+  --Real.Renderer2D.endScene()
   local ts = script:getTimestep()
   circle.color = col;
   --sprite.color = col;
@@ -150,10 +150,10 @@ function script:onDestroy()
   --karen = "karen"
   --qais = "qais"
   print("onEnd")
-  local v1 = Karen.Vec4.new(2)
-  local v2 = Karen.Vec4.new(1)
-  local m1 = Karen.Mat4.new(2)
-  local m2 = Karen.Mat4.new(3)
+  local v1 = Real.Vec4.new(2)
+  local v2 = Real.Vec4.new(1)
+  local m1 = Real.Mat4.new(2)
+  local m2 = Real.Mat4.new(3)
   print(m1:mul(v2))
   print(v1:mul(v2))
   print(m1:translate(v1))

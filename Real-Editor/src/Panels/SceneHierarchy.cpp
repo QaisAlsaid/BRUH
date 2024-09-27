@@ -2,7 +2,7 @@
 #include "imgui.h"
 
 
-namespace Karen
+namespace Real
 {
   SceneHierarchy::SceneHierarchy(const ARef<Scene>& context)
   {

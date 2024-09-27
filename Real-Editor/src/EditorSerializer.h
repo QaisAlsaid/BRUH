@@ -1,10 +1,10 @@
-#ifndef KR_EDITOR_SERIALIZER_H
-#define KR_EDITOR_SERIALIZER_H
+#ifndef EDITOR_SERIALIZER_H
+#define EDITOR_SERIALIZER_H
 
-#include <Karen/Karen.h>
+#include <Real-Engine/Real-Engine.h>
 #include "EditorLayer.h"
 
-namespace Karen
+namespace Real
 {
   class EditorSerializer
   {
@@ -24,4 +24,4 @@ namespace Karen
 
 
 
-#endif //KR_EDITOR_SERIALIZER_H
+#endif //EDITOR_SERIALIZER_H

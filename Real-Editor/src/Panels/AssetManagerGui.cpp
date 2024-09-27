@@ -1,11 +1,11 @@
 #include <pch.h>
 #include "AssetManagerGui.h"
-#include "Karen/Karen.h"
+#include "Real-Engine/Real-Engine.h"
 
 #include <imgui.h>
 
 
-namespace Karen
+namespace Real
 {
   static void drawTextuerStats(UUID id)
   {

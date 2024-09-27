@@ -1,10 +1,10 @@
 #ifndef KR_INSPECTOR_H
 #define KR_INSPECTOR_H
 
-#include "Karen/Karen.h"
+#include "Real-Engine/Real-Engine.h"
 
 
-namespace Karen
+namespace Real
 {
   class Inspector
   {

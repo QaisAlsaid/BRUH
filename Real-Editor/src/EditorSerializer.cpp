@@ -5,7 +5,7 @@
 #include <string>
 
 
-namespace Karen
+namespace Real
 {
   static void serializeVector4(const Vec4& vec, pugi::xml_node& parent, const char* x_name = "X", const char* y_name = "Y", const char* z_name = "Z", const char* w_name = "W")
   {
@@ -81,7 +81,7 @@ namespace Karen
     pugi::xml_parse_result result = doc.load_file(path, pugi::parse_default|pugi::parse_declaration);
     if (!result)
     {
-      KAREN_CORE_ERROR("Parse Error at: {0}, offset: {1}",result.description(), result.offset);
+      REAL_CORE_ERROR("Parse Error at: {0}, offset: {1}",result.description(), result.offset);
       return false;
     }
     
@@ -98,7 +98,7 @@ namespace Karen
         std::string green = color.child_value("Green");
         std::string blue = color.child_value("Blue");
         std::string alpha = color.child_value("Alpha");
-        KAREN_TRACE("type: {0}, red: {1}, green: {2}, blue: {3}, alpha: {4}", 
+        REAL_TRACE("type: {0}, red: {1}, green: {2}, blue: {3}, alpha: {4}", 
             type, red, green, blue, alpha);
         if(type.empty() || red.empty() || green.empty() || blue.empty() || alpha.empty())
           empty = true;
@@ -106,7 +106,7 @@ namespace Karen
         {
           Vec4 normalized_color = {std::stof(red), std::stof(green), std::stof(blue), std::stof(alpha)};
           normalized_color /= 255.0f;
-          KAREN_TRACE("normalized color: {0}", normalized_color);
+          REAL_TRACE("normalized color: {0}", normalized_color);
           m_context->m_colors.at(type) = normalized_color;
         }
       }
@@ -119,7 +119,7 @@ namespace Karen
 
       pugi::xml_node stats_window = windows.child("StatsWindow");
       std::string state = stats_window.child_value("Active");
-      KAREN_TRACE("StatsWindow: Active: {0}", state);
+      REAL_TRACE("StatsWindow: Active: {0}", state);
       const auto stats_window_ptr = (StatsWindow*)m_context->m_helper_windows.at("Stats").get();
       if(!state.empty())
         stats_window_ptr->is_active = (state == "True");
@@ -129,7 +129,7 @@ namespace Karen
       pugi::xml_node imgui = editor.child("ImGui");
       pugi::xml_node imgui_ini = imgui.child("ImGuiIni");
       std::string ini_path = imgui_ini.child_value("Path");
-      KAREN_TRACE("Ini Path: {0}", ini_path);
+      REAL_TRACE("Ini Path: {0}", ini_path);
       if(!ini_path.empty())
       {
         m_context->m_imgui_ini_path.clear();
@@ -143,7 +143,7 @@ namespace Karen
       pugi::xml_node default_font = fonts.child("Default");
       std::string default_path = default_font.child_value("Path");
       std::string default_size = default_font.child_value("Size");
-      KAREN_TRACE("Default Font: Path: {0}, Size: {1}", default_path, default_size);
+      REAL_TRACE("Default Font: Path: {0}, Size: {1}", default_path, default_size);
       if(!default_path.empty())
       {
         m_context->m_default_font.clear();

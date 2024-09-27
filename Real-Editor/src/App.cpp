@@ -1,9 +1,9 @@
-#include <Karen/Core/EntryPoint.h>
-#include <Karen/Karen.h>
+#include <Real-Engine/Core/EntryPoint.h>
+#include <Real-Engine/Real-Engine.h>
 
 #include "EditorLayer.h"
 
-namespace Karen
+namespace Real
 {
 
   class EditorApp : public App
@@ -22,7 +22,7 @@ namespace Karen
 
   App* createApp()
   {
-    KAREN_SET_LOGLEVEL(Log::LogLevel::Trace);
+    REAL_SET_LOGLEVEL(Log::LogLevel::Trace);
     return new EditorApp();
   }
 }

@@ -1,10 +1,10 @@
-#ifndef KR_HELPER_WINDOWS_H
-#define KR_HELPER_WINDOWS_H
+#ifndef HELPER_WINDOWS_H
+#define HELPER_WINDOWS_H
 
-#include <Karen/Karen.h>
+#include <Real-Engine/Real-Engine.h>
 
 
-namespace Karen
+namespace Real
 {
   struct Stats
   {
@@ -49,4 +49,4 @@ namespace Karen
 }
 
 
-#endif //KR_HELPER_WINDOWS_H
+#endif //HELPER_WINDOWS_H

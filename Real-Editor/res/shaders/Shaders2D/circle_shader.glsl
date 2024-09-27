@@ -1,4 +1,4 @@
-#KAREN_SHADER_TYPE KAREN_VERTEX
+#REAL_SHADER_TYPE REAL_VERTEX
 #version 330 core
 
 layout (location = 0) in vec4 a_color;
@@ -28,7 +28,7 @@ void main()
   //v_id = a_id;
 }
 
-#KAREN_SHADER_TYPE KAREN_FRAGMENT
+#REAL_SHADER_TYPE REAL_FRAGMENT
 
 #version 330 core
 

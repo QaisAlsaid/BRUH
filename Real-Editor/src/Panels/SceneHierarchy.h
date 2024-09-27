@@ -1,10 +1,10 @@
-#ifndef KR_SCENE_HIERARCHY_H
-#define KR_SCENE_HIERARCHY_H
+#ifndef SCENE_HIERARCHY_H
+#define SCENE_HIERARCHY_H
 
-#include <Karen/Karen.h>
+#include <Real-Engine/Real-Engine.h>
 
 
-namespace Karen
+namespace Real
 {
   class SceneHierarchy
   {
@@ -24,4 +24,4 @@ namespace Karen
     Entity m_current;
   };
 }
-#endif //KR_SCENE_HIERARCHY_H
+#endif //SCENE_HIERARCHY_H

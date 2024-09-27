@@ -1,11 +1,11 @@
 #include <filesystem>
 #include <pch.h>
 #include "ContentBrowser.h"
-#include "Karen/Core/AssetManager.h"
-#include "Karen/Render/API/Texture.h"
+#include "Real-Engine/Core/AssetManager.h"
+#include "Real-Engine/Render/API/Texture.h"
 #include "imgui.h"
 
-namespace Karen 
+namespace Real
 {   
   ContentBrowser::ContentBrowser(const std::string& res_dir)
     : m_res_dir(res_dir) 
@@ -39,7 +39,7 @@ namespace Karen
       }
     }
     m_current_dir = m_res_dir;
-    KAREN_CORE_WARN("EXIT ContentBrowser CTOR");
+    REAL_CORE_WARN("EXIT ContentBrowser CTOR");
   }
 
   void ContentBrowser::onImGuiUpdate()
@@ -64,6 +64,8 @@ namespace Karen
     ImGui::Columns(cols, 0, false);
     for(auto& entry : std::filesystem::directory_iterator(m_current_dir))
     {
+      if(entry.is_directory()) continue;
+
       ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
       const auto& path = entry.path();
       const auto& file_name = path.filename();
@@ -96,7 +98,7 @@ namespace Karen
       {
         if(ImGui::BeginDragDropSource(ImGuiDragDropFlags_None))
         {
-          KAREN_CORE_WARN("Drag and drop started handle: {0}", asset_id);
+          REAL_CORE_WARN("Drag and drop started handle: {0}", asset_id);
           switch(ft)
           {
             case FileType::Image:
@@ -184,7 +186,7 @@ namespace Karen
     if(entry.is_directory()) return FileType::Dir;
 
     const auto& file_ex = entry.path().extension();
-    if(file_ex == ".Karen") return FileType::Karen;
+    if(file_ex == ".Real") return FileType::Real;
     if(file_ex == ".png") return FileType::Png;
     if(file_ex == ".jpeg") return FileType::Jpeg;
     if(file_ex == ".jpg") return FileType::Jpg;
