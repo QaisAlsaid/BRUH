@@ -1,11 +1,11 @@
 build/
 examples/Test/build/
-examples/Karen/
-Karen/vendor/Lua/install/
+examples/Real-Engine/
+Real-Engine/vendor/Lua/install/
 .vscode/
-Karen/build/
-Karen/.cache/
+Real-Engine/build/
+Real-Engine/.cache/
 examples/.cache/
 examples/Test/.cache/
-Editor/.cache/
-Editor/build/
+Real-Editor/.cache/
+Real-Editor/build/
