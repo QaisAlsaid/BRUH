@@ -7,6 +7,7 @@
 #include "Real-Engine/Core/Log.h"
 #include "Real-Engine/Core/Timestep.h"
 #include "Real-Engine/Scene/Components.h"
+#include "Real-Engine/Scene/Entity.h"
 #include "Real-Engine/Scene/SceneSerializer.h"
 #include "Real-Engine/Scene/ScriptEntity.h"
 #include "glm/ext/quaternion_common.hpp"
@@ -129,7 +130,6 @@ static float* speed = new float;
     //nscdll.bind(native);
    //TODO: Native script instance* is templated to the type given
     //speed = &((Script*)nsc.instance)->speed;
-  
   }
 
 
@@ -375,19 +375,26 @@ static float* speed = new float;
     m_inspector_panel.onGuiUpdate();
 
     ImGui::ShowDemoWindow(&m_show_imgui_demo);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
     ImGui::Begin("Viewport", nullptr, ImGuiWindowFlags_NoDecoration);
-    auto vp_offset = ImGui::GetCursorPos();
+    const auto vp_offset = ImGui::GetWindowPos();
+    auto vp_min_reg = ImGui::GetWindowContentRegionMin();
+    auto vp_max_reg = ImGui::GetWindowContentRegionMax();
+
+    m_min_vp_bounds = {vp_min_reg.x + vp_offset.x, vp_min_reg.y + vp_offset.y};
+    m_max_vp_bounds = {vp_max_reg.x + vp_offset.x, vp_max_reg.y + vp_offset.y};
 
     const ImVec2 panel_size = ImGui::GetContentRegionAvail();
-    Vec2 k_panel_size = {panel_size.x, panel_size.y};
-    if(m_viewport_size != k_panel_size)
+    Vec2 r_panel_size = {panel_size.x, panel_size.y};
+    REAL_CORE_CRITICAL("ContentRegionAvail: {0}", r_panel_size);
+    if(m_viewport_size != r_panel_size)
     {
-      m_frame_buff->reSize(k_panel_size.x, k_panel_size.y);
-      m_viewport_size = k_panel_size;
+      m_frame_buff->reSize(r_panel_size.x, r_panel_size.y);
+      m_viewport_size = r_panel_size;
       m_scene->onViewportResize(m_viewport_size.x, m_viewport_size.y);
       m_camera.onResize(m_viewport_size.x, m_viewport_size.y);
     }
-    m_camera.aspect_ratio = m_viewport_size.x/m_viewport_size.y;
+    //m_camera.aspect_ratio = m_viewport_size.x/m_viewport_size.y;
     ImGui::Image((void*)(uintptr_t)m_frame_buff->getColorAttachmentId("render_buffer"), panel_size, ImVec2(0, 1), ImVec2(1, 0));
 
     if(ImGui::BeginDragDropTarget())
@@ -400,18 +407,20 @@ static float* speed = new float;
       }
       ImGui::EndDragDropTarget();
     }
-    auto window_size = ImGui::GetWindowSize();
-    auto min_vp_bounds = ImGui::GetWindowPos();
+    //auto window_size = ImGui::GetWindowSize();
+    //auto min_vp_bounds = ImGui::GetWindowPos();
 
-    m_min_vp_bounds = *(Vec2*)&min_vp_bounds;
-    m_min_vp_bounds.x += vp_offset.x;
-    m_min_vp_bounds.y += vp_offset.y;
+    //m_min_vp_bounds = *(Vec2*)&min_vp_bounds;
+    //m_min_vp_bounds.x += vp_offset.x;
+    //m_min_vp_bounds.y += vp_offset.y;
     
-    m_max_vp_bounds = m_min_vp_bounds;
-    m_max_vp_bounds.x += window_size.x;
-    m_max_vp_bounds.y += window_size.y;
+    //m_max_vp_bounds = *(Vec2*)&min_vp_bounds;
+    //m_max_vp_bounds.x += window_size.x - vp_offset.x;
+    //m_max_vp_bounds.y += window_size.y - vp_offset.y;
 
-
+    //REAL_CORE_ERROR("vp_offset: {0}, {1}", vp_offset.x, vp_offset.y);
+    //REAL_CORE_ERROR("window_size: {0}, {1}", window_size.x, window_size.y);
+    //REAL_CORE_ERROR("window_pos: {0}, {1}", min_vp_bounds.x, min_vp_bounds.y);
 
     const ImVec2 win_pos = ImGui::GetWindowPos();
 
@@ -425,8 +434,9 @@ static float* speed = new float;
     m_max_vp_bounds.x = t_x;
     m_max_vp_bounds.y = t_y;
 */
-    updateGizmos(*(Vec2*)&win_pos, *(Vec2*)&window_size);
-
+    //updateGizmos(*(Vec2*)&win_pos, *(Vec2*)&window_size);
+    updateGizmos();
+    ImGui::PopStyleVar();
     ImGui::End();
 
   }
@@ -495,14 +505,15 @@ static float* speed = new float;
     }
   }
 
-  void EditorLayer::updateGizmos(Vec2 pos, Vec2 size)
+  void EditorLayer::updateGizmos()
   {
     Mat4 scene_cam_view, scene_cam_proj;
     static bool tf = false;
     static bool usc = false;
     ImGuizmo::SetOrthographic(tf);
     ImGuizmo::SetDrawlist();
-    ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);
+    ImGuizmo::SetRect(m_min_vp_bounds.x, m_min_vp_bounds.y, 
+        m_max_vp_bounds.x - m_min_vp_bounds.x, m_max_vp_bounds.y - m_min_vp_bounds.y);
     ImGui::Begin("__DEBUG__");
     ImGui::Checkbox("ortho", &tf);
     ImGui::Checkbox("use Scene Camera", &usc);

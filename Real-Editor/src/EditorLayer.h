@@ -64,7 +64,7 @@ namespace Real
 
     void updateMenuBar();
     void updatePanels();
-    void updateGizmos(Vec2 panel_pos, Vec2 panel_size);
+    void updateGizmos();
     void exportVars();
 
     bool onMouseScrolledEvent(MouseScrolledEvent& e);

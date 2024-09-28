@@ -1,4 +1,5 @@
 #include "Real-Engine/Render/API/FrameBuffer.h"
+#include "Real-Engine/Render/API/RenderCommands.h"
 #include "glm/fwd.hpp"
 #include "pch.h"
 #include "OpenGlFrameBuffer.h"
@@ -171,6 +172,7 @@ namespace Real
   void OpenGlFrameBuffer::bind() const
   {
     glCall(glBindFramebuffer(GL_FRAMEBUFFER, m_renderer_id));
+    glViewport(0, 0, m_specs.width, m_specs.height);
   }
 
   void OpenGlFrameBuffer::unbind() const

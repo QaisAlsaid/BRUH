@@ -15,7 +15,7 @@ namespace Real
   void OpenGLRendererAPI::setViewPort(uint32_t left, uint32_t bottom, uint32_t right, uint32_t top)
   {
     REAL_PROFILE_FUNCTION();
-    glCall(glViewport(left, bottom, right, top));
+    //glCall(glViewport(left, bottom, right, top));
   }
 
   void OpenGLRendererAPI::drawIndexed(const ARef<VertexArray>& p_varr, uint32_t p_index_count)
