@@ -1,0 +1,9 @@
+<Assets>
+  <Asset>
+    <UUID>0</UUID>
+    <Meta>
+      <Path>../res/config/scene.yaml</Path>
+      <Type>Scene</Type>
+    </Meta>
+  </Asset>
+</Assets>

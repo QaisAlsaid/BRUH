@@ -1,6 +1,0 @@
-<ShadersList>
-  <Shader>
-    <Name>tux_shader</Name>
-      <Path>../res/shaders/Shaders2D/tux_shader.glsl</Path>
-  </Shader>
-</ShadersList>
