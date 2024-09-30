@@ -11,7 +11,7 @@
 
 namespace Real
 {
-  Renderer2D::Data* Renderer2D::s_data = new  Renderer2D::Data;
+  Renderer2D::Data* Renderer2D::s_data = new Renderer2D::Data;
 
   void Renderer2D::init(const std::string& shaders_2d_config_path)
   {
@@ -51,9 +51,9 @@ namespace Real
       {"color", Real::ShaderDataType::Float4},
       {"pos", Real::ShaderDataType::Float3},
       {"tux_coord", Real::ShaderDataType::Float2},
-      {"tux_idx", Real::ShaderDataType::Float}
+      {"tux_idx", Real::ShaderDataType::Float}, 
+      {"entity_id", Real::ShaderDataType::Int}
     };
-    
     s_data->quad_vertex_buff->setLayout(bl);
     s_data->quad_vertex_arr = VertexArray::create();
     s_data->quad_vertex_arr->setIndexBuffer(ib);
@@ -84,7 +84,8 @@ namespace Real
       {"pos", Real::ShaderDataType::Float3},
       {"local_pos", Real::ShaderDataType::Float2}, 
       {"thickness", Real::ShaderDataType::Float}, 
-      {"blur", Real::ShaderDataType::Float}
+      {"blur", Real::ShaderDataType::Float}, 
+      {"entity_id", Real::ShaderDataType::Int}
     };
     
     s_data->circle_vertex_buff->setLayout(cbl);
@@ -124,7 +125,7 @@ namespace Real
     s_data->circle_index_count = 0;
   }
    
-  void Renderer2D::drawCircle(const Mat4& trans, float thickness, float blur, const Vec4& color)
+  void Renderer2D::drawCircle(const Mat4& trans, float thickness, float blur, const Vec4& color, int entity_id)
   {
     if(s_data->circle_index_count >= s_data->MAX_INDES)
     {
@@ -139,6 +140,7 @@ namespace Real
       s_data->circle_ptr->vertices[i].local_position = s_data->quad_vertex_pos[i] * 2;
       s_data->circle_ptr->vertices[i].thickness = thickness;
       s_data->circle_ptr->vertices[i].blur = blur;
+      s_data->circle_ptr->vertices[i].entity_id = entity_id;
     } s_data->circle_ptr++;
     
     s_data->circle_index_count += 6;
@@ -146,7 +148,7 @@ namespace Real
     s_data->stats.quad_count++;
   }
  
-  void Renderer2D::drawQuad(const Mat4& trans, const Vec4& color)
+  void Renderer2D::drawQuad(const Mat4& trans, const Vec4& color, int entity_id)
   {
    if(s_data->quad_index_count >= s_data->MAX_INDES)
     {
@@ -167,6 +169,7 @@ namespace Real
       s_data->quad_ptr->vertices[i].color = color;
       s_data->quad_ptr->vertices[i].tux_coord = tux_coords[i];
       s_data->quad_ptr->vertices[i].tux_idx = 0.0f;
+      s_data->quad_ptr->vertices[i].entity_id = entity_id;
     } s_data->quad_ptr++;
     
     s_data->quad_index_count += 6;
@@ -175,12 +178,8 @@ namespace Real
 
   }
 
-  void Renderer2D::drawQuad(int id, const Mat4& trans, const Vec4& color)
-  {
 
-  }
-
-  void Renderer2D::drawQuad(const Mat4& trans, const ARef<Texture2D>& tux, const Vec4& color)
+  void Renderer2D::drawQuad(const Mat4& trans, const ARef<Texture2D>& tux, const Vec4& color, int entity_id)
   {
     if(s_data->quad_index_count >= s_data->MAX_INDES || s_data->texture_slot_index >= s_data->MAX_TEXTURE_SLOTS)
     {
@@ -220,6 +219,7 @@ namespace Real
       s_data->quad_ptr->vertices[i].color = color;
       s_data->quad_ptr->vertices[i].tux_coord = tux_coords[i];
       s_data->quad_ptr->vertices[i].tux_idx = c_tux_slot;
+      s_data->quad_ptr->vertices[i].entity_id = entity_id;
     } s_data->quad_ptr++;
     s_data->quad_index_count += 6;
 

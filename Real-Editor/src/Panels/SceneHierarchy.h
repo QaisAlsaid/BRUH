@@ -15,7 +15,8 @@ namespace Real
     void setContext(const ARef<Scene>& context);
     inline ARef<Scene> getContext() { return m_context; }
     void onGuiUpdate();
-    Entity getCurrentSelected() { return m_current; }
+    inline Entity getCurrentSelected() { return m_current; }
+    void setCurrentSelected(Entity e) {m_current = e;}
     void clearSelection() { m_current = {};}
   private:
     void drawEntityNode(Entity& entity);

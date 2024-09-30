@@ -79,10 +79,11 @@ namespace Real
     bool m_default_editor = false;
     std::string m_default_font;
     uint8_t m_default_font_size = 18;
+    int m_mouse_picked_entity_id = -1;
     EditorCamera m_camera;
 
     std::string m_imgui_ini_path;
-    Vec2 m_viewport_size = {0.0f, 0.0f};
+    Vec2 m_viewport_size = {1280.0f, 720.0f};
     Vec2 m_min_vp_bounds, m_max_vp_bounds;
     ARef<Scene> m_scene;
     ARef<Scene> m_editor_scene;

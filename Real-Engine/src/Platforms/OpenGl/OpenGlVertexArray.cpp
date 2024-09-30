@@ -4,7 +4,7 @@
 #include "Platforms/OpenGl/OpenGlCore.h"
 
 
-namespace Real
+namespace Real 
 {
   OpenGlVertexArray::OpenGlVertexArray()
   {
@@ -37,11 +37,40 @@ namespace Real
     const auto& bl = vb->getLayout();
     for(uint32_t i = 0; i < bl.getElements().size(); ++i)
     {
-      glEnableVertexAttribArray(i);
-      glVertexAttribPointer(i,
-      bl.getElements().at(i).count, GL_FLOAT,
-      bl.getElements().at(i).normalized == true ? GL_TRUE : GL_FALSE,
-      bl.getStride(), (const void*)(uintptr_t)(bl.getElements().at(i).offset));
+      switch(bl.getElements().at(i).type)
+      {
+        case ShaderDataType::Float:
+        case ShaderDataType::Float2:
+        case ShaderDataType::Float3:
+        case ShaderDataType::Float4:
+        {
+          glEnableVertexAttribArray(m_vertex_buff_idx);
+          glVertexAttribPointer(m_vertex_buff_idx,
+          bl.getElements().at(i).count, GL_FLOAT,
+          bl.getElements().at(i).normalized == true ? GL_TRUE : GL_FALSE,
+          bl.getStride(), (const void*)(uintptr_t)(bl.getElements().at(i).offset));
+          m_vertex_buff_idx++;
+          break;
+        }
+        case ShaderDataType::Sampler2D:
+        case ShaderDataType::Int:
+        case ShaderDataType::Int2:
+        case ShaderDataType::Int3:
+        case ShaderDataType::Int4:
+        {
+          glEnableVertexAttribArray(m_vertex_buff_idx);
+          glVertexAttribIPointer(m_vertex_buff_idx,
+          bl.getElements().at(i).count, GL_INT,
+          bl.getStride(), (const void*)(uintptr_t)(bl.getElements().at(i).offset));
+          m_vertex_buff_idx++;
+          break;
+        }
+        case ShaderDataType::Mat2:
+        case ShaderDataType::Mat3:
+        case ShaderDataType::Mat4:
+        case ShaderDataType::None:
+        default: REAL_CORE_ERROR("Unsupported ShaderDataType: {0}", ShaderDataTypeToString(bl.getElements().at(i).type)); break;
+      }
     }
     m_vertex_buffs.push_back(vb);
     vb->unbind();

@@ -46,10 +46,8 @@ namespace Real
 
   void EditorCamera::onResize(uint32_t w, uint32_t h)
   {
-    REAL_CORE_CRITICAL("onResize called aspect_ratio changed from: {0}, to: {1}", aspect_ratio, float(w)/float(h));
     if(!fixed_aspect_ratio)
-      aspect_ratio = (float)w/(float)h;
-  
+      aspect_ratio = (float)w/(float)h; 
   }
 
   void EditorCamera::onMouseScrolledEvent(MouseScrolledEvent& e)

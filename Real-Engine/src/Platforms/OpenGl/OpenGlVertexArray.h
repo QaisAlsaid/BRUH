@@ -26,6 +26,7 @@ namespace Real
   private:
     Real::ARef<IndexBuffer>               m_index_buff;
     std::vector<Real::ARef<VertexBuffer>> m_vertex_buffs;
+    uint32_t m_vertex_buff_idx = 0;
     uint32_t m_renderer_id = 0;
   };
 }

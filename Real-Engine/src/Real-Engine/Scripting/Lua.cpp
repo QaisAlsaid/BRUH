@@ -834,8 +834,8 @@ namespace Real
             ));
 
       r2d.set_function("drawQuad", sol::overload(
-            sol::resolve<void(const Mat4&, const Vec4&)>(&Renderer2D::drawQuad),
-            sol::resolve<void(const Mat4&, const ARef<Texture2D>&, const Vec4&)>(&Renderer2D::drawQuad),
+            sol::resolve<void(const Mat4&, const Vec4&, int)>(&Renderer2D::drawQuad),
+            sol::resolve<void(const Mat4&, const ARef<Texture2D>&, const Vec4&, int)>(&Renderer2D::drawQuad),
            //TODO: Camera overload but first make it take view insted of transform
 
             sol::resolve<void(const Vec3&, const Vec2&, const Vec4&)>(&Renderer2D::drawQuad),
