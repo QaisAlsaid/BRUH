@@ -7,6 +7,8 @@
 #include "Real-Engine/Render/API/RendererCapabilities.h"
 #include "Real-Engine/Core/Math/math.h"
 #include "OpenGlUtils.h"
+#include <algorithm>
+#include <vector>
 
 
 namespace Real
@@ -32,7 +34,6 @@ namespace Real
     else 
     {
       glCall(glBindTexture(GL_TEXTURE_2D, id));
-      
       glCall(glTexImage2D(GL_TEXTURE_2D, 0, OpenGlUtils::toOpenGlFormat(specs.internal_format), width, height, 0, OpenGlUtils::toOpenGlFormat(specs.format), type, nullptr));
     }
     return id;
@@ -97,7 +98,6 @@ namespace Real
     glCall(glGenFramebuffers(1, &m_renderer_id));
     glCall(glBindFramebuffer(GL_FRAMEBUFFER, m_renderer_id));
 
-    uint8_t ctr = 0;
     for(auto& cas : m_specs.attachment_specs.attachments)
     {
       if(isDepthFormat(cas.format)) 
@@ -106,20 +106,19 @@ namespace Real
         continue;
       }
       uint32_t id = 0;
-      if(cas.format == FrameBuffer::TextureFormat::RedInt || cas.format == FrameBuffer::TextureFormat::RGBInt)
+      if(cas.format == FrameBuffer::TextureFormat::RGBInt)
       {
-        id = genTexture(m_specs.samples, cas, m_specs.width, m_specs.height, GL_UNSIGNED_INT);
+        id = genTexture(m_specs.samples, cas, m_specs.width, m_specs.height, GL_INT);
       }
       else
       {
         id = genTexture(m_specs.samples, cas, m_specs.width, m_specs.height, GL_UNSIGNED_BYTE);
       }
       OpenGlUtils::bindTexture(id, m_specs.samples);
-      if(m_specs.samples < 2)
-        OpenGlUtils::applayFilters(cas.filters);
-      attachTexture(m_specs.samples, id, ctr);
+      //if(m_specs.samples < 2) why?
+      OpenGlUtils::applayFilters(cas.filters);
+      attachTexture(m_specs.samples, id, cas.idx);
       m_color_attachments_ids[cas.name] = id;
-      ++ctr;
     }
     if(m_depth_attachment.format != TextureFormat::None && m_depth_attachment.internal_format != TextureInternalFormat::None)
     {
@@ -183,9 +182,10 @@ namespace Real
   int OpenGlFrameBuffer::readPixelI(uint32_t att, int x, int y) const
   {
     REAL_CORE_ASSERT(m_color_attachments_ids.size() > att);
-    int out_val = 0;
+    int out_val = -1;
     glReadBuffer(GL_COLOR_ATTACHMENT0 + att);
     glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_INT, &out_val);
+    REAL_CORE_CRITICAL("out val: {0}", out_val);
     return out_val;
 
   }
@@ -214,12 +214,20 @@ namespace Real
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_renderer_id);
   }
 
-  /*
-  void OpenGlFrameBuffer::clearColorAttachment(uint32_t att, int val)
+
+  void OpenGlFrameBuffer::clearColorAttachment(uint32_t idx, int val)
   {
-    glGetFloatv(GL_COLOR_CLEAR_VALUE, prev_clear)
-    const auto& spec = m_specs.specs.attachments.at(att);
-    glClearBuffer();
+    //either this code sucks or its perfect idont know but it does work finally
+    std::vector<uint32_t> draw_buffers;
+    draw_buffers.reserve(m_color_attachments_ids.size());
+    for(auto& spec : m_specs.attachment_specs.attachments)
+    {
+      draw_buffers.emplace_back(spec.idx + GL_COLOR_ATTACHMENT0);
+    }
+    std::ranges::sort(draw_buffers);
+
+    glDrawBuffers(draw_buffers.size(), draw_buffers.data());
+    glCall(glClearBufferiv(GL_COLOR, idx, &val));
   }
-  */
+  
 }

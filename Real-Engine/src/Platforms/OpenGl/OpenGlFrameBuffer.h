@@ -20,6 +20,7 @@ namespace Real
     uint32_t readPixelUi(uint32_t att, int x, int y) const override; 
     glm::uvec3 readPixelV3ui(uint32_t att, int x, int y) const override; 
     void bindWriteFb(uint8_t aat) override;
+    void clearColorAttachment(uint32_t idx, int val) override;
     uint32_t getColorAttachmentId(const std::string& name) const override
     {
       return m_color_attachments_ids.at(name);

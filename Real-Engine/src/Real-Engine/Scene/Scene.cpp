@@ -346,10 +346,10 @@ namespace Real
           if(sprite.texture_handle)
           {
             Renderer2D::drawQuad(trans.getTransformationMatrix(),
-              AssetManager::get<AssetManager::Texture2DAsset>(sprite.texture_handle)->texture, sprite.color);
+              AssetManager::get<AssetManager::Texture2DAsset>(sprite.texture_handle)->texture, sprite.color, (int)e);
           }
           else
-            Renderer2D::drawQuad(trans.getTransformationMatrix(), sprite.color);
+            Renderer2D::drawQuad(trans.getTransformationMatrix(), sprite.color, (int)e);
         }
       }
 
@@ -359,7 +359,7 @@ namespace Real
         for(const auto& e : view)
         {
           auto &&[trans, circle] = view.get<TransformComponent, CircleComponent>(e);
-          Renderer2D::drawCircle(trans.getTransformationMatrix(), circle.thickness, circle.blur, circle.color);
+          Renderer2D::drawCircle(trans.getTransformationMatrix(), circle.thickness, circle.blur, circle.color, (int)e);
         }
       }
       Renderer2D::endScene();
@@ -417,10 +417,10 @@ namespace Real
         if(sprite.texture_handle)
         {
           Renderer2D::drawQuad(trans.getTransformationMatrix(),
-          AssetManager::get<AssetManager::Texture2DAsset>(sprite.texture_handle)->texture, sprite.color);
+          AssetManager::get<AssetManager::Texture2DAsset>(sprite.texture_handle)->texture, sprite.color, (int)e);
         }
         else
-          Renderer2D::drawQuad(trans.getTransformationMatrix(), sprite.color);
+          Renderer2D::drawQuad(trans.getTransformationMatrix(), sprite.color, (int)e);
       }
     }
 
@@ -431,7 +431,7 @@ namespace Real
       for(const auto& e : view)
       {
         auto &&[trans, circle] = view.get<TransformComponent, CircleComponent>(e);
-        Renderer2D::drawCircle(trans.getTransformationMatrix(), circle.thickness, circle.blur, circle.color);
+        Renderer2D::drawCircle(trans.getTransformationMatrix(), circle.thickness, circle.blur, circle.color, (int)e);
       }
     }
     Renderer2D::endScene();

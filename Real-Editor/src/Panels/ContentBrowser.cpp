@@ -64,8 +64,6 @@ namespace Real
     ImGui::Columns(cols, 0, false);
     for(auto& entry : std::filesystem::directory_iterator(m_current_dir))
     {
-      if(entry.is_directory()) continue;
-
       ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
       const auto& path = entry.path();
       const auto& file_name = path.filename();
@@ -74,7 +72,9 @@ namespace Real
 
       auto thm_id = loadOrGet(path, ft);
 
-      auto asset_id = AssetManager::getUUID(path);
+      UUID asset_id = UUID::invalid;
+      if(ft != FileType::Dir && ft == FileType::Image) //for now
+        asset_id = AssetManager::getUUID(path);
 
       if(ft != FileType::Image)
       {

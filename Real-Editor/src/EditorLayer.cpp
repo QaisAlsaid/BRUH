@@ -107,9 +107,9 @@ static float* speed = new float;
 
     FrameBuffer::Specs s;
     s.attachment_specs = {
-      {FrameBuffer::TextureFormat::RGBA, FrameBuffer::TextureInternalFormat::RGBA8, "render_buffer"}, 
-      {FrameBuffer::TextureFormat::RedInt, FrameBuffer::TextureInternalFormat::Int32, "id_buffer"},
-      {FrameBuffer::TextureFormat::DepthStencil, FrameBuffer::TextureInternalFormat::Depth24Stencil8, "depth_buffer"}
+      {FrameBuffer::TextureFormat::RGBA, FrameBuffer::TextureInternalFormat::RGBA8, "render_buffer", 0}, 
+      {FrameBuffer::TextureFormat::RedInt, FrameBuffer::TextureInternalFormat::Int32, "id_buffer", 1},
+      {FrameBuffer::TextureFormat::DepthStencil, FrameBuffer::TextureInternalFormat::Depth24Stencil8, "depth_buffer", 2}
     };
     s.width = 1280;
     s.height = 720;
@@ -130,6 +130,7 @@ static float* speed = new float;
     //nscdll.bind(native);
    //TODO: Native script instance* is templated to the type given
     //speed = &((Script*)nsc.instance)->speed;
+    App::get()->getWindow().setVsync(true);
   }
 
 
@@ -137,6 +138,9 @@ static float* speed = new float;
   
   void EditorLayer::onUpdate(Timestep ts)
   {
+    if(m_frame_buff->getSpecs().width != m_viewport_size.x || 
+       m_frame_buff->getSpecs().height != m_viewport_size.y)
+        m_frame_buff->reSize(m_viewport_size.x, m_viewport_size.y);
     if(m_scene_handle != UUID::invalid)
     {
       if(m_scene_state != SceneState::Play)
@@ -158,7 +162,8 @@ static float* speed = new float;
     //m_frame_buff->bindWriteFb(6);
     //Renderer2D::clear({200, 200, 200, 200});
     Renderer2D::clear(Vec4(0.25f, 0.25f, 0.25f, 1.0f));
-/*
+    m_frame_buff->clearColorAttachment(1, -1);
+    /*
  #ifdef REAL_PLATFORM_LINUX
     //if(Input::isKeyPressed(Keyboard::Z))
     //{
@@ -199,30 +204,23 @@ static float* speed = new float;
       mouse.y = vp_size.y - mouse.y;
         
 
-     // mouse = m_max_vp_bounds;
-      //REAL_CORE_WARN("MOUSE: {0}", mouse);
-      /*
       if(mouse.x > 0 && mouse.y > 0 && mouse.x < vp_size.x && mouse.y < vp_size.y)
       {
-        int x = m_frame_buff->readPixelI(1, mouse.x, mouse.y);
-        REAL_CORE_ERROR("ID: {0}, MOUSE: {1}", x, mouse);
-      }
-      auto se = m_scene_hierarchy_panel.getCurrentSelected(); 
-      if(se && se.hasComponent<TransformComponent>())
-      {
-        m_scene->forEach<TransformComponent>([&](auto e, TransformComponent& tsc)
+        if(ImGui::IsMouseDoubleClicked(0))
         {
-          auto& pos = tsc.position;
-          auto& scale = tsc.scale;
-          //if(mouse.x > pos.x + scale.x/2.0f && mouse.x < pos.x - scale.x/2.0f &&
-          //   mouse.y > pos.y + scale.y/2.0f && mouse.y < pos.y - scale.y/2.0f)
-          REAL_CORE_ERROR("True entity id: {0}", (uint32_t)e);
-        });
-        auto val = m_frame_buff->readPixelI(1, mouse.x, mouse.y);
-        REAL_ERROR("Value: {0}, mouse: {1}", val, mouse);
+          m_scene_hierarchy_panel.clearSelection();
+          m_op = GizmoOp::Bounds;
+        }
+        if(ImGui::IsMouseClicked(0) && m_op == GizmoOp::Bounds)
+        {
+          m_mouse_picked_entity_id = m_frame_buff->readPixelI(1, mouse.x, mouse.y);
+          if(m_mouse_picked_entity_id > -1)
+          {
+            m_scene_hierarchy_panel.setCurrentSelected({(uint32_t)m_mouse_picked_entity_id, m_scene.get()});
+          }
+        }
       }
-      */
-      m_frame_buff->unbind();
+      m_frame_buff->unbind();      
     }
 
   void EditorLayer::onGuiUpdate()
@@ -384,18 +382,21 @@ static float* speed = new float;
     m_min_vp_bounds = {vp_min_reg.x + vp_offset.x, vp_min_reg.y + vp_offset.y};
     m_max_vp_bounds = {vp_max_reg.x + vp_offset.x, vp_max_reg.y + vp_offset.y};
 
+    
+    
     const ImVec2 panel_size = ImGui::GetContentRegionAvail();
     Vec2 r_panel_size = {panel_size.x, panel_size.y};
-    REAL_CORE_CRITICAL("ContentRegionAvail: {0}", r_panel_size);
+    
+    //draw first to avoid flicker on resize
+    ImGui::Image((void*)(uintptr_t)m_frame_buff->getColorAttachmentId("render_buffer"), panel_size, ImVec2(0, 1), ImVec2(1, 0));
+
     if(m_viewport_size != r_panel_size)
     {
-      m_frame_buff->reSize(r_panel_size.x, r_panel_size.y);
+      //m_frame_buff->reSize(r_panel_size.x, r_panel_size.y);
       m_viewport_size = r_panel_size;
       m_scene->onViewportResize(m_viewport_size.x, m_viewport_size.y);
       m_camera.onResize(m_viewport_size.x, m_viewport_size.y);
     }
-    //m_camera.aspect_ratio = m_viewport_size.x/m_viewport_size.y;
-    ImGui::Image((void*)(uintptr_t)m_frame_buff->getColorAttachmentId("render_buffer"), panel_size, ImVec2(0, 1), ImVec2(1, 0));
 
     if(ImGui::BeginDragDropTarget())
     {

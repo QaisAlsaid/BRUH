@@ -32,18 +32,19 @@ namespace Real
     struct TextureSpecs
     {
       TextureSpecs() = default;
-      TextureSpecs(TextureFormat fmt, const std::string& name)
-        : format(fmt), name(name) {}
-      TextureSpecs(TextureFormat fmt, TextureInternalFormat internal, const std::string& name)
-        : format(fmt), internal_format(internal), name(name) {}
-      TextureSpecs(TextureFormat fmt, TextureInternalFormat internal, Texture::Filters fils, const std::string& name)
-        : format(fmt), internal_format(internal), filters(fils), name(name) {}
+      TextureSpecs(TextureFormat fmt, const std::string& name, uint32_t idx)
+        : format(fmt), name(name), idx(idx) {}
+      TextureSpecs(TextureFormat fmt, TextureInternalFormat internal, const std::string& name, uint32_t idx)
+        : format(fmt), internal_format(internal), name(name), idx(idx) {}
+      TextureSpecs(TextureFormat fmt, TextureInternalFormat internal, Texture::Filters fils, const std::string& name, uint32_t idx)
+        : format(fmt), internal_format(internal), filters(fils), name(name), idx(idx) {}
       
       TextureFormat format = TextureFormat::None;
       TextureInternalFormat internal_format = TextureInternalFormat::None;
       Texture::Filters filters;
   
       std::string name;
+      uint32_t idx = 0;
     };
     struct AttachmentsSpecs
     {
@@ -76,6 +77,7 @@ namespace Real
     virtual uint32_t readPixelUi(uint32_t attachment, int x, int y) const = 0;
     virtual glm::uvec3 readPixelV3ui(uint32_t attachment, int x, int y) const = 0;
     virtual void bindWriteFb(uint8_t att) = 0;
+    virtual void clearColorAttachment(uint32_t idx, int val) = 0;
   };
 }
 
