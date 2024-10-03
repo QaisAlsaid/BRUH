@@ -5,7 +5,7 @@ layout (location = 0) in vec4 a_color;
 layout (location = 1) in vec3 a_pos;
 layout (location = 2) in vec2 a_tux_coord;
 layout (location = 3) in float a_tux_idx;
-layout (location = 4) in int a_id;
+layout (location = 4) in uint a_id;
 
 uniform mat4 u_proj_view;
 uniform mat4 u_trans;
@@ -13,7 +13,7 @@ uniform mat4 u_trans;
 out vec4 v_color;
 out vec2 v_tux_coord;
 flat out int v_tux_idx;
-flat out int v_id;
+flat out uint v_id;
 
 void main()
 {
@@ -30,12 +30,12 @@ void main()
 #version 330 core
 
 layout (location = 0) out vec4 frag_color;
-layout (location = 1) out int e_id;
+layout (location = 1) out uint e_id;
 
 in vec2 v_tux_coord;
 in vec4 v_color;
 flat in int v_tux_idx;
-flat in int v_id;
+flat in uint v_id;
 
 uniform sampler2D u_textures[${REAL_MAX_TEXTUERS}];
 

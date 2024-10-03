@@ -77,8 +77,8 @@ set(REAL_PUBLIC_INCLUDE_DIRS
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/Imguizmo
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glm
   ${CMAKE_CURRENT_SOURCE_DIR}/vendor/sol2/include
-  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/Lua/src
-
+  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/Lua/src 
+  ${CMAKE_CURRENT_SOURCE_DIR}/vendor/flecs/include
   )
  set(REAL_INCLUDE_DIRS ${REAL_PUBLIC_INCLUDE_DIRS} PARENT_SCOPE)
  
@@ -107,11 +107,12 @@ add_subdirectory(vendor/Box2D)
 add_subdirectory(vendor/Imguizmo)
 add_subdirectory(vendor/sol2)
 add_subdirectory(vendor/Lua)
+add_subdirectory(vendor/flecs)
 if(NOT REAL_EMSCRIPTEN)
-  set(REAL_LIBS glm glfw imgui glad stb pugixml yaml-cpp box2d imguizmo Lua sol2)
+  set(REAL_LIBS glm glfw imgui glad stb pugixml yaml-cpp box2d imguizmo Lua sol2 flecs)
 else()
 set(REAL_ADDITIONAL_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/../../emsdk/upstream/emscripten/cache/sysroot/include)
-set(REAL_LIBS glm imgui stb pugixml yaml-cpp box2d imguizmo Lua sol2)
+set(REAL_LIBS glm imgui stb pugixml yaml-cpp box2d imguizmo Lua sol2 flecs)
 endif()
 
 if(REAL_IS_SHARED)

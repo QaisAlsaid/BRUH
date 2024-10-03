@@ -4,6 +4,7 @@
 #include "AssetManagerGui.h"
 #include "Real-Engine/Core/AssetManager.h"
 #include "Real-Engine/Render/API/Texture.h"
+#include "EditorEvents/EditorEvents.h"
 #include <filesystem>
 
 
@@ -14,6 +15,8 @@ namespace Real
   public:
     ContentBrowser(const std::string& res_path);//Should Take Project
     void onImGuiUpdate();
+
+    void onEditorEvent(EditorEvent& e) {}; //maybe someday
   private:
     enum class FileType 
     {

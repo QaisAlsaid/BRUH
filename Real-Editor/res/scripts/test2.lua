@@ -1,4 +1,4 @@
-local script = Karen.Script.new()
+local script = Real.Script.new()
 local entity = script.entity
 local num = 0
 
@@ -9,10 +9,8 @@ end
 
 
 function script:onUpdate()
-  local trans = entity:getTransform()
-  local rot = trans.rotation
-  rot.z = rot.z + num --script2:getTimestep()
-  num = num + 0.001
+  print("entity: ", entity)
+  entity.addSprite(Real.Vec4.new(1, 1, 1, 1))
 end
 
 function script:onDestroy()

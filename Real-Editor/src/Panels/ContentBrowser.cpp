@@ -2,6 +2,7 @@
 #include <pch.h>
 #include "ContentBrowser.h"
 #include "Real-Engine/Core/AssetManager.h"
+#include "Real-Engine/Core/Log.h"
 #include "Real-Engine/Render/API/Texture.h"
 #include "imgui.h"
 
@@ -73,7 +74,7 @@ namespace Real
       auto thm_id = loadOrGet(path, ft);
 
       UUID asset_id = UUID::invalid;
-      if(ft != FileType::Dir && ft == FileType::Image) //for now
+      if(ft != FileType::Dir && isAsset(ft)) //for now
         asset_id = AssetManager::getUUID(path);
 
       if(ft != FileType::Image)
@@ -89,6 +90,8 @@ namespace Real
       {
         ImGui::ImageButton((ImTextureID)(uintptr_t)AssetManager::get<AssetManager::Texture2DAsset>(asset_id)->texture->getRendererID(), {thm_width, thm_width}, {0, 1}, {1, 0});
       }
+
+      REAL_CORE_WARN("file_type: {0}, is_asset: {1}, path: {2}", (int)ft, isAsset(ft), path);
       if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) && isAsset(ft))
       {
         m_asset_manager_modal.setContext(asset_id);
@@ -220,7 +223,7 @@ namespace Real
   
   void ContentBrowser::dragAndDropScript(UUID id, const Vec2& thm_size)
   {
-    ImGui::SetDragDropPayload("TEXTURE2D_ASSET_HANDEL", &id, sizeof(UUID));
+    ImGui::SetDragDropPayload("SCRIPT_ASSET_HANDEL", &id, sizeof(UUID));
     ImGui::Image((void*)(uintptr_t)m_default_icons.at(getDefaultIcon(FileType::Script))->getRendererID(),
         { thm_size.x, thm_size.y }, {0, 1}, {1, 0});
     ImGui::EndDragDropSource();

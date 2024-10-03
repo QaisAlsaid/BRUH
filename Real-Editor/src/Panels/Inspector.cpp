@@ -1,4 +1,6 @@
 #include "Inspector.h"
+#include "EditorEvents/EditorEventsManager.h"
+#include "EditorEvents/SceneHierarchyPanelEvents.h"
 #include "Real-Engine/Scene/Components.h"
 #include "glm/trigonometric.hpp"
 #include "imgui.h"
@@ -27,14 +29,17 @@ namespace Real
     }
   }
 
+  Inspector::Inspector()
+  {
+    m_sub_id = EditorEventsManager::subscribe(BIND_EVENT_FUNCTION(Inspector::onEditorEvent));
+  }
 
   void Inspector::onGuiUpdate()
   {
     ImGui::Begin("Inspector");
     
-    if(m_current)
+    if(m_current.isAlive() && m_current)
     {
-
       UUID uuid;
       drawComponent<IDComponent>(m_current, "UUID", [&](auto* id_comp, bool removed)
       {
@@ -73,7 +78,7 @@ namespace Real
         }
         if(ImGui::BeginDragDropTarget())
         {
-          if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TEXTURE2D_ASSET_HANDEL"))
+          if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("SCRIPT_ASSET_HANDEL"))
           {
             UUID asset_handle = *(UUID*)payload->Data;
             REAL_CORE_WARN("Accepting drag and drop id: {0}", asset_handle);
@@ -182,7 +187,7 @@ namespace Real
           }
           ImGui::EndDragDropTarget();
         }
-        ImGui::Text("TextureHandel %li", (uint64_t)sprite_comp->texture_handle);
+        ImGui::Text("TextureHandel %lu", (uint64_t)sprite_comp->texture_handle);
         ImGui::ColorEdit4("Color", glm::value_ptr(sprite_comp->color)); 
         if(removed)
         {
@@ -359,5 +364,17 @@ namespace Real
         default: break;
       }
     }
+  }
+
+  void Inspector::onEditorEvent(EditorEvent& e)
+  {
+    EditorEventDispatcher dp(e);
+    dp.dispatch<SCHPSelectionChangedEvent>(BIND_EVENT_FUNCTION(Inspector::onSCHPSelectionChangedCall));
+  }
+
+  bool Inspector::onSCHPSelectionChangedCall(SCHPSelectionChangedEvent& schps)
+  {
+    m_current = schps.getEntity();
+    return false;
   }
 }

@@ -1,8 +1,6 @@
 #include "SceneSerializer.h"
 #include "Components.h"
 #include "Real-Engine/Core/UUID.h"
-#include "yaml-cpp/emitter.h"
-#include "yaml-cpp/emittermanip.h"
 
 
 namespace YAML
@@ -128,7 +126,7 @@ namespace Real
     emitter << Key << "Scene" << Value << m_context->m_name;
 
     emitter << Key << "Entities" << Value << BeginSeq;
-    m_context->m_registry.view<TagComponent>().each([&](auto id, auto& tc)
+    m_context->m_registry.query<IDComponent>().each([&](auto id, auto& uuid)
     {
       Entity e(id, m_context.get());
       serializeEntity(e, emitter);
@@ -173,30 +171,40 @@ namespace Real
         const auto& ctagn = entity["TagComponent"];
         if(ctagn)
           tag = ctagn["Tag"].as<std::string>();
-        
         Entity e = m_context->addEntity(uuid, tag);
         const auto& ctransform_n = entity["TransformComponent"]; 
         if(ctransform_n)
         {
-          auto& ctransform = e.insertComponent<TransformComponent>();
-          ctransform.position = ctransform_n["Position"].as<Vec3>();
-          ctransform.rotation = ctransform_n["Rotation"].as<Vec3>();
-          ctransform.scale = ctransform_n["Scale"].as<Vec3>();
+          auto* ctransform = e.insertComponent<TransformComponent>();
+          ctransform->position = ctransform_n["Position"].as<Vec3>();
+          ctransform->rotation = ctransform_n["Rotation"].as<Vec3>();
+          ctransform->scale = ctransform_n["Scale"].as<Vec3>();
         }
         const auto& csprite_n = entity["SpriteComponent"];
         if(csprite_n)
         {
-          auto& csprite = e.addComponent<SpriteComponent>();
+          auto* csprite = e.addComponent<SpriteComponent>();
           const auto& color = csprite_n["Color"].as<Vec4>();
-          csprite.color = color / 255.0f;
+          csprite->color = color / 255.0f;
           const auto& texture_handel = csprite_n["TextureHandle"].as<uint64_t>();
-          csprite.texture_handle = texture_handel;
+          csprite->texture_handle = texture_handel;
+        }
+        const auto& ccircle_n = entity["CircleComponent"];
+        if(ccircle_n)
+        {
+          auto* ccircle = e.addComponent<CircleComponent>();
+          const auto& color = ccircle_n["Color"].as<Vec4>();
+          ccircle->color = color / 255.0f;
+          const auto& thickness = ccircle_n["Thickness"].as<float>();
+          ccircle->thickness = thickness;
+          const auto& blur = ccircle_n["Blur"].as<float>();
+          ccircle->blur = blur;
         }
         const auto& ccamera_n = entity["CameraComponent"];
         if(ccamera_n)
         {
-          auto& ccamera = e.addComponent<CameraComponent>();
-          auto& cam = ccamera.camera;
+          auto* ccamera = e.addComponent<CameraComponent>();
+          auto& cam = ccamera->camera;
           const auto& pd_n = ccamera_n["PerspectiveData"];
           float p_fov = pd_n["FOV"].as<float>();
           float p_near_clip = pd_n["NearClip"].as<float>();
@@ -209,40 +217,40 @@ namespace Real
           cam.setOrthographicData({o_size, o_near_clip, o_far_clip});
 
           cam.setType((SceneCamera::ProjectionType)ccamera_n["Type"].as<int>());
-          ccamera.is_primary = ccamera_n["Primary"].as<bool>();
-          ccamera.is_fixed_aspect_ratio = ccamera_n["FixedAspectRatio"].as<bool>();
+          ccamera->is_primary = ccamera_n["Primary"].as<bool>();
+          ccamera->is_fixed_aspect_ratio = ccamera_n["FixedAspectRatio"].as<bool>();
         }
 
         const auto& crb2d_n = entity["RigidBody2DComponent"];
         if(crb2d_n)
         {
-          auto& rb2dc = e.addComponent<RigidBody2DComponent>();
-          rb2dc.type = (RigidBody2DComponent::BodyType)crb2d_n["Type"].as<int>();
-          rb2dc.fixed_rotation = crb2d_n["FixedRotatiin"].as<bool>();
+          auto* rb2dc = e.addComponent<RigidBody2DComponent>();
+          rb2dc->type = (RigidBody2DComponent::BodyType)crb2d_n["Type"].as<int>();
+          rb2dc->fixed_rotation = crb2d_n["FixedRotatiin"].as<bool>();
         }
 
         const auto& cbc_n = entity["BoxColliderComponent"];
         if(cbc_n)
         {
-          auto& bcc = e.addComponent<BoxColliderComponent>();
-          bcc.size = cbc_n["Size"].as<Vec2>();
-          bcc.offset = cbc_n["Offset"].as<Vec2>();
-          bcc.density = cbc_n["Density"].as<float>();
-          bcc.friction = cbc_n["Friction"].as<float>();
-          bcc.restitution = cbc_n["Restitution"].as<float>();
-          bcc.restitution_threshold = cbc_n["RestitutionThreshold"].as<float>();
+          auto* bcc = e.addComponent<BoxColliderComponent>();
+          bcc->size = cbc_n["Size"].as<Vec2>();
+          bcc->offset = cbc_n["Offset"].as<Vec2>();
+          bcc->density = cbc_n["Density"].as<float>();
+          bcc->friction = cbc_n["Friction"].as<float>();
+          bcc->restitution = cbc_n["Restitution"].as<float>();
+          bcc->restitution_threshold = cbc_n["RestitutionThreshold"].as<float>();
         }
 
         const auto& ccc_n = entity["CircleColliderComponent"];
         if(ccc_n)
         {
-          auto& ccc = e.addComponent<CircleColliderComponent>();
-          ccc.radius = ccc_n["Radius"].as<float>();
-          ccc.offset = ccc_n["Offset"].as<Vec2>();
-          ccc.density = ccc_n["Density"].as<float>();
-          ccc.friction = ccc_n["Friction"].as<float>();
-          ccc.restitution = ccc_n["Restitution"].as<float>();
-          ccc.restitution_threshold = ccc_n["RestitutionThreshold"].as<float>();
+          auto* ccc = e.addComponent<CircleColliderComponent>();
+          ccc->radius = ccc_n["Radius"].as<float>();
+          ccc->offset = ccc_n["Offset"].as<Vec2>();
+          ccc->density = ccc_n["Density"].as<float>();
+          ccc->friction = ccc_n["Friction"].as<float>();
+          ccc->restitution = ccc_n["Restitution"].as<float>();
+          ccc->restitution_threshold = ccc_n["RestitutionThreshold"].as<float>();
         }
       }
     }
@@ -252,26 +260,23 @@ namespace Real
   void SceneSerializer::serializeEntity(Entity& e, YAML::Emitter& emitter)
   {
     emitter << BeginMap;
-    emitter << Key << "UUID" <<Value << e.getComponent<IDComponent>().ID;
+    emitter << Key << "UUID" <<Value << e.getComponent<IDComponent>()->ID;
 
-    if(e.hasComponent<TagComponent>())
-    {
-      emitter << Key << "TagComponent" << BeginMap;
-      const auto& tag = e.getComponent<TagComponent>().name;
-      emitter << Key << "Tag" << Value << tag;
+    emitter << Key << "TagComponent" << BeginMap;
+    const std::string tag = e.get().name().c_str(); 
+    emitter << Key << "Tag" << Value << tag;
 
-      emitter << EndMap;
-    }
+    emitter << EndMap;
 
     if(e.hasComponent<TransformComponent>())
     {
       emitter << Key << "TransformComponent" << BeginMap;
 
-      auto& trans = e.getComponent<TransformComponent>();
+      auto* trans = e.getComponent<TransformComponent>();
 
-      emitter << Key << "Position" << trans.position;
-      emitter << Key << "Rotation" << trans.rotation;
-      emitter << Key << "Scale" << trans.scale;
+      emitter << Key << "Position" << Value << trans->position;
+      emitter << Key << "Rotation" << Value << trans->rotation;
+      emitter << Key << "Scale" << Value << trans->scale;
 
       emitter << EndMap;
     }
@@ -280,10 +285,22 @@ namespace Real
     {
       emitter << Key << "SpriteComponent" << BeginMap;
       
-      auto& sprite = e.getComponent<SpriteComponent>();
+      auto* sprite = e.getComponent<SpriteComponent>();
 
-      emitter << Key << "Color" << Value << sprite.color * 255.0f;
-      emitter << Key << "TextureHandle" << Value << sprite.texture_handle;
+      emitter << Key << "Color" << Value << sprite->color * 255.0f;
+      emitter << Key << "TextureHandle" << Value << sprite->texture_handle;
+      emitter << EndMap;
+    }
+    
+    if(e.hasComponent<CircleComponent>())
+    {
+      emitter << Key << "CircleComponent" << BeginMap;
+
+      auto* circle = e.getComponent<CircleComponent>();
+      
+      emitter << Key << "Color" << Value << circle->color * 255.0f;
+      emitter << Key << "Thickness" << Value << circle->thickness;
+      emitter << Key << "Blur" << Value << circle->blur;
       emitter << EndMap;
     }
 
@@ -291,26 +308,26 @@ namespace Real
     {
       emitter << Key << "CameraComponent" << BeginMap;
       
-      auto& cam = e. getComponent<CameraComponent>();
+      auto* cam = e. getComponent<CameraComponent>();
 
-      const auto& pd = cam.camera.getPerspectiveData();
+      const auto& pd = cam->camera.getPerspectiveData();
       emitter << Key << "PerspectiveData" << Value << BeginMap;
       emitter << Key << "FOV" << Value << pd.fov;
       emitter << Key << "NearClip" << Value << pd.near_clip;
       emitter << Key << "FarClip" << Value << pd.far_clip;
       emitter << EndMap;
 
-      const auto& od = cam.camera.getOrthographicData();
+      const auto& od = cam->camera.getOrthographicData();
       emitter << Key << "OrthographicData" << Value << BeginMap;
       emitter << Key << "Size" << Value << od.size;
       emitter << Key << "NearClip" << Value << od.near_clip;
       emitter << Key << "FarClip" << Value << od.far_clip;
       emitter << EndMap;
   
-      emitter << Key << "Type" << Value <<(int)cam.camera.getType();
+      emitter << Key << "Type" << Value <<(int)cam->camera.getType();
 
-      emitter << Key << "Primary" << Value << cam.is_primary;
-      emitter << Key << "FixedAspectRatio" << cam.is_fixed_aspect_ratio;
+      emitter << Key << "Primary" << Value << cam->is_primary;
+      emitter << Key << "FixedAspectRatio" << cam->is_fixed_aspect_ratio;
       
       emitter << EndMap;
     }
@@ -318,10 +335,10 @@ namespace Real
     if(e.hasComponent<RigidBody2DComponent>())
     {
       emitter << Key << "RigidBody2DComponent" << BeginMap;
-      auto& rb2dc = e.getComponent<RigidBody2DComponent>();
+      auto* rb2dc = e.getComponent<RigidBody2DComponent>();
       
-      emitter << Key << "Type" << (int)rb2dc.type;
-      emitter << Key << "FixedRotatiin" << rb2dc.fixed_rotation;
+      emitter << Key << "Type" << Value << (int)rb2dc->type;
+      emitter << Key << "FixedRotatiin" << Value << rb2dc->fixed_rotation;
 
       emitter << EndMap;
     }
@@ -330,27 +347,27 @@ namespace Real
     {
       emitter << Key << "BoxColliderComponent" << BeginMap;
       
-      auto& bcc = e.getComponent<BoxColliderComponent>();
-      emitter << Key << "Size" << bcc.size;
-      emitter << Key << "Offset" << bcc.offset;
-      emitter << Key << "Density" << bcc.density;
-      emitter << Key << "Friction" << bcc.friction;
-      emitter << Key << "Restitution" << bcc.restitution;
-      emitter << Key << "RestitutionThreshold" << bcc.restitution_threshold;
+      auto* bcc = e.getComponent<BoxColliderComponent>();
+      emitter << Key << "Size" << Value << bcc->size;
+      emitter << Key << "Offset" << Value << bcc->offset;
+      emitter << Key << "Density" << Value << bcc->density;
+      emitter << Key << "Friction" << Value << bcc->friction;
+      emitter << Key << "Restitution" << Value << bcc->restitution;
+      emitter << Key << "RestitutionThreshold" << Value << bcc->restitution_threshold;
       emitter << EndMap;
     }
 
-    if(e.hasComponent<BoxColliderComponent>())
+    if(e.hasComponent<CircleColliderComponent>())
     {
       emitter << Key << "CircleColliderComponent" << BeginMap;
       
-      auto& ccc = e.getComponent<CircleColliderComponent>();
-      emitter << Key << "Radius" << ccc.radius;
-      emitter << Key << "Offset" << ccc.offset;
-      emitter << Key << "Density" << ccc.density;
-      emitter << Key << "Friction" << ccc.friction;
-      emitter << Key << "Restitution" << ccc.restitution;
-      emitter << Key << "RestitutionThreshold" << ccc.restitution_threshold;
+      auto* ccc = e.getComponent<CircleColliderComponent>();
+      emitter << Key << "Radius" << Value << ccc->radius;
+      emitter << Key << "Offset" << Value << ccc->offset;
+      emitter << Key << "Density" << Value << ccc->density;
+      emitter << Key << "Friction" << Value << ccc->friction;
+      emitter << Key << "Restitution" << Value << ccc->restitution;
+      emitter << Key << "RestitutionThreshold" << Value << ccc->restitution_threshold;
       emitter << EndMap;
     }
 

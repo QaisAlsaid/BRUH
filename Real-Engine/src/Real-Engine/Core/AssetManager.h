@@ -150,6 +150,7 @@ namespace Real
 
     static UUID loadOrGet(const Asset::Meta& meta)
     {
+      //FIXME: it shouldnt call get to prevent printing error or you should add flag to get that prevents it from printing error
       auto id = getUUID(meta.path); 
       if(id != UUID::invalid)
         return id;

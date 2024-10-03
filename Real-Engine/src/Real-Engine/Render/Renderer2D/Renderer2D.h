@@ -57,11 +57,11 @@ namespace Real
     static void beginScene(const Mat4& projection, const Mat4& view);
 
     //Circle
-    static void drawCircle(const Mat4& transform, float thickness, float blur, const Vec4& color = Vec4(1.0f), int entity_id = -1);
+    static void drawCircle(const Mat4& transform, float thickness, float blur, const Vec4& color = Vec4(1.0f), uint32_t entity_id = 0);
     
     //Quad
-    static void drawQuad(const Mat4& transform, const Vec4& color = Vec4(1.0f), int entity_id = -1);
-    static void drawQuad(const Mat4& transform, const ARef<Texture2D>& tux, const Vec4& color = Vec4(1.0f), int entity_id = -1);
+    static void drawQuad(const Mat4& transform, const Vec4& color = Vec4(1.0f), uint32_t entity_id = 0);
+    static void drawQuad(const Mat4& transform, const ARef<Texture2D>& tux, const Vec4& color = Vec4(1.0f), uint32_t entity_id = 0);
     
     
     static void drawQuad(const Vec3& pos = Vec3(0.0f), const Vec2& size = Vec2(1.0f), float rotation = 0.0f, const Vec4& color = Vec4(1.0f)); 
@@ -92,7 +92,7 @@ namespace Real
       glm::vec2 tux_coord;
       float     tux_idx;
 
-      int entity_id;
+      uint32_t entity_id;
     };
 
     struct CircleVertex
@@ -103,7 +103,7 @@ namespace Real
       float thickness = 0.1f;
       float blur = 0.005f;
 
-      int entity_id;
+      uint32_t entity_id;
     };
 
     struct Quad 

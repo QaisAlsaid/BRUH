@@ -5,6 +5,8 @@
 #include "Real-Engine/Core/Math/math.h"
 #include "Real-Engine/Core/Timestep.h"
 #include "Real-Engine/Core/UUID.h"
+
+#include <flecs.h>
 #include <entt/entt.hpp>
 
 
@@ -32,19 +34,25 @@ namespace Real
     void clear();
     
     template<typename T>//TODO: ...
-    void forEach(std::function<void(entt::entity, T&)> func)
+    void forEach(std::function<void(flecs::entity, T&)> func)
     {
-      m_registry.view<T>().each(func);
+      m_registry.query<T>().each(func);
     }
 
     template<typename T>
-    entt::view<T> view()
+    flecs::query<T> view()
     {
-      return m_registry.view<T>();
+      return query<T>();
+    }
+    template<typename T>
+    flecs::query<T> query()
+    {
+      return m_registry.query<T>();
     }
 
     Entity getEntity(const std::string& name);
     Entity getEntity(UUID id);
+    Entity getMPEntity(uint32_t mp_id);
 
     void onLoad();
     void onStart();
@@ -54,13 +62,23 @@ namespace Real
     void onViewportResize(uint32_t width, uint32_t height);
     void onEnd();
   private:
+    std::string changeName(const std::string& name);
+    void recycleID(uint32_t recycled_id);
+    uint32_t giveMPID();
+  private:
     std::string m_name;
-    entt::registry m_registry;
+    flecs::world m_registry;
+    //entt::registry m_registry;
     b2World* m_physics_world = nullptr;
     uint32_t m_viewport_width = 1280, m_viewport_height = 720;
+    uint32_t m_unnamed_ctr = 0;
     EditorCamera m_editor_camera;
                                 //     Entity
-    std::unordered_map<uint64_t, std::pair<uint32_t, Scene*>> m_fast_access; 
+    std::unordered_map<uint64_t, std::pair<uint64_t, Scene*>> m_fast_access;
+
+    std::unordered_map<uint32_t, flecs::entity> m_mouse_picking_ids;
+    std::vector<uint32_t> m_recycled_ids;
+    uint32_t m_current_idx = 0;
   private:
     friend class Entity;
     friend class SceneHierarchy;

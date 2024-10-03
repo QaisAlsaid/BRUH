@@ -6,7 +6,7 @@ layout (location = 1) in vec3 a_pos;
 layout (location = 2) in vec2 a_local_pos;
 layout (location = 3) in float a_thickness;
 layout (location = 4) in float a_blur;
-layout (location = 5) in int a_id;
+layout (location = 5) in uint a_id;
 
 uniform mat4 u_proj_view;
 uniform mat4 u_trans;
@@ -16,7 +16,7 @@ out vec2 v_local_pos;
 out float v_thickness;
 out float v_blur;
 
-flat out int v_id;
+flat out uint v_id;
 
 void main()
 {
@@ -33,13 +33,13 @@ void main()
 #version 330 core
 
 layout (location = 0) out vec4 frag_color;
-layout (location = 1) out int e_id;
+layout (location = 1) out uint e_id;
 
 in vec4 v_color;
 in vec2 v_local_pos;
 in float v_thickness;
 in float v_blur;
-flat in int v_id;
+flat in uint v_id;
 
 
 

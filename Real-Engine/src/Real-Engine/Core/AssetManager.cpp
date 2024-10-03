@@ -95,7 +95,10 @@ namespace Real
     if(res.valid())
     {
       sol::function fun = res;
-      asset->script = fun();
+      if(fun.valid())
+        asset->script = fun();
+      else 
+        REAL_CORE_ERROR("GetObject is invalid for Script: {0}", asset->meta.path);
     }
     else 
     {

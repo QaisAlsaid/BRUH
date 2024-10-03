@@ -31,3 +31,6 @@
 [submodule "Karen/vendor/sol2"]
 	path = Real-Engine/vendor/sol2
 	url = https://github.com/ThePhD/sol2.git
+[submodule "Real-Engine/vendor/flecs"]
+	path = Real-Engine/vendor/flecs
+	url = https://github.com/SanderMertens/flecs.git

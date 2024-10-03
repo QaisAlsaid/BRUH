@@ -5,7 +5,7 @@ local asset_manager;
 local scene;
 local scene_camera_entity;
 local body;
-local karen = Real.Vec4.new(1);
+local real = Real.Vec4.new(1);
 local col = Real.Vec4.new(255);
 local move;
 local circle;
@@ -24,7 +24,10 @@ function lerp(on , dest, speed)
 
 print("made the create")
 function script:onCreate()
-  script:export("Real", karen)
+  while true do 
+    print("xxx")
+  end
+  script:export("Real", real)
   script:export("Color", col, true)
 
 
@@ -82,7 +85,7 @@ x = true
 function script:onUpdate()
   --print("Scene*");
   print("===================")
-  print("karen: ", karen)
+  print("real: ", real)
   print("===================")
   if(true) then
   if(Real.Input.isKeyPressed(Real.Keyboard.W)) then
@@ -147,7 +150,7 @@ function script:onUpdate()
 end
 
 function script:onDestroy()
-  --karen = "karen"
+  --real = "real"
   --qais = "qais"
   print("onEnd")
   local v1 = Real.Vec4.new(2)
@@ -163,6 +166,5 @@ end
 
 print("made getobj")
 function GetObject()
-  print("GetObject Called")
   return script;
 end

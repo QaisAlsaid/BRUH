@@ -23,6 +23,11 @@ namespace Real
     UUID ID;
   };
 
+  struct REAL_API MPIDComponent
+  {
+    uint32_t ID;
+  };
+
   struct REAL_API TagComponent
   {
     std::string name;

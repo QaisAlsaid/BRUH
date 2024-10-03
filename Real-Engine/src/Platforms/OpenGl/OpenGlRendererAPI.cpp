@@ -30,6 +30,7 @@ namespace Real
   {
     REAL_PROFILE_FUNCTION();
     glCall(glClearColor(col.x, col.y, col.z, col.w));
-    glCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+    //TODO: options
+    glCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT ));
   }
 }

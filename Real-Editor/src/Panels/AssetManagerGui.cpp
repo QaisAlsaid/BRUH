@@ -60,10 +60,10 @@ namespace Real
       auto type = AssetManager::get(m_context)->meta.type;
       switch(type)
       {
-        case AssetManager::Asset::Type::None: safe_ret = true; ;
-        case AssetManager::Asset::Type::Texture2D: drawTextuerStats(m_context);
-        case AssetManager::Asset::Type::Scene: drawSceneStats(m_context);
-        case AssetManager::Asset::Type::Script: drawScriptStats(m_context);
+        case AssetManager::Asset::Type::None: safe_ret = true; break;
+        case AssetManager::Asset::Type::Texture2D: drawTextuerStats(m_context); break;
+        case AssetManager::Asset::Type::Scene: drawSceneStats(m_context); break;
+        case AssetManager::Asset::Type::Script: drawScriptStats(m_context); break;
       }
       if(ImGui::Button("Cancel") || safe_ret)
       {

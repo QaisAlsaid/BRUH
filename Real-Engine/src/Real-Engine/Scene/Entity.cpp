@@ -5,24 +5,25 @@
 
 namespace Real 
 {
-  Entity::Entity(entt::entity e, Scene* s)
+  Entity::Entity(flecs::entity e, Scene* s)
     : m_id(e), m_scene(s)
   {
   }
 
-  Entity::Entity(uint32_t e, Scene* s)
-    : m_id((entt::entity)e), m_scene(s)
+  Entity::Entity(uint64_t e, Scene* s)
+    : m_id(e), m_scene(s)
   {
   }
 
 
-  Entity::Entity(Entity& e, entt::entity id, Scene* scene)
+  Entity::Entity(Entity& e, flecs::entity id, Scene* scene)
     : Entity(id, scene)
   {
+
+    this->insertComponent<IDComponent>(UUID());
     auto* tc = e.tryGetComponent<TagComponent>();
     if(tc)
     {
-      this->insertComponent<IDComponent>(UUID());
       this->insertComponent<TagComponent>(*tc);
     }
 

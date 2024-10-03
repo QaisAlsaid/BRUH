@@ -1,5 +1,7 @@
 #include <pch.h>
 #include "EditorLayer.h"
+#include "EditorEvents/EditorEventsManager.h"
+#include "EditorEvents/SceneEvents.h"
 #include "EditorSerializer.h"
 #include "Real-Engine/Core/App.h"
 #include "Real-Engine/Core/ButtonsAndKeyCodes.h"
@@ -20,7 +22,8 @@
 
 
 #include "Real-Engine/Core/AssetManager.h"
-
+//FIXME: crash if new-file is pressed when scene is on play make it fallback to stop before clearing
+//maybe open also crashes zzzz
 //#ifdef REAL_PLATFORM_LINUX
 //#include <dlfcn.h>
 //#include "../res/scripts/Test.h"
@@ -64,9 +67,8 @@ namespace Real
   EditorLayer::EditorLayer()
     : Layer("EditorLayer"), m_content_browser("../res")
   {
-    REAL_CORE_WARN("EditorLayer CTOR");
+    m_sub_id = EditorEventsManager::subscribe(BIND_EVENT_FUNCTION(EditorLayer::onEditorEvent)); 
     bool x = AssetManager::loadConfig("../res/config/assets.test.xml");
-    REAL_CORE_WARN("EXITED AssetManager::loadConfig WITH: {0}", x);
     activate();
 
     REAL_START_INSTRUMENTOR();
@@ -92,6 +94,10 @@ static float* speed = new float;
 
     
     m_scene = m_editor_scene;
+
+    SceneSetEvent e(m_scene);
+    EditorEventsManager::onEvent(e);
+
     m_helper_windows["Stats"] = createScoped<StatsWindow>();
   
           
@@ -117,8 +123,6 @@ static float* speed = new float;
     m_frame_buff = FrameBuffer::create(s);
     REAL_CORE_SET_LOGLEVEL(Log::LogLevel::Warn);
 
-    m_scene_hierarchy_panel.setContext(m_scene);
-    
 //    nsc.bind<Scriptt>();
 
     
@@ -135,25 +139,15 @@ static float* speed = new float;
 
 
   static bool first_time = true;
-  
+  Vec4 cc(1, 1, 1, 1);
   void EditorLayer::onUpdate(Timestep ts)
   {
     if(m_frame_buff->getSpecs().width != m_viewport_size.x || 
        m_frame_buff->getSpecs().height != m_viewport_size.y)
         m_frame_buff->reSize(m_viewport_size.x, m_viewport_size.y);
-    if(m_scene_handle != UUID::invalid)
-    {
-      if(m_scene_state != SceneState::Play)
-      {
-        m_scene = AssetManager::get<AssetManager::SceneAsset>(m_scene_handle)->scene;
-        m_editor_scene = m_scene;
-      }
-    }
-    else REAL_CORE_ERROR("UUID::invalid Can't be used as Scene Handle");
     m_camera.onUpdate(ts);
     m_scene->setEditorCamera(m_camera.getView(), m_camera.getProjection());
-    //TODO: callbacks for the context or something
-    m_scene_hierarchy_panel.setContext(m_scene);
+    //TODO: callbacks for the context or something :=> done baby
     if(Input::isKeyPressed(Keyboard::LeftControl) || Input::isKeyPressed(Keyboard::RightControl))
       handelCMD((int)Keyboard::LeftControl);
     m_time_step = ts;
@@ -161,8 +155,8 @@ static float* speed = new float;
     m_frame_buff->bind();
     //m_frame_buff->bindWriteFb(6);
     //Renderer2D::clear({200, 200, 200, 200});
-    Renderer2D::clear(Vec4(0.25f, 0.25f, 0.25f, 1.0f));
-    m_frame_buff->clearColorAttachment(1, -1);
+    Renderer2D::clear(cc);//Vec4(0.25f, 0.25f, 0.25f, 1.0f));
+    m_frame_buff->clearColorAttachment(1, 0);
     /*
  #ifdef REAL_PLATFORM_LINUX
     //if(Input::isKeyPressed(Keyboard::Z))
@@ -213,10 +207,10 @@ static float* speed = new float;
         }
         if(ImGui::IsMouseClicked(0) && m_op == GizmoOp::Bounds)
         {
-          m_mouse_picked_entity_id = m_frame_buff->readPixelI(1, mouse.x, mouse.y);
-          if(m_mouse_picked_entity_id > -1)
+          m_mouse_picked_entity_id = m_frame_buff->readPixelUi(1, mouse.x, mouse.y);
+          if(m_mouse_picked_entity_id > 0u)
           {
-            m_scene_hierarchy_panel.setCurrentSelected({(uint32_t)m_mouse_picked_entity_id, m_scene.get()});
+            m_scene_hierarchy_panel.setCurrentSelected(m_scene->getMPEntity(m_mouse_picked_entity_id));
           }
         }
       }
@@ -295,8 +289,9 @@ static float* speed = new float;
           break;
       }
     }
-      ImGui::DragFloat("Cam run speed", speed);
+      ImGui::DragFloat4("Clear Color", glm::value_ptr(cc), 0.1f, 0.0f, 1.0f);
     
+
 //Editor Camera
     ImGui::Separator();
     ImGui::Text("Editor Camera");
@@ -333,25 +328,35 @@ static float* speed = new float;
   void EditorLayer::changeScene(UUID id)
   {
     m_scene_handle = id;
+    if(m_scene_handle != UUID::invalid)
+    {
+      if(m_scene_state != SceneState::Play)
+      {
+        m_scene = AssetManager::get<AssetManager::SceneAsset>(m_scene_handle)->scene;
+        m_editor_scene = m_scene;
+      }
+    }
+    else REAL_CORE_ERROR("UUID::invalid Can't be used as Scene Handle");
+
   }
 
   void EditorLayer::onScenePlay()
   {
     m_scene_state = SceneState::Play;
     m_scene = Scene::copy(m_editor_scene);
-    m_scene_hierarchy_panel.clearSelection();
-    m_inspector_panel.setCurrentSelected( { } );
     App::get()->getExportedVariables().clear();
+    ScenePlayEvent e(m_editor_scene, m_scene);
+    EditorEventsManager::onEvent(e);
     m_scene->onStart();
   }
 
   void EditorLayer::onSceneStop()
   {
     m_scene_state = SceneState::Stop; 
-    m_scene_hierarchy_panel.clearSelection();
-    m_inspector_panel.setCurrentSelected( { } );
     m_scene->onEnd();
-    m_scene = m_editor_scene;
+    SceneStopEvent e(m_editor_scene, m_scene);
+    EditorEventsManager::onEvent(e);
+    m_scene = Scene::copy(m_editor_scene);
   }
 
   void EditorLayer::onDetach()
@@ -368,8 +373,6 @@ static float* speed = new float;
     m_content_browser.onImGuiUpdate();
     m_helper_windows["Stats"]->onImGuiUpdate();
     m_scene_hierarchy_panel.onGuiUpdate();
-    auto e = m_scene_hierarchy_panel.getCurrentSelected();
-    m_inspector_panel.setCurrentSelected(e);
     m_inspector_panel.onGuiUpdate();
 
     ImGui::ShowDemoWindow(&m_show_imgui_demo);
@@ -453,38 +456,40 @@ static float* speed = new float;
           m_scene_hierarchy_panel.clearSelection();
           m_scene->clear();
           m_editor_scene->clear();
-          m_editor_scene = createARef<Scene>();
+          //m_editor_scene = createARef<Scene>();
           m_scene = m_editor_scene;
-          m_scene_hierarchy_panel.setContext(m_scene);
-          m_inspector_panel.setCurrentSelected({});
+          SceneChangedEvent e(m_scene, m_scene);
+          EditorEventsManager::onEvent(e);
         }
   
         ImGui::Separator();
         if(ImGui::MenuItem("Open", "Ctrl+O")) 
         {
           //TODO : redirect to asset manager after open file
-          const auto& path = FileDialogs::OpenFile("yaml", "Real-Engine Scene (.yaml)");
+          const auto& path = FileDialogs::OpenFile("Real", "Real-Engine Scene (.Real)");
           REAL_TRACE("path: {0}", path);
           if(!path.empty())
           {
-            SceneSerializer ss(m_scene);
+            ARef<Scene> temp_scene = createARef<Scene>("Scene");
+            SceneSerializer ss(temp_scene);
             if(!ss.deSerializeText(path.c_str()))
             {
               REAL_CORE_ERROR("Error in deSerializeText(): Scene: {0}", path);
-              m_scene = createARef<Scene>("Scene");
             }
-            m_scene_hierarchy_panel.setContext(m_scene);
-            m_scene_hierarchy_panel.clearSelection();
-            m_inspector_panel.setCurrentSelected({});
+            else 
+            {
+              m_scene = temp_scene;
+              SceneChangedEvent e(m_editor_scene, m_scene);
+              EditorEventsManager::onEvent(e);
+            }
           }
-          else REAL_TRACE("Cancele");
         }
 
         ImGui::Separator();
   
         if(ImGui::MenuItem("Save As..")) 
         {
-          const auto& path = FileDialogs::SaveFile("yaml", "Real-Engine Scene (.Karen)");
+          const auto& path = FileDialogs::SaveFile("Real", "Real-Engine Scene (.Real)");
           REAL_TRACE("path: {0}", path);
           if(!path.empty())
           {
@@ -742,5 +747,10 @@ static float* speed = new float;
       if(e)
         m_scene->copyEntity(e);
     }
+  }
+
+  void EditorLayer::onEditorEvent(EditorEvent& e)
+  {
+
   }
 }

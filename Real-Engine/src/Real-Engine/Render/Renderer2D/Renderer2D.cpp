@@ -1,5 +1,5 @@
-#include "Real-Engine/Render/API/Shader.h"
 #include "pch.h"
+#include "Real-Engine/Render/API/Shader.h"
 #include "Renderer2D.h"
 #include "Real-Engine/Core/Log.h"
 #include "Real-Engine/Render/API/IndexBuffer.h"
@@ -8,6 +8,7 @@
 #include "Real-Engine/Render/API/VertexBuffer.h"
 #include "glm/ext/matrix_transform.hpp"
 #include <cstdint>
+#include <cstring>
 
 namespace Real
 {
@@ -125,7 +126,7 @@ namespace Real
     s_data->circle_index_count = 0;
   }
    
-  void Renderer2D::drawCircle(const Mat4& trans, float thickness, float blur, const Vec4& color, int entity_id)
+  void Renderer2D::drawCircle(const Mat4& trans, float thickness, float blur, const Vec4& color, uint32_t entity_id)
   {
     if(s_data->circle_index_count >= s_data->MAX_INDES)
     {
@@ -148,9 +149,9 @@ namespace Real
     s_data->stats.quad_count++;
   }
  
-  void Renderer2D::drawQuad(const Mat4& trans, const Vec4& color, int entity_id)
+  void Renderer2D::drawQuad(const Mat4& trans, const Vec4& color, uint32_t entity_id)
   {
-   if(s_data->quad_index_count >= s_data->MAX_INDES)
+    if(s_data->quad_index_count >= s_data->MAX_INDES)
     {
       flushQuad();
       reset();
@@ -179,8 +180,8 @@ namespace Real
   }
 
 
-  void Renderer2D::drawQuad(const Mat4& trans, const ARef<Texture2D>& tux, const Vec4& color, int entity_id)
-  {
+  void Renderer2D::drawQuad(const Mat4& trans, const ARef<Texture2D>& tux, const Vec4& color, uint32_t entity_id)
+  { 
     if(s_data->quad_index_count >= s_data->MAX_INDES || s_data->texture_slot_index >= s_data->MAX_TEXTURE_SLOTS)
     {
       flushQuad();
@@ -369,8 +370,8 @@ namespace Real
       }*/
     //};
 
-  auto* arr = s_data->quad_base;
-  uint32_t count = data_size / sizeof(QuadVertex);
+ // auto* arr = s_data->quad_base;
+ // uint32_t count = data_size / sizeof(QuadVertex);
      
   //std::sort((Quad*)s_data->quad_vertex_base, (Quad*)s_data->quad_vertex_ptr, 
    //   [](const Quad& lhs, const Quad& rhs)
@@ -393,7 +394,7 @@ namespace Real
   //  for(size_t j = 0; j < count - 1 - i; ++j)
     //  if(arr[j] > arr[j+1])
       //  std::swap(arr[j], arr[j+1]);  
-        REAL_CORE_WARN("vertex count: {0}, quad_count: {1}, first: << pos: {2}, color: {3}, tux_coord: {4}, tux_idx: {5} >>", count, count/4, arr->vertices[0].position, arr->vertices[0].color, arr->vertices[0].tux_coord, arr->vertices[0].tux_idx);
+        //REAL_CORE_WARN("vertex count: {0}, quad_count: {1}, first: << pos: {2}, color: {3}, tux_coord: {4}, tux_idx: {5} >>", count, count/4, arr->vertices[0].position, arr->vertices[0].color, arr->vertices[0].tux_coord, arr->vertices[0].tux_idx);
     //std::sort(s_data->quad_vertex_base, s_data->quad_vertex_base + (data_size / sizeof(QuadVertex)));
 
       //s_data->quad_vertex_arr->getIndexBuffer();
@@ -418,8 +419,8 @@ namespace Real
   {
     uint32_t data_size = ((unsigned char*)s_data->circle_ptr - (unsigned char*)s_data->circle_base) * 4;
     
-    auto* arr = s_data->circle_base;
-    uint32_t count = data_size / sizeof(CircleVertex);
+    //auto* arr = s_data->circle_base;
+    //uint32_t count = data_size / sizeof(CircleVertex);
      
     std::ranges::sort(s_data->circle_base, s_data->circle_ptr, 
       [](const Circle& lhs, const Circle& rhs)
@@ -429,7 +430,7 @@ namespace Real
         return std::abs(f) < std::abs(s);  
       });
 
-    REAL_CORE_WARN("vertex count: {0}, quad_count: {1}, first: << pos: {2}, color: {3} >>", count, count/4, arr->vertices[0].position, arr->vertices[0].color);
+    //REAL_CORE_WARN("vertex count: {0}, quad_count: {1}, first: << pos: {2}, color: {3} >>", count, count/4, arr->vertices[0].position, arr->vertices[0].color);
     
     s_data->circle_vertex_buff->setData(data_size, s_data->circle_base);
 

@@ -10,9 +10,9 @@ namespace Real
   class Script
   {
   public:
-    std::function<void(void)> onCreate;
-    std::function<void(void)> onUpdate;
-    std::function<void(void)> onDestroy;
+    std::function<void(void)> onCreate = []()  { REAL_CORE_ERROR("Uninitalized onCreate");  };
+    std::function<void(void)> onUpdate = []()  { REAL_CORE_ERROR("Uninitalized onUpdate");  };
+    std::function<void(void)> onDestroy = []() { REAL_CORE_ERROR("Uninitalized onDestroy"); };
     Entity entity;
     Timestep getTimestep() { return timestep; }
   private:

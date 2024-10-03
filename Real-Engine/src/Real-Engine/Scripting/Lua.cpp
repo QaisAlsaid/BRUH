@@ -790,7 +790,7 @@ namespace Real
       sol::usertype<Entity> entity = real.new_usertype<Entity>("Entity", 
           sol::constructors<Entity(uint64_t, Scene*)>()
           );
-      entity["getId"] = &Entity::operator unsigned int;//Debug
+      entity["getId"] = &Entity::operator uint64_t;//Debug
       entity["valid"] = &Entity::operator bool;
       entity["same"]  = &Entity::operator==;
 
@@ -834,8 +834,8 @@ namespace Real
             ));
 
       r2d.set_function("drawQuad", sol::overload(
-            sol::resolve<void(const Mat4&, const Vec4&, int)>(&Renderer2D::drawQuad),
-            sol::resolve<void(const Mat4&, const ARef<Texture2D>&, const Vec4&, int)>(&Renderer2D::drawQuad),
+            sol::resolve<void(const Mat4&, const Vec4&, uint32_t)>(&Renderer2D::drawQuad),
+            sol::resolve<void(const Mat4&, const ARef<Texture2D>&, const Vec4&, uint32_t)>(&Renderer2D::drawQuad),
            //TODO: Camera overload but first make it take view insted of transform
 
             sol::resolve<void(const Vec3&, const Vec2&, const Vec4&)>(&Renderer2D::drawQuad),
@@ -868,19 +868,19 @@ namespace Real
     script["export"] = sol::overload(
             [](Script* _this, const char* as, Vec4* v4){
               App::get()->pushExportVariable(as, { ExportType::Type::Vec4, v4 },
-                  _this->entity.getComponent<IDComponent>().ID);
+                  _this->entity.getComponent<IDComponent>()->ID);
               }, 
             [](Script* _this, const char* as, Vec3* v3){
               App::get()->pushExportVariable(as, { ExportType::Type::Vec3, v3 }, 
-                  _this->entity.getComponent<IDComponent>().ID);
+                  _this->entity.getComponent<IDComponent>()->ID);
               }, 
             [](Script* _this, const char* as, Vec2* v2){
               App::get()->pushExportVariable(as, { ExportType::Type::Vec2, v2 }, 
-                  _this->entity.getComponent<IDComponent>().ID);
+                  _this->entity.getComponent<IDComponent>()->ID);
               },
               [](Script* _this, const char* as, Vec4* v4, bool dummy){ 
               App::get()->pushExportVariable(as, { ExportType::Type::RGBA_Color, v4 },
-                  _this->entity.getComponent<IDComponent>().ID);
+                  _this->entity.getComponent<IDComponent>()->ID);
               } 
             //[](Script* _this, const char* as, float* f){
             //  App::get()->pushExportVariable(as, { ExportType::Type::Float, f }, 
