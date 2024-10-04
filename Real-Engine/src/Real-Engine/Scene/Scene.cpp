@@ -130,9 +130,18 @@ namespace Real
     const auto& id = e.addComponent<IDComponent>().ID;
     e.addComponent<TransformComponent>();
     if(tag.empty())
-      e.addComponent<TagComponent>("Entity");
-    else 
-      e.addComponent<TagComponent>(tag);
+    {
+      auto name = changeName("Entity");
+      e.addComponent<TagComponent>(name);
+    }
+    else
+    {
+      m_registry.view<TagComponent>().each([&](auto en, auto& tc)
+      {
+        if(tc.name == tag)
+          e.addComponent<TagComponent>(changeName(tag));
+      });
+    }
     m_fast_access[(uint64_t)id] = { e, this };
     return e;
   }
@@ -481,5 +490,24 @@ namespace Real
 
     delete m_physics_world;
     m_physics_world = nullptr;
+  }
+
+  std::string Scene::changeName(const std::string& n)
+  {
+    bool found_name = false;
+    std::string name = n;
+    uint32_t n_ctr = 0;
+    while(!found_name)
+    {
+      bool found_once = false;
+      m_registry.view<TagComponent>().each([&](auto e, auto& tc){if(tc.name == name) found_once = true;});
+      if(found_once)
+      {
+        name = n + "(" + std::to_string(n_ctr) + ")";
+        n_ctr++;
+      }
+      else found_name = true;
+    }
+    return name;
   }
 }

@@ -193,6 +193,17 @@ namespace Real
           csprite.texture_handle = texture_handel;
         }
         const auto& ccamera_n = entity["CameraComponent"];
+          const auto& ccircle_n = entity["CircleComponent"];
+        if(ccircle_n)
+        {
+          auto& ccircle = e.addComponent<CircleComponent>();
+          const auto& color = ccircle_n["Color"].as<Vec4>();
+          ccircle.color = color / 255.0f;
+          const auto& thickness = ccircle_n["Thickness"].as<float>();
+          ccircle.thickness = thickness;
+          const auto& blur = ccircle_n["Blur"].as<float>();
+          ccircle.blur = blur;
+        }
         if(ccamera_n)
         {
           auto& ccamera = e.addComponent<CameraComponent>();
@@ -284,6 +295,18 @@ namespace Real
 
       emitter << Key << "Color" << Value << sprite.color * 255.0f;
       emitter << Key << "TextureHandle" << Value << sprite.texture_handle;
+      emitter << EndMap;
+    }
+    
+    if(e.hasComponent<CircleComponent>())
+    {
+      emitter << Key << "CircleComponent" << BeginMap;
+
+      auto& circle = e.getComponent<CircleComponent>();
+
+      emitter << Key << "Color" << Value << circle.color * 255.0f;
+      emitter << Key << "Thickness" << Value << circle.thickness;
+      emitter << Key << "Blur" << Value << circle.blur;
       emitter << EndMap;
     }
 

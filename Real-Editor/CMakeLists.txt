@@ -9,10 +9,10 @@ add_subdirectory(../Real-Engine/ ../Real-Engine/build/)
 add_executable(${PROJECT_NAME} src/App.cpp src/EditorLayer.cpp
   src/Panels/SceneHierarchy.cpp src/Panels/Inspector.cpp
   src/HelperWindows.cpp src/EditorSerializer.cpp src/Panels/ContentBrowser.cpp
-  src/Panels/AssetManagerGui.cpp src/EditorCamera.cpp)
+  src/Panels/AssetManagerGui.cpp src/EditorCamera.cpp src/EditorEvents/EditorEventsManager.cpp)
 add_compile_options(-ldl)
 message("idrs" ${REAL_INCLUDE_DIRS})
-target_include_directories(${PROJECT_NAME} PUBLIC ${REAL_INCLUDE_DIRS})
+target_include_directories(${PROJECT_NAME} PUBLIC ${REAL_INCLUDE_DIRS} ./src)
 target_link_libraries(${PROJECT_NAME} Real-Engine)
 if(${REAL_IS_EMSCRIPTEN})
   set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".html"

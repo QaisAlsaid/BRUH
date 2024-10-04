@@ -54,6 +54,8 @@ namespace Real
     void onViewportResize(uint32_t width, uint32_t height);
     void onEnd();
   private:
+    std::string changeName(const std::string& name);
+  private:
     std::string m_name;
     entt::registry m_registry;
     b2World* m_physics_world = nullptr;

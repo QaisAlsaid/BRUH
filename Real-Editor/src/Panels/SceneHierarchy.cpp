@@ -1,17 +1,36 @@
 #include "SceneHierarchy.h"
+#include "EditorEvents/EditorEventsManager.h"
+#include "EditorEvents/SceneHierarchyPanelEvents.h"
+#include "Real-Engine/Core/Macros.h"
+#include "Real-Engine/Scene/Components.h"
 #include "imgui.h"
 
 
 namespace Real
 {
+  SceneHierarchy::SceneHierarchy()
+  {
+    m_sub_id = EditorEventsManager::subscribe(BIND_EVENT_FUNCTION(SceneHierarchy::onEditorEvent));
+  }
+
   SceneHierarchy::SceneHierarchy(const ARef<Scene>& context)
   {
+    m_sub_id = EditorEventsManager::subscribe(BIND_EVENT_FUNCTION(SceneHierarchy::onEditorEvent));
     setContext(context);
   }
 
   void SceneHierarchy::setContext(const ARef<Scene>& context)
   {
+    SCHPContextChangedEvent e(context);
+    EditorEventsManager::onEvent(e);
     m_context = context;
+  }
+  
+  void SceneHierarchy::setCurrentSelected(Entity e)
+  {
+    m_current = e;
+    SCHPSelectionChangedEvent ev(e);
+    EditorEventsManager::onEvent(ev);
   }
 
   void SceneHierarchy::onGuiUpdate()
@@ -35,7 +54,7 @@ namespace Real
     
     if(ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
     {
-      m_current = {};
+      setCurrentSelected({});
     }
     auto flags = ImGuiPopupFlags_NoOpenOverItems | ImGuiPopupFlags_MouseButtonRight;
     if(ImGui::BeginPopupContextWindow("SceneContextWindow", flags))
@@ -54,7 +73,7 @@ namespace Real
     bool opend = ImGui::TreeNodeEx((void*)(uintptr_t)e, flags, "%s",tag.c_str());
     if(ImGui::IsItemClicked())
     {
-      m_current = e;
+      setCurrentSelected(e);
     }
     bool deleted = false;
     auto popup_flags = ImGuiPopupFlags_NoOpenOverExistingPopup | ImGuiPopupFlags_MouseButtonRight;
@@ -73,7 +92,34 @@ namespace Real
     {
       e.destroy();
       if(m_current == e)
-        m_current = {};
+        setCurrentSelected({});
     }
+  }
+
+  void SceneHierarchy::onEditorEvent(EditorEvent& e)
+  {
+    EditorEventDispatcher dp(e);
+    dp.dispatch<SceneChangedEvent>(BIND_EVENT_FUNCTION(SceneHierarchy::onSceneChangedCall));
+    dp.dispatch<MousePickedChangedEvent>(BIND_EVENT_FUNCTION(SceneHierarchy::onMousePickedChangedCall));
+  }
+
+  bool SceneHierarchy::onSceneChangedCall(SceneChangedEvent& sc)
+  {
+    setContext(sc.getNewScene());
+    setCurrentSelected({});
+    return false;
+  }
+
+  bool SceneHierarchy::onMousePickedChangedCall(MousePickedChangedEvent& mpc)
+  {
+    setCurrentSelected(mpc.getEntity());
+    return false;
+  }
+
+  bool SceneHierarchy::onSceneSetCall(SceneSetEvent& ss)
+  {
+    setContext(ss.getScene());
+    setCurrentSelected({});
+    return false;
   }
 }

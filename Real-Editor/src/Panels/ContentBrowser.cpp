@@ -73,7 +73,7 @@ namespace Real
       auto thm_id = loadOrGet(path, ft);
 
       UUID asset_id = UUID::invalid;
-      if(ft != FileType::Dir && ft == FileType::Image) //for now
+      if(ft != FileType::Dir && isAsset(ft)) //for now
         asset_id = AssetManager::getUUID(path);
 
       if(ft != FileType::Image)
@@ -220,7 +220,7 @@ namespace Real
   
   void ContentBrowser::dragAndDropScript(UUID id, const Vec2& thm_size)
   {
-    ImGui::SetDragDropPayload("TEXTURE2D_ASSET_HANDEL", &id, sizeof(UUID));
+    ImGui::SetDragDropPayload("SCRIPT_ASSET_HANDEL", &id, sizeof(UUID));
     ImGui::Image((void*)(uintptr_t)m_default_icons.at(getDefaultIcon(FileType::Script))->getRendererID(),
         { thm_size.x, thm_size.y }, {0, 1}, {1, 0});
     ImGui::EndDragDropSource();

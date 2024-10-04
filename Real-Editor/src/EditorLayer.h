@@ -5,6 +5,7 @@
 #include <Real-Engine/Real-Engine.h>
 #include "Panels/SceneHierarchy.h"
 #include "Panels/Inspector.h"
+#include "EditorEvents/EditorEvents.h"
 #include "HelperWindows.h"
 #include "Panels/ContentBrowser.h"
 #include "EditorCamera.h"
@@ -71,6 +72,7 @@ namespace Real
     bool onKeyPressedEvent(KeyPressedEvent& e);
     bool onKeyReleasedEvent(KeyReleasedEvent& e);
     void handelCMD(int key);
+    void onEditorEvent(EditorEvent& e);
   private:
     Timestep m_time_step;
     UUID m_scene_handle = UUID::invalid;
@@ -80,6 +82,7 @@ namespace Real
     std::string m_default_font;
     uint8_t m_default_font_size = 18;
     int m_mouse_picked_entity_id = -1;
+    uint32_t m_sub_id;
     EditorCamera m_camera;
 
     std::string m_imgui_ini_path;
